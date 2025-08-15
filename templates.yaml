@@ -1,0 +1,477 @@
+#######################
+###    TEMPLATES    ###
+#######################
+
+#
+# IRRIGATION LEAK
+#
+- sensor:
+    - name: "irrig_zone_0_gals" # leakaage while all vbalves off = zone zero
+      unique_id: irrig_zone_0_gals
+      device_class: "volume"
+      unit_of_measurement: "gal"
+      icon: mdi:waves-arrow-right
+      state: >-
+        {{ state_attr('sensor.irrig_report_avg_gpm_zone_0', 'preMeasureGallons') | int +
+            state_attr('sensor.irrig_report_avg_gpm_zone_0', 'measuredZoneGallons') | int}}
+
+- sensor:
+    - name: "irrig_zone_1_gals"
+      unique_id: irrig_zone_1_gals
+      device_class: "volume"
+      unit_of_measurement: "gal"
+      icon: mdi:waves-arrow-right
+      state: >-
+        {{ state_attr('sensor.irrig_report_avg_gpm_zone_1', 'preMeasureGallons') | int +
+            state_attr('sensor.irrig_report_avg_gpm_zone_1', 'measuredZoneGallons') | int}}
+
+- sensor:
+    - name: "irrig_zone_2_gals"
+      unique_id: irrig_zone_2_gals
+      device_class: "volume"
+      unit_of_measurement: "gal"
+      icon: mdi:waves-arrow-right
+      state: >-
+        {{ state_attr('sensor.irrig_report_avg_gpm_zone_2', 'preMeasureGallons') | int  +
+            state_attr('sensor.irrig_report_avg_gpm_zone_2', 'measuredZoneGallons') | int}}
+
+- sensor:
+    - name: "irrig_zone_3_gals"
+      unique_id: irrig_zone_3_gals
+      device_class: "volume"
+      unit_of_measurement: "gal"
+      icon: mdi:waves-arrow-right
+      state: >-
+        {{ state_attr('sensor.irrig_report_avg_gpm_zone_3', 'preMeasureGallons') | int +
+            state_attr('sensor.irrig_report_avg_gpm_zone_3', 'measuredZoneGallons') | int }}
+
+- sensor:
+    - name: "irrig_zone_4_gals"
+      unique_id: irrig_zone_4_gals
+      device_class: "volume"
+      unit_of_measurement: "gal"
+      icon: mdi:waves-arrow-right
+      state: >-
+        {{ state_attr('sensor.irrig_report_avg_gpm_zone_4', 'preMeasureGallons') | int  +
+            state_attr('sensor.irrig_report_avg_gpm_zone_4', 'measuredZoneGallons') | int}}
+
+#
+# HVAC FAULT
+#
+- binary_sensor:
+    - name: "Main HVAC Fault"
+      unique_id: main_hvac_fault
+      icon: mdi:alert-circle
+      state: >-
+        {% if (is_state('climate.local_ecobee', 'cool')) %}
+          {{ ( (states('sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'temperature') 
+              | float | round(2)) > 3 ) }}
+        {% elif (is_state('climate.local_ecobee', 'heat')) %}
+          {{ ( (states('sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'temperature') 
+              | float | round(2)) < -3 ) }}
+        {% elif (is_state('climate.local_ecobee', 'heat_cool')) %}
+          {{
+              (
+                ( (states('sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'target_temp_high')
+                  | float | round(2)) > 3 ) 
+              ) or
+              (
+                ( (states('sensor.sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'target_temp_low')
+                  | float | round(2)) < -3 ) 
+              )
+          }}
+        {% endif %}
+
+- binary_sensor:
+    - name: "Sunroom HVAC Fault"
+      unique_id: sunroom_hvac_fault
+      icon: mdi:alert-circle
+      state: >-
+        {% if (is_state('climate.sunroom_ac', 'cool')) %}
+          {{ ( (states('sensor.actual_sunroom_temperature') | float(default=0) - state_attr('climate.sunroom_ac', 'temperature') 
+                | float | abs | round(2)) > 4 ) }}
+        {% elif (is_state('climate.sunroom_ac', 'heat')) %}
+          {{ ( (states('sensor.actual_sunroom_temperature') | float(default=0) - state_attr('climate.sunroom_ac', 'temperature') 
+                | float | abs | round(2)) > 4 ) }}
+        {% endif %}
+
+#
+# MISCALE WEIGHT/PERSON MAPPING
+#
+
+- sensor:
+    - name: "yang_template_weight"
+      unique_id: yang_template_weight
+      device_class: "weight"
+      unit_of_measurement: "lbs"
+      icon: mdi:weight-lb
+      state: >-
+        {% set yang_previous_weight = states('sensor.yang_template_weight') | float(default=0) %}
+        {% set weight = states('sensor.ble_weight_d03e7d3e3afa') | float(default=0) %}
+          {% if (180 <= weight <= 200) %}
+            {{ weight }}      
+          {% else %}
+            {{ yang_previous_weight }}
+          {% endif %}
+
+- sensor:
+    - name: "karen_template_weight"
+      unique_id: karen_template_weight
+      device_class: "weight"
+      unit_of_measurement: "lbs"
+      icon: mdi:weight-lb
+      state: >-
+        {% set karen_previous_weight = states('sensor.karen_template_weight') | float(default=0) %}
+        {% set weight = states('sensor.ble_weight_d03e7d3e3afa') | float(default=0) %}
+          {% if (130 <= weight <= 150) %}  
+            {{ weight }}
+          {% else %}
+            {{ karen_previous_weight }}
+          {% endif %}
+
+- sensor:
+    - name: "yang_template_impedance"
+      unique_id: yang_template_impedance
+      unit_of_measurement: "ohm"
+      state: >-
+        {% set yang_previous_impedance = states('sensor.yang_template_impedance') | float(default=0) %}
+        {% set weight = states('sensor.ble_weight_d03e7d3e3afa') | float(default=0) %}
+          {% if (180 <= weight <= 200) %}  
+            {{ states("sensor.ble_impedance_d03e7d3e3afa") | float(default=0) }}      
+          {% else %}
+            {{ yang_previous_impedance }}
+          {% endif %}
+
+- sensor:
+    - name: "karen_template_impedance"
+      unique_id: karen_template_impedance
+      unit_of_measurement: "ohm"
+      state: >-
+        {% set karen_previous_impedance = states('sensor.karen_template_impedance') | float(default=0) %}
+        {% set weight = states('sensor.ble_weight_d03e7d3e3afa') | float(default=0) %}
+          {% if (130 <= weight <= 150) %}
+            {{ states("sensor.ble_impedance_d03e7d3e3afa") | float(default=0) }}
+          {% else %}
+            {{ karen_previous_impedance }}
+          {% endif %}
+
+#
+# SENSORS FOR Weber iGrill
+#
+- sensor:
+    - name: "grill_alert_temp"
+      state: >-
+        {% if (states('sensor.igrill_70918f19e8d1_probe_4') | int(default=0)) < (states('input_number.igrill_alert_low') | int(default=0)) 
+              or (states('sensor.igrill_70918f19e8d1_probe_4') | int(default=0))  > (states('input_number.igrill_alert_high') | int(default=0)) %}
+          Alert
+        {% else %}
+          Normal
+        {% endif %}
+
+- sensor:
+    - name: "target_alert_temp_probe_1"
+      state: >-
+        {% if (states('sensor.igrill_70918f19e8d1_probe_1') | int(default=0)) >= (states('input_number.igrill_probe_1_target') | int(default=0)) %}
+          Alert
+        {% else %}
+          Normal
+        {% endif %}
+
+- sensor:
+    - name: "target_alert_temp_probe_2"
+      state: >-
+        {% if (states('sensor.igrill_70918f19e8d1_probe_2') | int(default=0)) >= (states('input_number.igrill_probe_2_target') | int(default=0)) %}
+          Alert
+        {% else %}
+          Normal
+        {% endif %}
+
+- sensor:
+    - name: "target_alert_temp_probe_3"
+      state: >-
+        {% if (states('sensor.igrill_70918f19e8d1_probe_3') | int(default=0)) >= (states('input_number.igrill_probe_3_target') | int(default=0)) %}
+          Alert
+        {% else %}
+          Normal
+        {% endif %}
+
+- sensor:
+    - name: "target_alert_temp_probe_4"
+      state: >-
+        {% if (states('sensor.igrill_70918f19e8d1_probe_4') | int(default=0)) >= (states('input_number.igrill_probe_4_target') | int(default=0)) %}
+          Alert
+        {% else %}
+          Normal
+        {% endif %}
+
+#
+# CURRENT SENSING SENSORS
+#
+
+- binary_sensor:
+    - name: "dishwasher_on_or_off" # since this is a binary sensor, we only have to determine true/false
+      unique_id: dishwasher_on_off_sensor
+      delay_on:
+        seconds: 30 # amount of time template state must be met before switching to ON
+      delay_off:
+        seconds: 60 # amount of time template state is NOT met before switching to OFF
+      state: >-
+        {{ states('sensor.dishwasher_sonoff_energy_current') | float(default=0) > 0.1 }}
+
+#
+# LUMINOSITY TRIGGERS - Consolidated as binary template sensors here so trigger values are in one place for automations & scripts #
+#   These are binary sensors that are set ON/OFF in automations.yaml based on the input_number settings on the UI settings view.  #
+#   Other automations then trigger based on these binary sensors.  A roundabout way to centralize.                                #
+#
+#   Some triggers have a ON value and an offset OFF value which prevents them as being implemented directly as a binary sensor,   #
+#   hence the need to use an input_boolean                                                                                        #
+#
+- binary_sensor:
+    - name: lum_outdoor_lights_solar_trig
+      unique_id: lum_outdoor_lights_solar_trig
+      state: >-
+        {{ is_state('input_boolean.inp_bool_lum_outdoor_lights_solar_trig','on') }}
+
+- binary_sensor:
+    - name: lum_mood_lights_f_solar_trig
+      unique_id: lum_mood_lights_f_solar_trig
+      state: >-
+        {{ is_state('input_boolean.inp_bool_lum_mood_lights_f_solar_trig','on') }}
+
+- binary_sensor:
+    - name: lum_sunrm_shades_trig
+      unique_id: lum_sunrm_shades_trig
+      state: >-
+        {{ is_state('input_boolean.inp_bool_lum_sunrm_shades_trig','on') }}
+
+#
+# LUMINOSITY OTHER
+#
+
+- sensor:
+    - name: kflwildw56_backed_up_local_solar_rad_lx # uses aws if local not avaialble
+      unique_id: kflwild w56_backed_up_local_solar_rad_lx
+      unit_of_measurement: "lx"
+      state: >
+        {% if(is_number(states("sensor.kflwildw56_local_solar_rad_lx"))) %}
+          {{ states("sensor.kflwildw56_local_solar_rad_lx") }}
+        {% else %}
+          {{ states("sensor.kflwildw56_aws_solar_rad_lx") }}
+        {% endif %}
+
+#
+# ESPHOME - sensors used in espHome
+#
+
+- trigger:
+    - trigger: time_pattern
+      hours: /1
+    - trigger: homeassistant
+      event: start
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: hourly
+      target:
+        entity_id: weather.openweathermap
+      response_variable: hourly
+  sensor:
+    - name: Openweathermap Forecast Hourly
+      unique_id: openweathermap_forecast_hourly
+      state: "{{ now().isoformat() }}"
+      attributes:
+        forecast: "{{ hourly['weather.openweathermap'].forecast }}"
+
+- sensor:
+    - name: weather_hourly_next_8
+      unique_id: weather_hourly_next_8 # updates whenever sensor.openweathermap_forcast_hourly changes
+      state: >-
+        {%- for i in state_attr('sensor.openweathermap_forecast_hourly', 'forecast') -%}
+          {%- if(loop.index <= 8) -%}
+            {{(as_timestamp(i.datetime) | timestamp_custom('%-I%p')) | lower}},{{ i.condition }},{{ i.precipitation }}#
+          {%- endif -%}
+        {%- endfor -%}
+
+#
+# CLIMATE
+#
+
+# GET FORECASTED HI/LOW TEMPERATURES WEATHER
+- trigger:
+    - trigger: time_pattern
+      hours: /1
+    - trigger: homeassistant
+      event: start
+    - trigger: event
+      event_type: event_template_reloaded
+  action:
+    - action: weather.get_forecasts
+      data:
+        type: daily
+      target:
+        entity_id: weather.openweathermap
+      response_variable: wx_data
+  sensor:
+    - name: "Openweathermap Daily Forecast"
+      unique_id: openweathermap_daily_forecast
+      state: "{{ now().isoformat() }}"
+      attributes:
+        forecast: "{{ wx_data['weather.openweathermap'].forecast }}"
+    - name: "Openweathermap Today High"
+      unique_id: openweathermap_today_high
+      device_class: temperature
+      unit_of_measurement: °F
+      icon: mdi:thermometer-high
+      state: "{{ wx_data['weather.openweathermap'].forecast[0].temperature }}"
+    - name: "Openweathermap Today Low"
+      unique_id: openweathermap_today_low
+      device_class: temperature
+      unit_of_measurement: °F
+      icon: mdi:thermometer-low
+      state: "{{ wx_data['weather.openweathermap'].forecast[0].templow }}"
+
+- sensor:
+    - name: ecobee_avg_indoor_temperature # ecobee current temp is the average of all ecobee sensors
+      unique_id: ecobee_avg_indoor_temperature
+      state: "{{ state_attr('climate.local_ecobee','current_temperature') }}"
+      unit_of_measurement: "°F"
+
+- sensor:
+    - name: actual_sunroom_temperature # room temperature as measured by mrcool ac unit
+      unique_id: actual_sunroom_temperature
+      state: "{{ state_attr('climate.sunroom_ac','current_temperature') }}"
+      unit_of_measurement: "°F"
+
+- sensor:
+    - name: espresense_adjusted_sunroom_temperature
+      unique_id: espresense_adjusted_sunroom_temperature
+      state: "{{ (states('sensor.espresense_sunrm_temperature') | float(default=0) - 8.23) | round(2) }}"
+      unit_of_measurement: "°F"
+
+    #  BATTERIES #
+    #    - not all batteries need sensor attribute templates, so not all are here
+
+- sensor:
+    - name: sunrm_window_1_opened_battery
+      unique_id: sunrm_window_1_opened_battery
+      state: "{{ state_attr('binary_sensor.sunrm_window_1_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sunrm_window_2_opened_battery
+      unique_id: sunrm_window_2_opened_battery
+      state: "{{ state_attr('binary_sensor.sunrm_window_2_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sunrm_window_3_opened_battery
+      unique_id: sunrm_window_3_opened_battery
+      state: "{{ state_attr('binary_sensor.sunrm_window_3_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sunrm_window_4_opened_battery
+      unique_id: sunrm_window_4_opened_battery
+      state: "{{ state_attr('binary_sensor.sunrm_window_4_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: front_door_opened_battery
+      unique_id: front_door_opened_battery
+      state: "{{ state_attr('binary_sensor.front_door_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: back_door_opened_battery
+      unique_id: back_door_opened_battery
+      state: "{{ state_attr('binary_sensor.back_door_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: garagehouse_door_opened_battery
+      unique_id: garagehouse_door_opened_battery
+      state: "{{ state_attr('binary_sensor.garagehouse_door_opened','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sun_room_remote_1_battery
+      unique_id: sun_room_remote_1_battery
+      state: "{{ state_attr('sensor.sun_room_remote_1','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sun_room_remote_2_battery
+      unique_id: sun_room_remote_2_battery
+      state: "{{ state_attr('sensor.sun_room_remote_2','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sun_room_remote_3_battery
+      unique_id: sun_room_remote_3_battery
+      state: "{{ state_attr('sensor.sun_room_remote_3','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+- sensor:
+    - name: sun_room_remote_4_battery
+      unique_id: sun_room_remote_4_battery
+      state: "{{ state_attr('sensor.sun_room_remote_4','battery_level') | int(default=0) }}"
+      unit_of_measurement: "%"
+
+#
+# MISC SENSORS
+#
+
+- sensor:
+    - name: ys_cell_gps_accuracy
+      unique_id: ys_cell_gps_accuracy
+      unit_of_measurement: "m"
+      state: "{{ state_attr('device_tracker.ys_cell_gps', 'gps_accuracy') }}"
+
+- sensor:
+    - name: kt_cell_gps_accuracy
+      unique_id: kt_cell_gps_accuracy
+      unit_of_measurement: "m"
+      state: "{{ state_attr('device_tracker.kt_cell_gps', 'gps_accuracy') }}"
+
+- sensor:
+    - name: validated_water_static_pressure_test_result
+      unique_id: validated_static_pressure_test_result
+      unit_of_measurement: "psi"
+      state: >-
+        {% if (is_state('sensor.spt_data_status', 'valid')) %}
+          {{ states('sensor.unvalidated_water_static_pressure_test_result') | float(default=0) }}
+        {% else %}
+          0
+        {% endif %}
+
+- sensor:
+    - name: water_static_pressure_loss_per_minute
+      unique_id: water_static_pressure_loss_per_minute
+      unit_of_measurement: "psi"
+      state: >
+        {{ (states('sensor.validated_water_static_pressure_test_result') | float(default=0)) / 
+          (states('input_number.inp_num_spt_duration') | float(default=0)) }}
+
+- sensor:
+    - name: lv_rm_suggested_brightness
+      unique_id: lv_rm_suggested_brightness
+      unit_of_measurement: "%"
+      # lvrm lux sensor is embedded in espresence_greatrm
+      # - remember suggested brightness goes up as lux goes down
+      # - return fixed value if sun below horizon to prevent TV & other interaction with sensor
+      state: >-
+        {% if ( is_state('binary_sensor.espresense_greatrm', 'off')  or is_state('sun.sun', 'below_horizon') ) %} 
+          30
+        {% elif ( ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) > (states('input_number.inp_num_off_threshold') | float(default=0)) ) ) %}
+          0
+        {% elif ( ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) <= (states('input_number.inp_num_off_threshold') | float(default=0)) ) and
+              ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) > (states('input_number.inp_num_low_threshold') | float(default=0)) ) ) %}
+          12
+        {% elif ( ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) <= (states('input_number.inp_num_low_threshold') | float(default=0)) ) and
+              ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) > (states('input_number.inp_num_med_threshold') | float(default=0)) ) ) %}
+          20
+        {% elif ( (states('sensor.filtered_living_rm_visible_light') | float(default=0)) <= (states('input_number.inp_num_med_threshold') | float(default=0)) ) %}
+          30
+        {% else %}
+          99
+        {% endif %}

@@ -1,0 +1,85 @@
+#################################################
+##                                             ##
+## influxdb.yaml - what to put in the database ##
+## if you care about:                          ##
+##     - states between reboots                ##
+##     - history data                          ##
+##                                             ##
+##    See recorder.yaml for HA                 ##
+##      database filters                       ##
+##                                             ##
+#################################################
+
+host: a0d7b954-influxdb
+port: 8086
+database: homeassistant
+username: !secret influxdb_user
+password: !secret influxdb_pwd
+max_retries: 5
+default_measurement: state
+
+#
+# INCLUDES & EXCLUDES
+#
+include:
+  domains:
+    #    - automation
+    #    - binary_sensor
+    #    - button
+    #    - camera
+    #    - climate
+    #    - cover
+    #    - device_tracker
+    #    - input_boolean
+    #    - input_datetime
+    #    - input_number
+    #    - input_select
+    #    - input_text
+    #    - light
+    #    - lock
+    #    - media_player
+    #    - number
+    - person
+    #    - proximity
+    #    - select
+    #    - sensor
+    #    - scene
+    #    - script
+    #    - switch
+    #    - update
+    #    - zone
+  entity_globs:
+    - sensor.*_temperature*  # anything with temperature
+    - sensor.*_humidity*     # anything with humidity
+    - sensor.*_pressure*
+    - sensor.*_basal_metabolism
+    - sensor.*_body_fat
+    - sensor.*_bone_mass
+    - sensor.*_lean_body_mass
+    - sensor.*_muscle_mass
+    - sensor.*_protien
+    - sensor.*_impedance
+    - sensor.*_visceral_fat
+    - sensor.*_water
+    - sensor.*_weight
+    - sensor.*_bmi
+    - sensor.*_luminosity
+    - sensor.irrig_*
+    - device_tracker.ys_*
+    - device_tracker.kt_*
+  entities:
+    - input_number.loss_per_minute_alarm_threshold
+    - binary_sensor.dishwasher_on_or_off
+    - binary_sensor.water_heater
+    - binary_sensor.air_handler
+    - binary_sensor.water_heater
+    - device_tracker.opnsense_ys_cell_shencentral_net
+    - device_tracker.opnsense_kt_cell_shencentral_net
+    - sensor.dishwasher_sonoff_energy_current
+    - sensor.kflwildw56_backed_up_local_solar_rad_lx
+    - sensor.filtered_kflwildw56_bu_local_rad_lx
+    - sensor.statistical_mean_living_rm_visible_light
+    - sensor.filtered_living_rm_visible_light
+    - sensor.raw_living_rm_visible_light
+
+# EVERYTHING ELSE IS IMPLICITLY EXCLUDED

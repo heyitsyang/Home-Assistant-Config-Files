@@ -1,0 +1,327 @@
+#
+# MQTT SENSORS
+#
+
+sensor:
+  # filament dry box sensors
+  - unique_id: drybox_battery_volts
+    name: "Drybox Battery Voltage"
+    state_topic: "drybox/battery_volts"
+    device_class: voltage
+    unit_of_measurement: "V"
+    qos: 0
+
+  - unique_id: drybox_battery_percent
+    name: "Drybox Battery Percent"
+    state_topic: "drybox/battery_percent"
+    device_class: battery
+    unit_of_measurement: "%"
+    qos: 0
+
+  - unique_id: drybox_report_timestamp
+    name: "Drybox Last Report Time"
+    state_topic: "drybox/time_stamp"
+    qos: 0
+
+  - unique_id: drybox_relative_humidity
+    name: "Drybox Relative Humidity"
+    state_topic: "drybox/relative_humidity"
+    device_class: humidity
+    unit_of_measurement: "%"
+    qos: 0
+
+  - unique_id: drybox_absolute_humidity
+    name: "Drybox Absolute Humidity"
+    state_topic: "drybox/absolute_humidity"
+    unit_of_measurement: "g/m³"
+    qos: 0
+
+  - unique_id: drybox_temperture
+    name: "Drybox Temperature"
+    state_topic: "drybox/temperature"
+    device_class: temperature
+    unit_of_measurement: "°F"
+    qos: 0
+
+  # irrigation leak sensors
+  - unique_id: irrig_battery_voltage
+    name: "Irrig Battery Voltage"
+    device_class: voltage
+    state_topic: "irrig_leak/battery_volts"
+    unit_of_measurement: "V"
+    qos: 0
+
+  - unique_id: irrig_battery_percent
+    name: "Irrig Battery Percent"
+    device_class: battery
+    state_topic: "irrig_leak/battery_percent"
+    unit_of_measurement: "%"
+    qos: 0
+
+  - unique_id: irrig_last_idle_heartbeat
+    name: "Irrig Last Idle Heartbeat"
+    state_topic: "irrig_leak/idle/time_stamp"
+    qos: 0
+
+  - unique_id: irrig_wifi_dbm
+    name: "Irrig WiFi Signal Strength"
+    state_topic: "irrig_leak/wifi_dbm"
+    unit_of_measurement: "dBm"
+    qos: 0
+
+  - unique_id: irrig_idle_water_pressure
+    name: "Irrig Idle Water Pressure"
+    state_topic: "irrig_leak/idle/water_pressure"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+
+  - unique_id: irrig_idle_water_temperature
+    name: "Irrig Idle Water Temperature"
+    state_topic: "irrig_leak/idle/water_temperature"
+    state_class: measurement
+    device_class: temperature
+    unit_of_measurement: "°F"
+    qos: 0
+
+  - unique_id: irrig_last_report_time
+    name: "Irrig Last Report Time"
+    state_topic: "irrig_leak/report/time_stamp"
+    qos: 0
+
+  - unique_id: irrig_report_tot_gallons_all_zones
+    name: "Irrig Report Total Gallons All Zones"
+    state_topic: "irrig_leak/report/tot_gals_all_zones"
+    state_class: total
+    device_class: water
+    unit_of_measurement: "gal"
+    qos: 0
+
+  - unique_id: irrig_report_valve_leak_gallons
+    name: "Irrig Report Valve Leak Gallons"
+    state_topic: "irrig_leak/report/valve_leak"
+    state_class: measurement
+    device_class: water
+    unit_of_measurement: "gal"
+    qos: 0
+
+  - unique_id: irrig_report_avg_gpm_zone_0
+    name: "Irrig Report Avg GPM Zone 0"
+    state_topic: "irrig_leak/report/avg_gpm_zone_0"
+    state_class: measurement
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_gpm_zone_0/attributes"
+
+  - unique_id: irrig_report_avg_gpm_zone_1
+    name: "Irrig Report Avg GPM Zone 1"
+    state_topic: "irrig_leak/report/avg_gpm_zone_1"
+    state_class: measurement
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_gpm_zone_1/attributes"
+
+  - unique_id: irrig_report_avg_gpm_zone_2
+    name: "Irrig Report Avg GPM Zone 2"
+    state_topic: "irrig_leak/report/avg_gpm_zone_2"
+    state_class: measurement
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_gpm_zone_2/attributes"
+
+  - unique_id: irrig_report_avg_gpm_zone_3
+    name: "Irrig Report Avg GPM Zone 3"
+    state_topic: "irrig_leak/report/avg_gpm_zone_3"
+    state_class: measurement
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_gpm_zone_3/attributes"
+
+  - unique_id: irrig_report_avg_gpm_zone_4
+    name: "Irrig Report Avg GPM Zone 4"
+    state_topic: "irrig_leak/report/avg_gpm_zone_4"
+    state_class: measurement
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_gpm_zone_4/attributes"
+
+  - unique_id: irrig_report_avg_psi_zone_0
+    name: "Irrig Report Avg PSI Zone 0"
+    state_topic: "irrig_leak/report/avg_psi_zone_0"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_psi_zone_0/attributes"
+
+  - unique_id: irrig_report_avg_psi_zone_1
+    name: "Irrig Report Avg PSI Zone 1"
+    state_topic: "irrig_leak/report/avg_psi_zone_1"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_psi_zone_1/attributes"
+
+  - unique_id: irrig_report_avg_psi_zone_2
+    name: "Irrig Report Avg PSI Zone 2"
+    state_topic: "irrig_leak/report/avg_psi_zone_2"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_psi_zone_2/attributes"
+
+  - unique_id: irrig_report_avg_psi_zone_3
+    name: "Irrig Report Avg PSI Zone 3"
+    state_topic: "irrig_leak/report/avg_psi_zone_3"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_psi_zone_3/attributes"
+
+  - unique_id: irrig_report_avg_psi_zone_4
+    name: "Irrig Report Avg PSI Zone 4"
+    state_topic: "irrig_leak/report/avg_psi_zone_4"
+    state_class: measurement
+    unit_of_measurement: "psi"
+    device_class: pressure
+    qos: 0
+    json_attributes_topic: "irrig_leak/report/avg_psi_zone_4/attributes"
+
+  # SPT (watermain) sensors
+
+  - unique_id: water_spt_data_status
+    name: "SPT Data Status"
+    state_topic: "watermain/spt_data_status"
+    json_attributes_topic: "watermain/spt_data_status/attributes"
+    qos: 0
+
+  - unique_id: water_pressure
+    name: "Water Pressure"
+    state_topic: "watermain/water_pressure"
+    qos: 0
+    device_class: pressure
+    unit_of_measurement: "psi"
+    expire_after: 600 # state becomes "unknown" after 10 minutes
+
+  - unique_id: water_temperature
+    name: "Water Temperature"
+    state_topic: "watermain/water_temperature"
+    qos: 0
+    device_class: temperature
+    unit_of_measurement: "°F"
+    expire_after: 600 # state becomes "unknown" after 10 minutes
+
+  - unique_id: unvalidated_water_static_pressure_test_result # see template sensor.validated_water_static_pressure_test_result
+    name: "Unvalidated Water Static Pressure Test Result"
+    state_topic: "watermain/spt_result"
+    unit_of_measurement: "psi"
+
+  # misc individual sensors
+  - unique_id: raw_living_rm_visible_light # this is also sensor.espresense_greatrm_tsl2561_lux added by MQTT discovery
+    name: "Raw Living Rm Visible Light" # the code uses this entity name not the one from MQTT discovery
+    device_class: illuminance
+    state_class: measurement
+    state_topic: "espresense/rooms/greatrm/tsl2561_lux"
+    force_update: true # update even if values haven't changed - required if filters depend on update timing for calc
+    qos: 0
+    unit_of_measurement: "lx"
+
+  - unique_id: attic_temperature
+    name: "Attic Temperature"
+    state_topic: "attic/DS18b20/Temperature"
+    qos: 0
+    unit_of_measurement: "°F"
+
+  - unique_id: esp32_igrill_ble_client
+    state_topic: "homeassistant/sensor/igrill_70918f19e8d1/status"
+    name: "ESP32 iGrill BLE Client"
+    json_attributes_topic: "homeassistant/sensor/igrill_70918f19e8d1/systeminfo"
+
+#
+# MQTT BINARY SENSORS
+#
+binary_sensor:
+  - unique_id: spt_sensor_online_status
+    name: "SPT Sensor Online Status"
+    state_topic: "watermain/status/LWT"
+    device_class: connectivity
+    payload_on: "Connected"
+    payload_off: "Connection Lost"
+    qos: 0
+
+  - unique_id: utilitycloset_airhandler
+    name: "Air Handler"
+    state_topic: "utilitycloset/airhandler/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 0
+
+  - unique_id: utilitycloset_waterheater # water heater on/off
+    name: "Water Heater"
+    state_topic: "utilitycloset/waterheater/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 0
+
+  - unique_id: utilitycloset_leakdetector
+    name: "Leak Water Heater"
+    state_topic: "utilitycloset/leakdetector/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 1
+
+  - unique_id: refigerator_leak
+    name: "Leak Refrigerator"
+    state_topic: "refrigeratorleak/leakdetector/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 1
+
+  - unique_id: dishwasher_leak
+    name: "Leak Dishwasher"
+    state_topic: "kitchenislandleak/dishwasher_leak/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 1
+
+  - unique_id: kitchen_sink_rear_leak
+    name: "Leak Kitchen Sink Rear"
+    state_topic: "kitchenislandleak/kitchen_sink_leak_rear/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 1
+
+  - name: "Front Ent Attic uWave"
+    unique_id: front_ent_attic_uwave
+    state_topic: "frontentrance/FrontEntAtticuWave/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 0
+
+  - name: "Front Ent Soffit uWave"
+    unique_id: front_ent_soffit_uwave
+    state_topic: "frontentrance/FrontEntSoffituWave/State"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 0
+
+  - name: "YS-Desktop availability"
+    unique_id: ys_desktop_availability
+    state_topic: homeassistant/sensor/YS-DESKTOP/availability
+    payload_on: "online"
+    payload_off: "offline"
+
+#
+# MQTT COVERS
+#
+
+#
+# MQTT SWITCHES
+#
+switch:
+  - name: "Water Valve"
+    unique_id: water_valve
+    state_topic: "watermain/valve_zeroisclosed"
+    command_topic: "watermain/cmd/valveState"
+    payload_on: "1"
+    payload_off: "0"
+    qos: 2

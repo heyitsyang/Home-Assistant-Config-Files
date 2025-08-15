@@ -1,0 +1,40 @@
+[]
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+ 
+ 
+### CAMERAS ###
+# MOST CAMERAS ARE NOW CONFIGURED THROUGH THE ONVIF INTEGRATION IN THE UI
+
+#- platform: ffmpeg
+#  name: 'GreatRoom camera'                       # DIGOO M1Ql ONVIF2.0/RTSP camera
+#  input: !secret greatroom_url
+
+#- platform: ffmpeg
+#  name: 'Doorbell camera'                        # RCA, LaView, EZVIZ, GuardingVision all seem to be Hikvision cameras
+#  input: !secret doorbell_url                    #  LaView android app works on the RCA camera - rest do not
+
+#- platform: ffmpeg
+#  name: 'FrontPorch camera'                      # HikVision DS-2CD2142FWD-IS 2.8mm
+#  input: !secret frontporch_url                  # user & pwd are embedded in the URL, so !secret the whole thing
+
+#- platform: ffmpeg
+#  name: 'Driveway camera'                        # Chinese ONVIF2.1/RTSP dome camera
+#  input: -rtsp_transport tcp -i rtsp://video-driveway.shencentral.net:554/11
+
+#- platform: ffmpeg
+#  name: 'SunRoom camera'                         # ESCAM QF605 ONVIF2.0/RTSP camera
+#  input: !secret sunroom_url
+
+#- platform: ffmpeg
+#  name: 'Garage camera'                          # DIGOO M1Ql ONVIF2.0/RTSP camera
+#  input: !secret garage_url
+
+#- platform: ffmpeg
+#  name: 'Pano camera'                            # MISECU Fisheye ONVIF/RTSP camera
+#  input: !secret pano1_url                       # user & pwd are embedded in the URL, so !secret the whole thing
+
+  
+# - platform: local_file
+#   name: 'FrontPorch snapshot'
+#   file_path: /config/www/camera_stills/frontporch.jpg

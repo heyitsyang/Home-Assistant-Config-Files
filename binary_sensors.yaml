@@ -1,0 +1,37 @@
+
+
+# BINARY SENSORS CAN BE CREATED IN OTHER FILES:
+# - templates.yaml
+# - command_line.yaml
+# etc.
+
+
+
+#######################
+### BINARY SENSORS  ###
+#######################
+
+#  - platform: hikvision
+#    host: video-doorbell.shencentral.net
+#    port: 80
+#    ssl: False
+#    username: !secret doorbell_user
+#    password: !secret doorbell_pwd
+#    customize:                                    # field detection in HA is same as instrusion detection in hikvision firmware
+#      motion:
+#        delay: 5                                  # debounce delay to prevent multiple quick line crossing detections
+
+#  - platform: hikvision
+#    host: video-frontporch.shencentral.net
+#    port: 80
+#    ssl: False
+#    username: !secret frontporch_user
+#    password: !secret frontporch_pwd
+#    customize:                                    # field detection in HA is same as instrusion detection in hikvision firmware
+#      line_crossing:
+#        delay: 5                                  # debounce delay to prevent multiple quick line crossing detections
+#      tamper_detection:
+#        ignored: True
+#      motion:
+#        ignored: True
+

@@ -1,0 +1,9 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+### TTS ###
+
+- platform: google_translate
+  cache: true
+  cache_dir: tts
+  time_memory: 57600 # secs voice data is held in MEMORY for quick playback - max is 57600 (16hrs)

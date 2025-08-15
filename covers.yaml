@@ -1,0 +1,53 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+### COVERS  ###
+
+# MQTT covers are configured in mqtt.yaml
+
+- platform: group
+  name: "Sun Room Shades"
+  unique_id: sun_room_shades
+  entities:
+    - cover.sun_room_shade_1
+    - cover.sun_room_shade_2
+    - cover.sun_room_shade_3
+    - cover.sun_room_shade_4
+
+- platform: group
+  name: "Garage Doors"
+  unique_id: garage_doors
+  entities:
+    - cover.large_garage_door
+    - cover.small_garage_door
+
+- platform: group
+  name: "Master Bedroom Shades"
+  unique_id: master_bedroom_shades
+  entities:
+    - cover.master_bedroom_shade_1_outer
+    - cover.master_bedroom_shade_2_outer
+    - cover.master_bedroom_shade_3_outer
+    - cover.master_bedroom_shade_4_outer
+    - cover.master_bedroom_shade_1_inner
+    - cover.master_bedroom_shade_2_inner
+    - cover.master_bedroom_shade_3_inner
+    - cover.master_bedroom_shade_4_inner
+
+- platform: group
+  name: "Master Bedroom Outer Shades"
+  unique_id: master_bedroom_outer_shades
+  entities:
+    - cover.master_bedroom_shade_1_outer
+    - cover.master_bedroom_shade_2_outer
+    - cover.master_bedroom_shade_3_outer
+    - cover.master_bedroom_shade_4_outer
+
+- platform: group
+  name: "Master Bedroom Inner Shades"
+  unique_id: master_bedroom_inner_shades
+  entities:
+    - cover.master_bedroom_shade_1_inner
+    - cover.master_bedroom_shade_2_inner
+    - cover.master_bedroom_shade_3_inner
+    - cover.master_bedroom_shade_4_inner

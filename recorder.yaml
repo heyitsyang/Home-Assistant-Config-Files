@@ -1,0 +1,79 @@
+#################################################
+##                                             ##
+## recorder.yaml - what to put in the database ##
+## if you care about:                          ##
+##     - states between reboots                ##
+##     - history data                          ##
+##                                             ##
+##  Items kept in tyhe recorder should be      ##
+##  for the short term (~30days max).  Longer  ##
+##  term data shoudl go into influxDB          ##
+##                                             ##
+##    SEE influxdb.yaml FOR INFLUXDB FILTERS!  ##
+##                                             ##
+#################################################
+
+db_url: !secret mariadb_url
+
+auto_purge: true
+auto_repack: true
+purge_keep_days: 7 # how many days of history to keep
+
+include:
+  domains:
+    - automation # keep automations for debugging using Logbook
+    - binary_sensor
+    #    - button
+    #    - camera
+    #    - climate
+    #    - cover
+    #    - device_tracker
+    - input_boolean
+    - input_datetime
+    - input_number
+    - input_select
+    - input_text
+    #    - light
+    #    - lock
+    #    - media_player
+    #    - number
+    - person
+    - proximity
+    #    - select
+    - sensor
+    #    - scene
+    #    - script
+    #    - switch
+    #    - update
+    #    - zone
+  entity_globs:
+    - device_tracker.ys_*
+    - device_tracker.kt_*
+    - sensor.irrig_*
+  entities:
+    - device_tracker.opnsense_ys_cell_shencentral_net
+    - device_tracker.opnsense_kt_cell_shencentral_net
+    - vacuum.rosie
+    - sensor.irrig_battery_percent
+
+exclude:
+  domains:
+    - group
+  entity_globs:
+    - sensor.ys_desktop_*
+    - sensor.*_battery*
+    - sensor.esp01_*
+    - sensor.hot_*
+    - sensor.openweathermap_*
+    - sensor.weather_*
+    - binary_sensor.*_battery*
+    - binary_sensor.esp01_*
+    - binary_sensor.hot_*
+  entities:
+    - automation.awtrix_mega_weather
+    - sensor.influxdb_db_size
+    - sensor.date
+    - sensor.time
+    - sensor.date_time
+    - sensor.time_date
+    - sun.sun

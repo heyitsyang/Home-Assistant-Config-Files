@@ -1,0 +1,197 @@
+#####################################################
+#
+# groups.yaml for UI display purposes is deprecated
+# in favor of Lovelace UI.  Control groups is still in
+# effect.
+#
+#####################################################
+
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+mood_lights:
+  name: "Mood Lights"
+  entities:
+    - switch.candles
+    - light.kitchen_leds_upper_master
+    - switch.christmas_tree
+
+pathway_lights:
+  name: "Pathway Lights"
+  entities:
+    - switch.candles
+    - light.kitchen_leds_upper_master
+
+sunrm_shades: # This group is used to display all shades individually in the frontend UI
+  name: "Sun Room Shades" # Using cover.sun_room_shades (defined in covers.yaml)
+  entities:
+    - cover.sun_room_shades
+    - cover.sun_room_shade_1
+    - cover.sun_room_shade_2
+    - cover.sun_room_shade_3
+    - cover.sun_room_shade_4
+
+locks:
+  name: "Locks"
+  entities:
+    - lock.front_door_lock
+    - lock.back_door_lock
+
+window_sensors:
+  name: "Window Sensors"
+  entities:
+    - binary_sensor.sun_room_window_1_window_door_is_open
+    - binary_sensor.sun_room_window_2_window_door_is_open
+    - binary_sensor.sun_room_window_3_window_door_is_open
+    - binary_sensor.sun_room_window_4_window_door_is_open
+    - binary_sensor.sun_room_window_5_window_door_is_open
+    - binary_sensor.sun_room_window_6_window_door_is_open
+
+door_sensors:
+  name: "Door Sensors"
+  entities:
+    - binary_sensor.front_door_window_door_is_open
+    - binary_sensor.back_door_window_door_is_open
+    - binary_sensor.garagehouse_door_window_door_is_open
+
+garage_door_status:
+  name: "Garage Door Status"
+  entities:
+    - cover.large_garage_door
+    - cover.small_garage_door
+    - switch.lg_garage_opener_power
+    - switch.sm_garage_opener_power
+    - camera.garage
+
+all_lighting: # This group created for frontend UI use
+  name: "All Lighting" # all_lights cannot be used - reserved & automatically created by HA/Wink also includes fans
+  entities:
+    - light.living_room_lights
+    - light.track_lights
+    - light.island_lights
+    - light.kitchen_cabinet_lights
+    - light.eating_area_lights
+    - light.sun_room_lights
+    - light.sun_room_uplights
+    - light.master_bedroom_lights
+    - switch.master_closet_lights
+    - light.office_lights
+    - light.office_cabinet_leds_master
+    - light.office_monitor_leds
+    - light.guest_room_lights
+    - switch.front_door_lights
+    - switch.back_door_lights
+    - switch.candles
+    - light.kitchen_leds_upper_master
+    - light.kitchen_leds_lower
+    - light.entryway_lights
+    - switch.christmas_tree
+
+all_lighting_xabove_cabinet:
+  name: "Lights"
+  entities:
+    - light.living_room_lights
+    - light.track_lights
+    - light.island_lights
+    - light.kitchen_cabinet_lights
+    - light.eating_area_lights
+    - light.sun_room_lights
+    - light.sun_room_uplights
+    - light.master_bedroom_lights
+    - switch.master_closet_lights
+    - light.office_lights
+    - light.office_cabinet_leds_master
+    - light.office_monitor_leds
+    - light.guest_room_lights
+    - switch.front_door_lights
+    - switch.back_door_lights
+    - switch.candles
+    - light.kitchen_leds_lower
+    - light.entryway_lights
+    - switch.christmas_tree
+
+great_room_lights:
+  name: "Great Room Lights"
+  entities:
+    - light.living_room_lights
+    - light.track_lights
+    - light.island_lights
+    - light.kitchen_cabinet_lights
+    - switch.christmas_tree
+
+living_area_lights:
+  name: "Living Area Lights"
+  entities:
+    - light.living_room_lights
+    - light.track_lights
+
+kitchen_lights:
+  name: "Kitchen Lights"
+  entities:
+    - light.island_lights
+    - light.kitchen_cabinet_lights
+    - light.kitchen_leds_lower
+    - light.kitchen_leds_upper_master
+
+ceiling_fans:
+  name: "Ceiling Fans"
+  entities:
+    - fan.living_room_fan
+    - fan.master_bedroom_fan
+    - fan.office_fan
+    - fan.guest_room_fan
+    - fan.sun_room_fan_1
+    - fan.sun_room_fan_2
+
+sunroom_fans:
+  name: "Sunroom Fans"
+  entities:
+    - fan.sun_room_fan_1
+    - fan.sun_room_fan_2
+
+outdoor_lights:
+  name: "Outdoor Lights"
+  entities:
+    - switch.front_door_lights
+    - switch.back_door_lights
+
+indoor_lights:
+  name: "Indoor Lights"
+  entities:
+    - light.kitchen_cabinet_lights
+    - light.eating_area_lights
+    - light.guest_room_lights
+    - light.island_lights
+    - light.living_room_lights
+    - light.master_bedroom_lights
+    - light.office_lights
+    - light.office_cabinet_leds_master
+    - light.office_monitor_leds
+    - light.sun_room_lights
+    - light.track_lights
+    - light.entryway_lights
+    - switch.candles
+    - light.kitchen_leds_upper_master
+    - light.kitchen_leds_lower
+    - switch.christmas_tree
+    - light.master_closet_lights
+    - light.hvac_closet_lights
+
+upper_office_cabinet_leds:
+  name: "Upper Office Cabinet LEDs"
+  entities:
+    - light.office_cabinet_leds
+    - light.office_cabinet_leds_segment_1
+    - light.office_cabinet_leds_segment_2
+
+office_mood_lights:
+  name: "Office Mood Lights"
+  entities:
+    - light.office_cabinet_leds_master
+    - light.office_monitor_leds
+
+garage_opener_power:
+  name: "Garage door power"
+  entities:
+    - switch.lg_garage_opener_power
+    - switch.sm_garage_opener_power

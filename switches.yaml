@@ -1,0 +1,13 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+##############
+## SWITCHES ##
+##############
+
+##  Can't find a switch?
+##  Some MQTT switches are sutomatically added
+##  via auto discovery and are not listed below
+## also MQTT switches are now under mqtt.yaml
+
+[]

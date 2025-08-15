@@ -1,0 +1,7 @@
+{
+  "editor.bracketPairColorization.enabled": true,
+  "files.associations": {
+    "*.yaml": "home-assistant"
+  },
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true
+}

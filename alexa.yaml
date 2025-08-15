@@ -1,0 +1,207 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+##################
+## ALEXA SKILLS ##
+##################
+
+smart_home:
+  locale: en-US
+  endpoint: https://api.amazonalexa.com/v3/events
+  client_id: !secret alexa_client_id # not the same as the client_id and client secret in the security profile
+  client_secret:
+    !secret alexa_client_secret # go to Alexa Developer Console:haha>Build>Permissions>Alexa Skill Messaging
+    # to get this client_id and client_secret
+
+  # if no "filter:" then everything is included
+  # usingpresence of "filter:" excludes everything unless explicitly listed
+  filter:
+    include_domains:
+      - light
+      - cover
+      - fan
+    exclude_entity_globs:
+      - light.*leds*segment*
+    include_entities:
+      - group.garage_opener_power
+      - group.mood_lights
+      - input_boolean.party_mode
+      - input_boolean.inp_bool_theater_mode
+      - input_boolean.inp_bool_guest_mode
+      - input_boolean.inp_bool_sleeping
+      - input_boolean.inp_bool_extended_absence_mode
+      - lock.front_door_lock
+      - lock.back_door_lock
+      - script.scr_open_garage_doors
+      - script.scr_close_garage_doors
+      - script.scr_open_large_garage_door
+      - script.scr_close_large_garage_door
+      - script.scr_open_small_garage_door
+      - script.scr_close_small_garage_door
+      - script.scr_open_all_sunrm_shades
+      - script.scr_close_all_sunrm_shades
+      - script.scr_close_sunrm_shades_to_40_percent
+      - script.scr_open_sunrm_shade_1
+      - script.scr_close_sunrm_shade_1
+      - script.scr_open_sunrm_shade_2
+      - script.scr_close_sunrm_shade_2
+      - script.scr_open_sunrm_shade_3
+      - script.scr_close_sunrm_shade_3
+      - script.scr_open_sunrm_shade_4
+      - script.scr_close_sunrm_shade_4
+      - script.scr_partially_close_masterbdrm_outer_shades
+      - script.scr_goodnight
+      - script.scr_goodmorning
+      - script.scr_vacuum_start_custom_cleaning
+      - script.scr_reset_mood_lights_to_default
+      - sensor.garage_controller_temperature
+      - sensor.ecobee_avg_indoor_temperature
+      - switch.hamstation
+      - switch.lan2_power
+      - switch.water_valve
+      - switch.candles
+      - switch.christmas_tree
+    #      - switch.lg_garage_opener_power  # use group.garage_opener_power instead
+    #      - switch.sm_garage_opener_power  # use group.garage_opener_power instead
+    #      - group.indoor_lights            # these groups are done in Alexa groups instead
+    #      - group.kitchen_lights           # for faster reaction time
+    #      - group.living_area_lights
+    #      - group.ceiling_fans
+    exclude_entities:
+      - light.kitchen_leds_upper # using ..._master instead
+      - light.office_cabinet_leds # using ..._master instead
+      - light.office_fan
+      - light.guest_room_fan
+      - light.master_bedroom_fan
+      - light.living_room_fan
+      - light.sun_room_fan_1
+      - light.sun_room_fan_2
+      - switch.front_door_lights # mapped to lights.xxx
+      - switch.back_door_lights # mapped to lights.xxx
+      - switch.entryway_lights # mapped to lights.xxx
+      - switch.kitchen_cabinet_lights # mapped to lights.xxx
+      - switch.master_closet_lights # mapped to lights.xxx
+      - switch.eating_area_lights # mapped to lights.xxx
+
+  # Create friendlier aliases for Alexa
+  entity_config:
+    switch.christmas_tree:
+      name: "Christmas Tree"
+      display_categories: LIGHT
+    switch.lan2_power:
+      name: "Lan 2"
+    light.kitchen_leds_lower:
+      name: "Kitchen counter lights"
+      display_categories: LIGHT
+    switch.hamstation: # avoid Alexa confusion with radio "stations"
+      name: "Ham radio"
+    input_boolean.inp_bool_sleeping:
+      name: "Sleep mode"
+    input_boolean.inp_bool_guest_mode:
+      name: "Guest mode"
+    input_boolean.party_mode:
+      name: "Party mode"
+    script.scr_reset_mood_lights_to_default:
+      name: "Reset mood lights"
+      display_categories: LIGHT
+    script.scr_goodmorning:
+      name: "Goodmorning script"
+    script.scr_goodnight:
+      name: "Goodnight Script"
+    script.scr_vacuum_start_custom_cleaning:
+      name: "Rosie"
+      display_categories: "VACUUM_CLEANER"
+    input_boolean.inp_bool_announcements:
+      name: "Announcements"
+    # cover.large_garage_door:
+    #   name: "Large Garage Door"
+    #   display_categories: GARAGE_DOOR
+    # cover.small_garage_door:
+    #   name: "Small Garage Door"
+    #   display_categories: GARAGE_DOOR
+    # cover.garage_doors:
+    #   name: "Garage doors"
+    #   display_categories: GARAGE_DOOR
+    cover.master_bedroom_shades:
+      name: "All master bedroom shades"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_filtering_shades:
+      name: "Master bedroom filtering shades"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_blackout_shades:
+      name: "Master bedroom black out shades"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_1_outer:
+      name: Master bedroom shade 1 outer"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_2_outer:
+      name: Master bedroom shade 2 outer"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_3_outer:
+      name: Master bedroom shade 3 outer"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_4_outer:
+      name: Master bedroom shade 4 outer"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_1_inner:
+      name: Master bedroom shade 1 inner"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_2_inner:
+      name: Master bedroom shade 2 inner"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_3_inner:
+      name: Master bedroom shade 3 inner"
+      display_categories: INTERIOR_BLIND
+    cover.master_bedroom_shade_4_inner:
+      name: Master bedroom shade 4 inner"
+      display_categories: INTERIOR_BLIND
+    script.scr_partially_close_masterbdrm_outer_shades:
+      name: "Partial master bedroom shades"
+      display_categories: INTERIOR_BLIND
+    # cover.sun_room_shade_1:
+    #   name: "Sun room shade 1"
+    #   display_categories: INTERIOR_BLIND
+    # cover.sun_room_shade_2:
+    #   name: "Sun room shade 2"
+    #   display_categories: INTERIOR_BLIND
+    # cover.sun_room_shade_3:
+    #   name: "Sun room shade 3"
+    #   display_categories: INTERIOR_BLIND
+    # cover.sun_room_shade_4:
+    #   name: "Sun room shade 4"
+    #   display_categories: INTERIOR_BLIND
+    # cover.sun_room_shades:
+    #   name: "All sun room shades"
+    #   display_categories: INTERIOR_BLIND
+    script.scr_close_sunrm_shades_to_40_percent:
+      name: "Partial sun room shades"
+      display_categories: INTERIOR_BLIND
+    sensor.attic_temperature:
+      name: "Attic"
+      display_categories: TEMPERATURE_SENSOR
+    sensor.garage_controller_temperature:
+      name: "Garage"
+      display_categories: TEMPERATURE_SENSOR
+    sensor.ecobee_avg_indoor_temperature:
+      name: "Indoor"
+      display_categories: TEMPERATURE_SENSOR
+    group.garage_opener_power:
+      name: "Garage opener power"
+    group.mood_lights:
+      name: "Mood lights"
+      display_categories: LIGHT
+    light.office_cabinet_leds_master:
+      name: "Office cabinet lights"
+      display_categories: LIGHT
+    light.office_cabinet_leds:
+      name: "Lower office cabinet lights"
+      display_categories: LIGHT
+    light.office_cabinet_leds_segment_1:
+      name: "Upper office cabinet lights"
+      display_categories: LIGHT
+    light.office_monitor_leds:
+      name: "Office monitor lights"
+      display_categories: LIGHT
+    light.front_door_lights:
+      name: "Front porch light"
+      display_categories: LIGHT

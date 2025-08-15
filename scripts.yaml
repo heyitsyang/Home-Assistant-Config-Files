@@ -1,0 +1,1050 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+#################################
+# SCRIPTS
+#################################
+
+#
+# STARTUP ACTIONS
+#
+scr_ha_startup:
+  sequence:
+    - delay: "00:00:15" # short delay to be sure entities are initialized before use
+    - action: input_boolean.turn_off # initialize announcements as off
+      target:
+        entity_id: input_boolean.inp_bool_announcements
+    - action: input_boolean.turn_off # initialize sleeping as ON
+      target:
+        entity_id: input_boolean.inp_bool_sleeping
+    - if:
+        - condition: template # initialize announcements state
+          value_template: >
+            {{ ( as_timestamp(now(), '')| timestamp_custom('%H:%M:%S', true, '') > (states('input_datetime.announcements_enable') ) )  and 
+              ( as_timestamp(now(), '')| timestamp_custom('%H:%M:%S', true, '') < (states('input_datetime.announcements_disable') ) ) }}
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.inp_bool_announcements
+    - if:
+        - condition: template # initialize sleeping state
+          value_template: >
+            {{ ( as_timestamp(now(), '')| timestamp_custom('%H:%M:%S', true, '') > (states('input_datetime.assume_awake') ) )  and 
+              ( as_timestamp(now(), '')| timestamp_custom('%H:%M:%S', true, '') < (states('input_datetime.assume_asleep') ) ) }}
+      then:
+        - action: input_boolean.turn_off
+          target:
+            entity_id:
+              - input_boolean.inp_bool_sleeping
+              - input_boolean.inp_bool_visitor_while_sleeping_flag
+
+#
+# GOOD MORNING SCRIPT
+#   Other actions are accomplished in the Alexa routine - see Alexa App
+#
+scr_goodmorning:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.semaphore_good_morning_was_used
+    - if:
+        - condition: state
+          entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
+          state: "on"
+      then:
+        - action: notify.send_message
+          data:
+            message: >
+              While you were asleep, there was a visitor at the front door.  
+              I'll turn on the yellow ring as a reminder to check for packages.
+          target:
+            entity_id: notify.echo_masterbdrm_speak
+        - action: notify.alexa_yellow_ring
+          data:
+            message: >
+              While you asleep, there was a visitor at the front door.
+              You might want to check for packages.
+        - delay:
+            seconds: 3 # delay to reduce noise cometition from shades
+    - action: input_boolean.turn_off
+      target:
+        entity_id:
+          - input_boolean.inp_bool_sleeping
+          - input_boolean.inp_bool_visitor_while_sleeping_flag
+    - action: cover.set_cover_position
+      target:
+        entity_id: cover.master_bedroom_inner_shades
+      data:
+        position: 30
+    - delay:
+        minutes: 15
+    - action: cover.open_cover
+      target:
+        entity_id: cover.master_bedroom_inner_shades
+
+#
+# COVER SCRIPTS
+#  These scripts are to avoid having to use ON and OFF for covers (shades, garage doors, etc.)
+#
+scr_open_garage_doors:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.garage_doors
+
+scr_close_garage_doors:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.garage_doors
+
+scr_open_large_garage_door:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.large_garage_door
+
+scr_close_large_garage_door:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.large_garage_door
+
+scr_open_small_garage_door:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.small_garage_door
+
+scr_close_small_garage_door:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.small_garage_door
+
+scr_open_all_sunrm_shades:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shades
+
+scr_close_all_sunrm_shades:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shades
+
+scr_open_sunrm_shade_1:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shade_1
+
+scr_close_sunrm_shade_1:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shade_1
+
+scr_open_sunrm_shade_2:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shade_2
+
+scr_close_sunrm_shade_2:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shade_2
+
+scr_open_sunrm_shade_3:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shade_3
+
+scr_close_sunrm_shade_3:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shade_3
+
+scr_open_sunrm_shade_4:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shade_4
+
+scr_close_sunrm_shade_4:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shade_4
+
+#
+# GOOD NIGHT SCRIPT
+#   All lights except guest suite are turned off in an Alexa routine before
+#   running this script, so only guest suite lights a handled here
+#
+scr_goodnight: # called by Alexa as PART of Goodnight Routine
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.party_mode
+    - action: lock.lock
+      target:
+        entity_id: lock.front_door_lock, lock.back_door_lock
+    - action: cover.close_cover
+      entity_id: cover.master_bedroom_shades
+    - if:
+        - or:
+            - condition: state
+              entity_id: cover.large_garage_door
+              state: "open"
+            - condition: state
+              entity_id: cover.small_garage_door
+              state: "open"
+      then:
+        - action: script.scr_say_phrase
+          data:
+            message: "A garage door is still open"
+        - action: notify.alexa_yellow_ring
+          data:
+            message: "A garage door is still open"
+    - if:
+        - condition: state
+          entity_id: input_boolean.inp_bool_guest_mode # goodnight routine ignores guest area lights if overnight guest mode is ON
+          state: "off"
+        - not:
+            condition: state
+            entity_id: sensor.ys_cell_ble_room
+            state: "office"
+      then:
+        - action: light.turn_off
+          target:
+            entity_id:
+              - light.office_lights
+              - light.office_cabinet_leds_master
+              - light.office_monitor_leds
+              - light.guest_room_lights
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_sleeping
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_announcements
+
+#
+# NOBODY HOME
+#
+scr_nobody_home:
+  sequence:
+    # - action: script.scr_say_phrase
+    #   data:
+    #     message: "I feel so empty inside when my people are away"
+    - condition: state
+      entity_id: input_boolean.inp_bool_guest_mode # do not execute remainder unless Overnight Guest is OFF
+      state: "off"
+    - action: lock.lock
+      target:
+        entity_id: lock.front_door_lock, lock.back_door_lock
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.all_lighting_xabove_cabinet
+
+#
+# PLUMBING & WATER RELATED
+#
+scr_spt_start:
+  sequence:
+    - action: mqtt.publish
+      data:
+        topic: watermain/cmd/sptDuration
+        payload: "{{ states('input_number.inp_num_spt_duration') }}"
+    - action: mqtt.publish
+      data:
+        topic: watermain/cmd/sptStart # sptStart topic itself is used as a semaphore by firmware
+        payload: on # payload content is not reqd by firmware but reqd here to pass HA syntax checking
+
+#
+# PERFORM INDIV. HOME ARRIVAL ACTIONS
+#
+scr_arrival_announcement:
+  mode: parallel # start another run even if another hasn't completed
+  sequence:
+    - action: input_boolean.turn_off
+      data:
+        entity_id: input_boolean.inp_bool_visitor_while_out_flag
+    - condition: state # continue if not inhibited
+      entity_id: input_boolean.inhibit_presence_announcements
+      state: "off"
+    - action: google_generative_ai_conversation.generate_content
+      data:
+        prompt: In one sentence, welcome a person back home in a warm way as a singular entity. Do not use special characters.
+      response_variable: ai_response
+    - action: script.scr_say_phrase
+      data: # ai_response['text'] gets the value of the text key from the response
+        message: >
+          {% if person == "karen" %}
+            {% if is_state('input_boolean.inp_bool_visitor_while_out_flag', 'on') %}
+              "Hello Mistress Karen, welcome home.  While you were away, there was a visitor at the front door"
+            {% else %}
+              "Hello Mistress Karen. {{ ai_response['text'] }}" 
+            {% endif %}
+          {% else %}
+            {% if is_state('input_boolean.inp_bool_visitor_while_out_flag', 'on') %}
+              "Hello Master Yang, welcome home.  While you were away, there was a visitor at the front door"
+            {% else %}
+              "Hello Master Yang. {{ ai_response['text'] }}"
+            {% endif %}
+          {% endif %}
+
+#
+# SIMULATE AN OCCUPIED HOME
+#
+scr_occupied_sim:
+  sequence:
+    - delay: "00:{{ (range(1, 20)|random|int(default=0)) }}:00"
+    - action: light.turn_on
+      data:
+        entity_id: light.living_room_lights
+        brightness_pct: 30
+    - delay: "02:{{ (range(1, 59)|random|int(default=0)) }}:00"
+    - action: light.turn_on
+      data:
+        entity_id: light.master_bedroom_lights
+        brightness_pct: 50
+    - delay: "00:{{ (range(1, 59)|random|int(default=0)) }}:00"
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.indoor_lights
+
+#
+# COMMON EXTENDED ABSENCE ACTIONS
+#
+scr_common_extended_absence_on:
+  mode: restart # start new script run after stopping previous to prevent confusion due to delay
+  sequence:
+    - action: script.scr_check_sunrm_windows
+    - action: script.scr_close_sunrm_shades
+    - action: lock.lock
+      target:
+        entity_id: lock.front_door_lock,lock.back_door_lock
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.all_lighting_xabove_cabinet
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_vacuum_every_sunday
+    - if:
+        - condition: state
+          entity_id: input_boolean.leave_water_valve_on
+          state: "off"
+      then:
+        - action: switch.turn_off
+          target:
+            entity_id: switch.water_valve
+    - delay: "00:20:00"
+    - action: switch.turn_off
+      target:
+        entity_id:
+          - switch.lg_garage_opener_power
+          - switch.sm_garage_opener_power
+
+scr_common_extended_absence_off:
+  mode: restart # start new script run after stopping previous to prevent confusion due to delay
+  sequence:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.water_valve
+    - action: switch.turn_on
+      target:
+        entity_id:
+          - switch.lg_garage_opener_power
+          - switch.sm_garage_opener_power
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_vacuum_every_sunday
+
+#
+# COMMON GUEST MODE ACTIONS
+#
+scr_common_guest_mode_on:
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_on # leave water valve ON if absent & with guest
+      target:
+        entity_id: input_boolean.leave_water_valve_on
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_vacuum_every_sunday
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inhibit_office_mood_lighting
+
+scr_common_guest_mode_off:
+  mode: restart
+  sequence:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_guest_in_sunroom
+    - action: input_boolean.turn_off # leave water valve ON if absent & with guest
+      target:
+        entity_id: input_boolean.leave_water_valve_on
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_vacuum_every_sunday
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inhibit_office_mood_lighting
+
+#
+# CHECK IF SUN ROOM WINDOWS ARE OPEN & REPORT
+#
+scr_check_sunrm_windows:
+  sequence:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_5_window_door_is_open
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_6_window_door_is_open
+          state: "on"
+    - action: script.scr_say_phrase
+      data:
+        message: "You have a window open in the sun room.  The shades will not be automatically closed"
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "You have a window open in the sun room.  The shades will not be automatically closed"
+
+#
+# CLOSE SUN ROOM SHADES
+#
+scr_close_sunrm_shades:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: input_boolean.inp_bool_inhibit_shades
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_5_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_6_window_door_is_open
+          state: "off"
+    - action: cover.close_cover
+      target:
+        entity_id: cover.sun_room_shades
+
+#
+# PARTIALLY CLOSE SUN ROOM SHADES
+#
+scr_partial_close_masterbdrm_outer_shades:
+  sequence:
+    - action: cover.set_cover_position
+      data:
+        entity_id: cover.master_bedroom_outer_shades
+        position: "{{ position }}"
+
+scr_partially_close_masterbdrm_outer_shades:
+  mode: single
+  sequence:
+    - action: script.scr_partial_close_master_bedroom_outer_shades
+      data:
+        position: "30" # drop shades to X% open
+#
+# PARTIALLY CLOSE SUN ROOM SHADES
+#
+scr_partial_close_sunrm_shades:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: input_boolean.inp_bool_inhibit_shades
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_5_window_door_is_open
+          state: "off"
+        - condition: state
+          entity_id: binary_sensor.sun_room_window_6_window_door_is_open
+          state: "off"
+    - action: cover.set_cover_position
+      data:
+        entity_id: cover.sun_room_shades
+        position: "{{ position }}"
+
+scr_close_sunrm_shades_to_40_percent:
+  mode: single
+  sequence:
+    - action: script.scr_check_sunrm_windows # be sure no windows are open
+    - action: script.scr_partial_close_sunrm_shades
+      data:
+        position: "40" # drop shades to X% open
+
+#
+# SUSPICIOUS ACTIVITY IF NOBODY HOME
+#
+scr_check_if_suspicious:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: input_boolean.inp_bool_guest_mode # do not execute remainder unless Overnight Guest is OFF
+          state: "off"
+        - condition: state
+          entity_id: input_boolean.inp_bool_extended_absence_mode # do not execute remainder unless Extended Absence is ON
+          state: "on"
+        - condition: not # testing for not_home else doesn't work if in a known zone
+          conditions:
+            - condition: state
+              entity_id: person.yang
+              state: "home"
+            - condition: state
+              entity_id: person.karen
+              state: "home"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "SUSPICIOUS ACTIVITY at Norcoose"
+        message: "PRESS to investigate"
+        data:
+          clickAction: "ccab4aaf_frigate/dashboard"
+          channel: "Urgent"
+          importance: "high"
+          media_stream: alarm_stream
+          vibrationPattern: "100, 1000, 100, 1000, 100, 1000"
+          persistent: "true"
+          tag: "persistent"
+          priority: high
+          ttl: 0
+          data:
+            car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        message: "SUSPICIOUS ACTIVITY detected in Norcoose home"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        message: "TTS"
+        data:
+          tts_text: "SUSPICIOUS ACTIVITY at Norcoose"
+          media_stream: alarm_stream_max
+          data:
+            car_ui: true
+
+#
+# NOTIFY IF GARAGE DOOR IS OPEN
+#
+scr_check_garage_open:
+  sequence:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: cover.large_garage_door
+          state: "open"
+        - condition: state
+          entity_id: cover.small_garage_door
+          state: "open"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        message: "TTS"
+        data:
+          tts_text: "A garage door has been left open"
+          media_stream: alarm_stream
+          priority: high
+          ttl: 0
+          data:
+            car_ui: true
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "GARAGE DOOR LEFT OPEN"
+        message: "Did you forget to close it?  PRESS to see."
+        data:
+          clickAction: "lovelace/security"
+          priority: high
+          ttl: 0
+          data:
+            car_ui: true
+
+scr_repeat_say_garage_open:
+  sequence:
+    - action: script.scr_say_phrase
+      data:
+        message: "A garage door has been left open"
+    - delay: "00:10:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: cover.large_garage_door
+          state: "open"
+        - condition: state
+          entity_id: cover.small_garage_door
+          state: "open"
+    - action: script.scr_say_phrase
+      data:
+        message: "A garage door is still open"
+    - delay: "00:10:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: cover.large_garage_door
+          state: "open"
+        - condition: state
+          entity_id: cover.small_garage_door
+          state: "open"
+    - action: script.scr_say_phrase
+      data:
+        message: "A garage door is still open"
+    - delay: "00:10:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: cover.large_garage_door
+          state: "open"
+        - condition: state
+          entity_id: cover.small_garage_door
+          state: "open"
+    - action: script.scr_say_phrase
+      data:
+        message: "A garage door is still open"
+    - delay: "00:10:00"
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: cover.large_garage_door
+          state: "open"
+        - condition: state
+          entity_id: cover.small_garage_door
+          state: "open"
+    - action: script.scr_say_phrase
+      data:
+        message: "A garage door is still open.  This is your last reminder"
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "A garage door is still open"
+
+#
+# MOOD LIGHTING
+#
+scr_mood_lighting_on:
+  sequence:
+    # - condition: state
+    #   entity_id: group.mood_lights
+    #   state: "off"
+    - if:
+        - condition: state
+          entity_id: input_boolean.inp_bool_guest_in_sunroom
+          state: "off"
+      then:
+        - action: scene.turn_on
+          target:
+            entity_id: scene.sun_room_uplights_20
+    - action: homeassistant.turn_on
+      target:
+        entity_id: group.mood_lights
+    - action: script.scr_turn_on_kitchen_leds_upper
+
+scr_turn_on_kitchen_leds_upper:
+  sequence:
+    - if:
+        - condition: time
+          weekday:
+            - mon # night before trash day
+            - thu # night before trash day
+      then:
+        - action: light.turn_on
+          target:
+            entity_id: light.kitchen_leds_upper
+        - action: light.turn_on
+          target:
+            entity_id: light.kitchen_leds_upper_master
+        - action: select.select_option
+          target:
+            entity_id: select.kitchen_leds_upper_preset
+          data:
+            option: "Trash Night"
+      else:
+        - action: light.turn_on
+          target:
+            entity_id: light.kitchen_leds_upper_master
+        - action: script.scr_reset_mood_lights_to_default
+
+scr_reset_mood_lights_to_default:
+  sequence:
+    - action: select.select_option
+      target:
+        entity_id: select.kitchen_leds_upper_preset
+      data:
+        option: "Spots Warm Wht 50%"
+
+#
+# MOTION LIGHTING - if luminosity is low and motion is detected
+#
+scr_motion_lighting_on:
+  sequence:
+    - condition: and
+      conditions:
+        - condition: state
+          entity_id: input_boolean.inp_bool_sleeping # execute only if not sleeping
+          state: "off"
+        - condition: state
+          entity_id: input_boolean.inp_bool_theater_mode # avoid changing brightness if theater mode
+          state: "off"
+    - action: light.turn_on
+      data:
+        entity_id: light.living_room_lights
+        brightness_pct: "{{ states('sensor.lv_rm_suggested_brightness') | int(default=0)}}"
+
+#
+# PATHWAY MOTION LIGHTING
+#
+scr_pathway_motion_lighting_on:
+  sequence:
+    - condition: state
+      entity_id: binary_sensor.lum_mood_lights_f_solar_trig
+      state: "on"
+    - action: light.turn_on
+      target:
+        entity_id: light.kitchen_leds_upper_master
+    - action: light.turn_on
+      target:
+        entity_id: light.kitchen_leds_upper
+    - action: select.select_option
+      target:
+        entity_id: select.kitchen_leds_upper_preset
+      data:
+        option: "Spots Warm Wht 20%"
+    - action: homeassistant.turn_on
+      target:
+        entity_id: group.pathway_lights
+
+scr_pathway_motion_lighting_off:
+  sequence:
+    - condition: time # confine auto-off period due to *MOTION*
+      after: "00:09" # to after midnight
+    - condition: sun # and before sunrise
+      before: sunrise
+    - condition: state
+      entity_id: group.pathway_lights
+      state: "on"
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.pathway_lights
+
+#
+# GREAT ROOM LIGHTING
+#
+scr_great_room_motion_lighting_off:
+  sequence:
+    - condition: state
+      entity_id: group.great_room_lights
+      state: "on"
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.great_room_lights
+
+#
+# OUTDOOR LIGHTS AND NOTIFICATIONS
+#
+scr_frontporch_activity:
+  sequence:
+    - action: script.turn_on # use this method to de-serialize the speech so camera snapshots are not delayed by scr_say_phrase
+      entity_id: script.scr_say_phrase # scr_say_phrase doesn't announce if not during announcement hours
+      data:
+        variables:
+          message: "You have a visitor at the front door"
+    - action: camera.snapshot
+      data:
+        entity_id: camera.frontporch
+        filename: /config/www/camera_stills/frontporch.jpg
+    - if:
+        - condition: not # testing for "not_home" else doesn't work if in a known zone so use !home logic
+          conditions:
+            - condition: state
+              entity_id: person.yang
+              state: "home"
+            - condition: state
+              entity_id: person.karen
+              state: "home"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.inp_bool_visitor_while_out_flag
+        - action: notify.alexa_yellow_ring
+          data:
+            message: "While you out, there was a visitor at the front door"
+        - action: notify.mobile_app_yskt_cell
+          data:
+            title: Front door activity
+            message: "Front door activity detected"
+            data:
+              clickAction: "lovelace/last-snaps"
+        - action: notify.mobile_app_yskt_cell
+          data:
+            title: Front door activity
+            message: TTS
+            data:
+              tts_text: "Front door activity detected"
+              data:
+                car_ui: true
+    - if:
+        - condition: state # notify quietly if sleeping
+          entity_id: input_boolean.inp_bool_sleeping
+          state: "on"
+      then:
+        - action: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
+        - action: notify.mobile_app_yskt_cell
+          data:
+            title: Front door activity
+            message: "Front door activity detected while asleep"
+            data:
+              clickAction: "lovelace/last-snaps"
+
+scr_front_door_lights_on:
+  sequence:
+    - condition: state
+      entity_id: binary_sensor.lum_outdoor_lights_solar_trig
+      state: "on"
+    - condition: state
+      entity_id: timer.pause_auto_front_door_lights
+      state: "idle"
+    - action: light.turn_on
+      target:
+        entity_id: light.front_door_lights # light is auto switched off after door locked and/or delay
+
+scr_back_door_lights_on:
+  sequence:
+    - condition: state
+      entity_id: binary_sensor.lum_outdoor_lights_solar_trig
+      state: "on"
+    - action: light.turn_on
+      target:
+        entity_id: light.back_door_lights # light is auto switched off door locked and/or delay
+
+#
+# SPEAK PHRASE
+#
+# - if ANNOUNCEMENTS are off, then don't speak
+# - if GUEST MODE then only to kitchen, otherwise to all
+#
+scr_say_phrase:
+  mode: queued
+  sequence:
+    - action: sonos.snapshot
+      data:
+        entity_id:
+          - all
+        with_group: true
+    - choose:
+        - conditions: # high priority - ignores announce & sleeping conditions & boost volume
+            - condition: template
+              value_template: "{{ priority == 'high' }}"
+          sequence:
+            - action: media_player.volume_set
+              data:
+                entity_id: media_player.office_speakers
+                volume_level: "{{ '%0.2f' | format(states('input_number.office_announce_vol') | float(default=0)  + 0.25) }}" # set high priority speaking volume
+            - action: media_player.volume_set
+              data:
+                entity_id: media_player.greatroom_speakers
+                volume_level: "{{ '%0.2f' | format(states('input_number.greatrm_announce_vol') | float(default=0)  + 0.25) }}" # set high priority speaking volume
+            - action: media_player.volume_set
+              data:
+                entity_id: media_player.garage_speakers
+                volume_level: "{{ '%0.2f' | format(states('input_number.garage_announce_vol') | float(default=0)  + 0.25) }}" # set high priority speaking volume
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: input_boolean.inp_bool_guest_mode
+                      state: "on"
+                  sequence:
+                    - action: media_player.play_media
+                      data:
+                        announce: false
+                        entity_id:
+                          - media_player.greatroom_speakers
+                          - media_player.garage_speakers
+                        media_content_id: media-source://tts/tts.piper?message="This is a high priority message. {{ message | replace(' Yang', ' Yainng')  | regex_replace('.$', '') }}"
+                        media_content_type: music
+              default:
+                - action: media_player.play_media
+                  data:
+                    announce: false
+                    entity_id:
+                      - media_player.greatroom_speakers
+                      - media_player.garage_speakers
+                      - media_player.office_speakers
+                    media_content_id: media-source://tts/tts.piper?message="This is a high priority message. {{ message | replace(' Yang', ' Yainng') | regex_replace('.$', '') }}"
+                    media_content_type: music
+      default: # normal priority - respects announcement conditions
+        - condition: state
+          entity_id: input_boolean.inp_bool_announcements # do not execute remaining unless announce is ON
+          state: "on"
+        - action: media_player.volume_set
+          data:
+            entity_id: media_player.office_speakers
+            volume_level: "{{ states('input_number.office_announce_vol') }}" # set normal speaking volume
+        - action: media_player.volume_set
+          data:
+            entity_id: media_player.greatroom_speakers
+            volume_level: "{{ states('input_number.greatrm_announce_vol') }}" # set normal speaking volume
+        - action: media_player.volume_set
+          data:
+            entity_id: media_player.garage_speakers
+            volume_level: "{{ states('input_number.garage_announce_vol') }}" # set normal speaking volume
+        - choose:
+            - conditions:
+                - condition: state
+                  entity_id: input_boolean.inp_bool_guest_mode
+                  state: "on"
+              sequence:
+                - action: media_player.play_media
+                  data:
+                    announce: false
+                    entity_id:
+                      - media_player.greatroom_speakers
+                      - media_player.garage_speakers
+                    media_content_id: media-source://tts/tts.piper?message="{{ message | regex_replace('.$', '') }}"
+                    media_content_type: music
+          default:
+            - action: media_player.play_media
+              data:
+                announce: false
+                entity_id:
+                  - media_player.greatroom_speakers
+                  - media_player.garage_speakers
+                  - media_player.office_speakers
+                media_content_id: media-source://tts/tts.piper?message="{{ message }}"
+                media_content_type: music
+    #- delay: "00:00:01" # delay needed so media attributes for announcement are loaded
+    - wait_template: "{{ states('media_player.greatroom_speakers')}}" # wait for a state change
+      timeout:
+        seconds: 1
+    - action: logbook.log
+      data_template:
+        name: "say_phrase: "
+        message: "{{ message + '(' ~ state_attr('media_player.greatroom_speakers', 'media_duration') + 's)' }}" # tilde converts to string in jinja
+    - delay:
+        seconds: "{{ state_attr('media_player.greatroom_speakers', 'media_duration') | int(default=5) }}" # wait for announce duration
+    - action: sonos.restore # premature restore will cut off speech before it has started or during play
+      data:
+        entity_id:
+          - all
+        with_group: true
+
+#
+#  MANUAL UI REQUESTS
+#
+
+# SPEAK TIME
+scr_manual_say_time:
+  mode: queued
+  sequence:
+    - action: script.scr_say_phrase
+      data:
+        message: >-
+          'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
+          | regex_replace(":0(\\d)", " oh \\1") }}'
+
+# VACUUM COMMANDS
+scr_vacuum_start_custom_cleaning:
+  sequence:
+    - condition: state
+      entity_id: vacuum.rosie # do not execute unless docked (not already cleaning)
+      state: "docked"
+    - action: neato.custom_cleaning
+      target:
+        entity_id: vacuum.rosie
+
+scr_vacuum_pause:
+  sequence:
+    - action: vacuum.pause
+      target:
+        entity_id: vacuum.rosie
+
+scr_vacuum_stop:
+  sequence:
+    - action: vacuum.stop
+      target:
+        entity_id: vacuum.rosie
+
+scr_vacuum_return_to_base:
+  sequence:
+    - action: vacuum.return_to_base
+      target:
+        entity_id: vacuum.rosie

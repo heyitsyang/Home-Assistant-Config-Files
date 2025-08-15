@@ -1,0 +1,2840 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+################################
+##        AUTOMATIONS         ##
+################################
+
+# If you want to specify multiple actions to be called,
+# or to include a delay, a script component must be used
+# If you want to describe the desired state of certain entities,
+# check out the scene component
+
+#####################################
+#       HA startup automation       #
+#####################################
+
+- id: aut_ha_startup
+  alias: "aut ha startup" # if this doesn't work, it's because it may be firing before entities have been setup
+  initial_state: true
+  trigger: # which may happen if something is slowing down the startup process such as an external
+    - platform: homeassistant # database connection or error
+      event: start
+  actions:
+    - action: script.scr_ha_startup
+
+#####################################
+#    Time triggered automations     #
+#####################################
+
+#
+# SET MASTER BEDROOM SHADES FOR MID-MORNING
+#
+- id: aut_masterbdrm_shades_mid_morning
+  alias: "aut masterbdrm shades mid morning"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: "10:00:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.semaphore_good_morning_was_used
+      state: "on"
+    - condition: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.inp_bool_sleeping
+      state: "off"
+  actions:
+    - action: cover.set_cover_position
+      target:
+        entity_id: cover.master_bedroom_outer_shades
+      data:
+        position: 29
+
+#
+# PLUMBING STATIC PRESSURE TEST
+#
+- id: aut_start_spt_leak_test
+  alias: "aut start spt leak test"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.daily_start_spt
+    # trigger if more than N miles away and not directly after a reboot (resets last_trigger to NONE)
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.home_ys_cell_gps_distance') | float(default=0) > 2) and (states('sensor.home_kt_cell_gps_distance') | float(default=0) > 2) 
+        and (state_attr(" script.scr_spt_start","last_triggered") != none) }}
+      for:
+        minutes: 15
+  conditions:
+    # don't execute if Overnight Guest is ON
+    - condition: state
+      entity_id: input_boolean.inp_bool_guest_mode
+      state: "off"
+    # don't execute if Extended Absence is ON (valve is OFF for duration of absence)
+    - condition: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "off"
+    # don't continue if dishwasher is ON
+    - condition: state
+      entity_id: binary_sensor.dishwasher_on_or_off
+      state: "off"
+    # don't continue if washer is ON
+    - condition: state
+      entity_id: sensor.top_load_washer
+      state: "off"
+    # don't run more often than every N hours from last test
+    - condition: template
+      value_template: >-
+        {{ (as_timestamp(now(),'') | int(default=0)) - (as_timestamp(state_attr('automation.aut_start_spt_leak_test', 'last_triggered'),'') | int(default=0) )
+          > (4 * 60 * 60) }}
+  actions:
+    - choose: # if water heater is ON, wait until OFF
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.water_heater
+              state: "on"
+          sequence:
+            - wait_for_trigger:
+                - platform: state
+                  entity_id: binary_sensor.water_heater
+                  from: "on"
+                  to: "off"
+                  for:
+                    minutes: 5
+    - action: script.scr_spt_start
+
+# triggers if previous SPT was aborted
+- id: delayed_spt_leak_test
+  alias: "aut delayed spt leak test"
+  initial_state: on
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: sensor.spt_data_status
+      from: "in_process"
+      to: "aborted"
+  conditions:
+    # don't execute if Overnight Guest is ON
+    - condition: state
+      entity_id: input_boolean.inp_bool_guest_mode
+      state: "off"
+    # don't execute if Extended Absence is ON (valve is OFF for duration of absence)
+    - condition: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "off"
+    # don't continue if dishwasher is ON
+    - condition: state
+      entity_id: binary_sensor.dishwasher_on_or_off
+      state: "off"
+    # don't continue if washer is ON
+    - condition: state
+      entity_id: sensor.top_load_washer
+      state: "off"
+  actions:
+    - delay:
+        minutes: 15
+    - choose: # if water heater is ON, wait until OFF
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.water_heater
+              state: "on"
+          sequence:
+            - wait_for_trigger:
+                - platform: state
+                  entity_id: binary_sensor.water_heater
+                  from: "on"
+                  to: "off"
+                  for:
+                    minutes: 5
+    - action: script.scr_spt_start
+
+# triggers if SPT is aborted too many times
+- id: spt_max_aborts_exceeded_error
+  alias: "aut spt max aborts exceeded error"
+  initial_state: on
+  trigger:
+    - platform: template
+      value_template: "{{ (state_attr('sensor.spt_data_status', 'consec_aborts') | int(default=0)) > 3 }}"
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "SPT consecutive aborts exceeds threshold"
+        message: "SPT consecutive aborts: {{ state_attr('sensor.spt_data_status', 'consec_aborts') }}"
+
+#
+# START VACUUM (ROSIE)
+#
+- id: aut_start_vacuum
+  alias: "aut start vacuum"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: "07:35:00"
+  conditions:
+    - condition: time
+      weekday:
+        - sun
+    - condition: state
+      entity_id: input_boolean.inp_bool_vacuum_every_sunday
+      state: "on"
+    - condition: state # do not execute if extended absence ON
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.inp_bool_guest_mode # do not execute unless Overnight Guest is OFF
+      state: "off" # in case we have a guest
+    - condition: template # testing for 'not_home' doesn't work if in a known zone so use != 'home'
+      value_template: "{{ states('person.yang') != 'home' }}"
+    - condition: template # testing for 'not_home' doesn't work if in a known zone so use != 'home'
+      value_template: "{{ states('person.karen') != 'home' }}"
+  actions:
+    - action: script.scr_vacuum_start_custom_cleaning
+
+#
+# SET SLEEPING & ANNOUNCEMENT HOURS AUTOMATICALLY
+#
+# *** input_datetime_assume_asleep is also used in startup actions in scripts.yaml  ***
+#
+# Note spleeping hours and announcement hours are not the same
+#
+- id: aut_assume_awake # sleeping also set by sensors - see aut_sleeping_mode_off
+  alias: "aut assume awake"
+  initial_state: true
+  trigger: # in timestamp_custom() below, the local time flag is set to false since
+    - platform: template # the timestamp compared is already in local time so no conversion desired
+      value_template: >
+        {{ ( states('sensor.time') == (state_attr('input_datetime.assume_awake', 'timestamp') | int(default=0) | timestamp_custom('%H:%M', false, '')) ) }}
+  actions:
+    - action: input_boolean.turn_off
+      data:
+        entity_id: 
+          - input_boolean.inp_bool_sleeping
+          - input_boolean.inp_bool_visitor_while_sleeping_flag
+
+- id: aut_assume_asleep # sleeping also set by sensors - see aut_sleeping_mode_on
+  alias: "aut assume asleep"
+  initial_state: true
+  trigger: # in timestamp_custom() below, the local time flag is set to false since
+    - platform: template # the timestamp compared is already in local time so no conversion desired
+      value_template: >
+        {{ ( states('sensor.time') == (state_attr('input_datetime.assume_asleep', 'timestamp') | int(default=0) | timestamp_custom('%H:%M', false, '')) ) }}
+  actions:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_sleeping
+
+- id: aut_datetime_announcements_on
+  alias: "aut datetime announcements on"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.announcements_enable
+  actions:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_announcements
+
+- id: aut_datetime_announcements_off
+  alias: "aut datetime announcements off"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.announcements_disable
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_announcements
+
+#
+# HOURLY TIME ANNOUNCEMENT
+#
+- id: aut_hourly_announcement
+  alias: "aut hourly announcement"
+  initial_state: true
+  trigger:
+    - platform: time_pattern
+      minutes: 00 # Matches every hour at 00 minutes
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: >-
+          'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
+          | regex_replace(":0(\\d)", " oh \\1") }}'
+
+#
+# EXTINGUISH MOOD LIGHTS DAILY
+#
+- id: aut_mood_lights_daily_off
+  alias: "aut mood lights daily off"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_sleeping
+      to: "on"
+  actions:
+    - action: script.scr_reset_mood_lights_to_default
+    - action: homeassistant.turn_off
+      target:
+        entity_id:
+          - light.sun_room_uplights
+          - switch.candles
+          - light.kitchen_leds_upper_master
+          - switch.christmas_tree
+
+#
+# TURN OFF GOOD MORNING USED SEMAPHORE
+#
+- id: aut_good_morning_used_semphore_reset
+  alias: "aut good morning used semaphore reset"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: "23:59:00"
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.semaphore_good_morning_was_used
+
+#
+# FAILSAFE TO EXTINGUISH OUTDOOR LIGHTS
+#
+- id: aut_outdoor_lights_failsafe
+  alias: "aut outdoor lights failsafe"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: "01:05:00"
+    - platform: state
+      entity_id: group.outdoor_lights
+      to: "on"
+      for:
+        minutes: 120
+  actions:
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.outdoor_lights
+
+#
+# FAILSAFE TO EXTINGUISH INDOOR LIGHTS
+#
+- id: aut_indoor_lights_failsafe
+  alias: "aut indoor lights failsafe"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: "02:30:00"
+  actions:
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.indoor_lights
+
+#
+# PARTY MODE
+#
+
+# PARTY MODE ON/OFF ACTIONS
+- id: aut_party_mode_on
+  alias: party mode on
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.party_mode
+      from: "off"
+      to: "on"
+  actions:
+    - action: light.turn_on
+      data:
+        entity_id: light.living_room_lights
+        brightness_pct: 30
+    - action: light.turn_on
+      target:
+        entity_id:
+          - light.track_lights
+          - group.kitchen_lights
+          - light.sun_room_lights
+          - light.eating_area_lights
+          - light.entryway_lights
+
+- id: aut_party_mode_off
+  alias: party mode off
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.party_mode
+      from: "on"
+      to: "off"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id:
+          - light.track_lights
+          - light.sun_room_lights
+          - light.eating_area_lights
+          - light.entryway_lights
+    - action: lock.lock
+      target:
+        entity_id:
+          - lock.front_door_lock
+          - lock.back_door_lock
+
+# PARTY MODE DETERMINED BY DATE/TIME
+- id: aut_datetime_party_mode_on
+  alias: "aut datetime extended absence on"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.party_mode_start
+  conditions:
+    - condition: state # only bother if currently OFF
+      entity_id: input_boolean.party_mode
+      state: "off"
+  actions:
+    - action: input_boolean.turn_on # This action triggers aut_extended_absence_on
+      target:
+        entity_id: input_boolean.party_mode # since it is triggered by off-to-on input_boolean change
+
+- id: aut_datetime_party_mode_off
+  alias: "aut datetime extended absence off"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.party_mode_end
+  conditions:
+    - condition: state # only bother if currently ON
+      entity_id: input_boolean.party_mode
+      state: "on"
+  actions:
+    - action: input_boolean.turn_off # This action triggers aut_extended_absence_off
+      target:
+        entity_id: input_boolean.party_mode # since it is triggered by on-to-off input_boolen change
+
+#
+# ADJUST LIVING ROOM LIGHT BRIGHTNESS IF NECESSARY
+#
+- id: auto_adj_lvrm_brightness
+  alias: "auto adj lvrm brightness"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: sensor.lv_rm_suggested_brightness # this triggers with any state change
+      to: ~
+  conditions:
+    - condition: state
+      entity_id: input_boolean.party_mode
+      state: "off"
+    - condition: or
+      conditions:
+        - condition: state # motion has triggered them ON
+          entity_id: light.living_room_lights
+          state: "on"
+        - condition: state # in case in living room after motion timeout & lighting has changed
+          entity_id: media_player.tv_livingrm
+          state: "on"
+  actions:
+    - action: light.turn_on
+      data:
+        entity_id: light.living_room_lights
+        brightness_pct: "{{ states('sensor.lv_rm_suggested_brightness') | int(default=0) }}"
+
+###########################################################
+#      Test luminosity based triggers and save states     #
+#      Luminosity trigger levels are set in the UI        #
+###########################################################
+
+- id: aut_lum_outdoor_lights_solar_trig_on
+  alias: "aut lum outdoor lights solar trig on"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.kflwildw56_backed_up_local_solar_rad_lx') | int(default=0) <= states('input_number.inp_num_outdoor_lights_on_solar_trig') | int(default=0) ) }}
+  actions:
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.inp_bool_lum_outdoor_lights_solar_trig
+
+- id: aut_lum_outdoor_lights_solar_trig_off
+  alias: "aut lum outdoor lights solar trig off"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.kflwildw56_backed_up_local_solar_rad_lx') | int(default=0) >= states('input_number.inp_num_outdoor_lights_off_solar_trig') | int(default=0) ) }}
+  actions:
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.inp_bool_lum_outdoor_lights_solar_trig
+
+- id: aut_lum_mood_lights_f_solar_trig_on
+  alias: "aut lum mood lights f_solar trig on"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ ( (states('sensor.filtered_kflwildw56_bu_local_rad_lx') | int(default=0)) <= (states('input_number.inp_num_mood_lights_on_f_solar_trig') | int(default=0)) ) }}
+  actions:
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.inp_bool_lum_mood_lights_f_solar_trig
+
+- id: aut_lum_mood_lights_f_solar_trig_off
+  alias: "aut lum mood lights f_solar trig off"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ ( (states('sensor.filtered_kflwildw56_bu_local_rad_lx') | int(default=0)) >= (states('input_number.inp_num_mood_lights_off_f_solar_trig') | int(default=0)) ) }}
+  actions:
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.inp_bool_lum_mood_lights_f_solar_trig
+
+- id: aut_lum_sunrm_shades_trig_on
+  alias: "aut lum sunrm shades trig on" # set bool to "on" when bright enough
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ ( (states('sensor.kflwildw56_backed_up_local_solar_rad_lx') | int(default=0)) >= (states('input_number.inp_num_sunrm_shades_open_trig') | int(default=0)) ) }}
+  actions:
+    action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.inp_bool_lum_sunrm_shades_trig
+
+- id: aut_lum_sunrm_shades_trig_off
+  alias: "aut lum sunrm shades trig off" # set bool to "off" when too dark
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ ( (states('sensor.kflwildw56_backed_up_local_solar_rad_lx') | int(default=0)) <= (states('input_number.inp_num_sunrm_shades_close_low_lux_trig') | int(default=0)) ) }}
+      for:
+        minutes: "{{ states('input_number.inp_num_sunrm_shades_close_low_lux_trig_delay') | int(default=0) }}"
+  actions:
+    action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.inp_bool_lum_sunrm_shades_trig
+
+##################################################
+#      Sensor event driven automations           #
+#      also see Security automations section     #
+##################################################
+
+#
+# OFFICE MOOD LIGHTS
+#
+- id: aut_office_mood_lights_auto_on
+  alias: aut office mood lights auto on
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.ys_desktop_availability
+      from: "off"
+      to: "on"
+    - platform: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.ys_desktop_lastactive'), '')| float(default=0)) ) | int(default=0) ) < 15 }}
+  conditions:
+    - condition: state # don't repetitively turn on
+      entity_id: group.office_mood_lights
+      state: "off"
+    - condition: state
+      entity_id: input_boolean.inp_bool_lum_outdoor_lights_solar_trig
+      state: "on"
+  actions:
+    - action: light.turn_on
+      target:
+        entity_id: light.office_monitor_leds
+    - action: select.select_option
+      entity_id: select.office_cabinet_leds_preset
+      data:
+        option: "Upper Blu-Org"
+
+- id: aut_office_mood_lights_auto_off
+  alias: aut office mood lights auto off
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.ys_desktop_availability
+      to: "off"
+    - platform: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.ys_desktop_lastactive'), '')| float(default=0)) ) | int(default=0) ) > 3600 }}
+    - platform: state
+      entity_id: input_boolean.inp_bool_lum_outdoor_lights_solar_trig
+      to: "off"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id:
+          - group.office_mood_lights
+
+#
+# DEVICE TRACKER UPDATE EVENTS
+#
+
+- id: aut_update_ys_cell_ble_tracker
+  alias: "aut update ys cell ble tracker"
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: sensor.ys_cell_ble_room
+      to:
+    - platform: homeassistant
+      event: start
+  actions:
+    - data:
+        dev_id: ys_cell_ble
+        location_name: >
+          {% if states('sensor.ys_cell_ble_room') != 'not_home' -%}
+            home
+          {%- else -%}
+            not_home
+          {%- endif %}
+      action: device_tracker.see
+
+- id: aut_update_kt_cell_ble_tracker
+  alias: "aut update kt cell ble tracker"
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: sensor.kt_cell_ble_room
+      to:
+    - platform: homeassistant
+      event: start
+  actions:
+    - data:
+        dev_id: kt_cell_ble
+        location_name: >
+          {% if states('sensor.kt_cell_ble_room') != 'not_home' -%}
+            home
+          {%- else -%}
+            not_home
+          {%- endif %}
+      action: device_tracker.see
+
+#
+# UNINTERRUPTABLE POWER SUPPLY EVENTS
+#
+- id: aut_ups_on_battery_mode
+  alias: "aut ups on battery mode"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.rackups_input_voltage') | float(default=0)) <= (states('sensor.rackups_low_voltage_transfer') | float(default=0)) }}
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.rackups_input_voltage') | float(default=0)) >= (states('sensor.rackups_high_voltage_transfer') | float(default=0)) }}
+  conditions:
+    condition: template # prevent false trigger from disconnected UPS comms
+    value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "HA UPS on battery power"
+        message: "HA UPS on battery mode: {{ states('sensor.rackups_status') }}"
+
+- id: aut_ups_on_ac_mode # mains power restored
+  alias: "aut ups on ac mode"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ ((states('sensor.rackups_input_voltage') | float(default=0)) > (states('sensor.rackups_low_voltage_transfer') | float(default=0)))
+          and ((states('sensor.rackups_input_voltage') | float(default=0)) < (states('sensor.rackups_high_voltage_transfer') | float(default=0))) }}
+  conditions:
+    condition: template # prevent false trigger from disconnected UPS comms
+    value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "HA grid power restored"
+        message: "HA UPS on AC mode: {{ states('sensor.rackups_status') }}"
+    - action: homeassistant.turn_on # ceiling fans all go off during power faillure
+      target:
+        entity_id: group.ceiling_fans # so we turn them back on
+
+- id: aut_ups_emergency_shutdown
+  alias: "auto ups emergency shutdown"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.rackups_battery_runtime
+      below: 600 # in seconds
+  condition: # prevent false trigger from disconnected UPS comms
+    condition: template
+    value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "HA UPS emergency shutdown"
+        message: "UPS emergency shutdown: {{ states('sensor.rackups_battery_runtime') }} seconds remaining"
+    - action: notify.mobile_app_ys_cell
+      data:
+        title: "HA UPS emergency shutdown"
+        message: "UPS emergency shutdown: {{ states('sensor.rackups_battery_runtime') }} seconds remaining"
+        data:
+          car_ui: true
+    - action: hassio.host_shutdown
+
+#
+# IRRIGATION LEAKS
+#
+- id: irrig_leak_while_valves_off
+  alias: "irrig leak while valves off"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.irrig_report_avg_gpm_zone_0') | float(default=0)) > 0 }}
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+        message: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+        message: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+
+- id: irrig_leak_zone_1_front
+  alias: "irrig leak zone 1 front"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.irrig_report_avg_gpm_zone_1') | float(default=0)) > states('input_number.irrig_z1_front_yd_gpm_limit') | float(default=7) }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
+        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
+        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
+
+- id: irrig_leak_zone_2_drip
+  alias: "irrig leak zone 2 drip"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.irrig_report_avg_gpm_zone_2') | float(default=0)) > states('input_number.irrig_z2_drip_gpm_limit') | float(default=5) }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+
+- id: irrig_leak_zone_3_right
+  alias: "irrig leak zone 3 right"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.irrig_report_avg_gpm_zone_3') | float(default=0)) > states('input_number.irrig_z3_right_yd_gpm_limit') | float(default=10) }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+
+- id: irrig_leak_zone_4_left
+  alias: "irrig leak zone 4 left"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (states('sensor.irrig_report_avg_gpm_zone_4') | float(default=0)) > states('input_number.irrig_z4_left_yd_gpm_limit') | float(default=13) }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+
+#
+# DRYBOX HUMIDITY TOO HIGH
+#
+- id: aut_drybox_humidity_above_tolerance
+  alias: "aut drybox humidity above tolerance"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.drybox_relative_humidity
+      above: input_number.inp_num_drybox_relative_humidity_threshold
+      for:
+        hours: 12
+  actions:
+    - action: notify.persistent_notification
+      data:
+        title: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
+        message: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
+    - action: notify.gmail_to_yang
+      data:
+        title: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
+        message: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
+
+#
+# WATER EXPANSION TANK FAULT
+#
+- id: aut_expansion_tank_fault
+  alias: "aut expansion tank fault"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.water_pressure
+      above: 85
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
+        message: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
+        message: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
+
+#
+# REFRIGERATOR/FREEZER FAULT
+#
+- id: aut_freezer_fault
+  alias: "aut freezer fault"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.freezer_sensor_temperature
+      above: 7
+      for:
+        minutes: 90
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Freezer temperature too high"
+        message: "Freezer temperature is {{ states('sensor.freezer_sensor_temperature') }} F"
+        data:
+          clickAction: "lovelace/graphs"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Freezer temperature too high"
+        message: TTS
+        data:
+          tts_text: "Freezer temperature problem detected.  Currently {{ states('sensor.freezer_sensor_temperature') }} degrees"
+          data:
+            car_ui: true
+
+#
+# LEAK DETECTION
+#
+
+# IRRIGATION SYSTEM
+- id: aut_irrig_valve_leak_notify
+  alias: "aut irrig valve leak notify"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.irrig_report_valve_leak_gallons
+      above: 0
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
+        message: |
+          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          were measured between watering cycles or when the valves should have been off.
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
+        message: |
+          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          were measured between watering cycles or when the valves should have been off.
+
+# WHOLE HOUSE WATER
+- id: aut_spt_leak_notify
+  alias: "aut spt leak notify"
+  initial_state: true
+  triggers:
+    - trigger: state
+      entity_id: sensor.spt_data_status
+      from: "in_process"
+      to: "valid"
+      for: "00:00:10" # 2nd condition below requires a delay to test correctly
+  conditions:
+    # don't notify if no pressure drop
+    - condition: template
+      value_template: >
+        {{ (states('sensor.validated_water_static_pressure_test_result') | float(default=0)) <= 0 }}
+    # measured average 24hr drop is -0.028125 PSI per minute
+    - condition: template
+      value_template: >
+        {{ (states('sensor.validated_water_static_pressure_test_result') | float(default=0)) < 
+          ((states('input_number.loss_per_minute_alarm_threshold') | float(default=0)) 
+            * (states('input_number.inp_num_spt_duration') | float(default=0))) }}
+  actions:
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "SPT water leak detected"
+        message: |
+          Leak detected during Static Pressure Test!
+          Test ended: {{ as_timestamp(states.sensor.spt_data_status.last_changed) | timestamp_custom('%d-%b-%Y, %I:%M:%S %p') }}
+          Total pressure drop: {{ states('sensor.validated_water_static_pressure_test_result') | float(default=0) }}
+          Drop per minute: {{ states('sensor.water_static_pressure_loss_per_minute') }}
+    - action: notify.gmail_to_yang
+      data:
+        title: "SPT water leak detected"
+        message: |
+          Leak detected during Static Pressure Test!
+          Test ended: {{ as_timestamp(states.sensor.spt_data_status.last_changed) | timestamp_custom('%d-%b-%Y, %I:%M:%S %p') }}
+          Total pressure drop: {{ states('sensor.validated_water_static_pressure_test_result') | float(default=0) }}
+          Drop per minute: {{ states('sensor.water_static_pressure_loss_per_minute') }}
+    - action: notify.persistent_notification
+      data:
+        title: "SPT water leak detected"
+        message: |
+          Leak detected during Static Pressure Test!
+          Test ended: {{ as_timestamp(states.sensor.spt_data_status.last_changed) | timestamp_custom('%d-%b-%Y, %I:%M:%S %p') }}
+          Total pressure drop: {{ states('sensor.validated_water_static_pressure_test_result') | float(default=0) }}
+          Drop per minute: {{ states('sensor.water_static_pressure_loss_per_minute') }}
+
+- id: aut_leak_detected
+  alias: "aut leak detected"
+  mode: single
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.leak_refrigerator
+        - binary_sensor.leak_dishwasher
+        - binary_sensor.leak_kitchen_sink
+        - binary_sensor.leak_kitchen_sink_rear
+        - binary_sensor.leak_water_heater
+        - binary_sensor.leak_karens_sink_water_leak
+        - binary_sensor.leak_yangs_sink_water_leak
+        - binary_sensor.leak_guest_sink_water_leak
+        - binary_sensor.leak_master_toilet_water_leak
+        - binary_sensor.leak_guest_toilet_water_leak
+        - binary_sensor.leak_washer_contact
+        - binary_sensor.leak_laundry
+      from: "off"
+      to: "on"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.water_valve
+    - action: script.scr_say_phrase
+      data:
+        priority: "high"
+        message: "Water Leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
+    - action: script.scr_say_phrase
+      data:
+        priority: "high"
+        message: "House water has been turned off.  Leak detected at {{ trigger.entity_id }}. Turn on manually when leak is resolved."
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "House water turned OFF. Leak detected at {{ trigger.entity_id }}."
+        message: "House water is OFF.  Turn on manually when leak is resolved."
+        data:
+          car_ui: true
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "House water is OFF. Leak detected at {{ trigger.entity_id }}. Turn on manually when leak is resolved."
+    - action: notify.mobile_app_yskt_cell
+      data:
+        message: "TTS"
+        data:
+          tts_text: "House water turned OFF. Leak detected at {{ trigger.entity_id }}"
+          priority: high
+          ttl: 0
+          media_stream: alarm_stream
+          data:
+            car_ui: true
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
+        message: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
+        data:
+          channel: "Urgent"
+          importance: "high"
+          vibrationPattern: "100, 1000, 100, 1000, 100, 1000"
+          persistent: "true"
+          tag: "persistent"
+          priority: high
+          ttl: 0
+          data:
+            car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        message: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
+    - repeat:
+        while:
+          - condition: template
+            value_template: "{{ repeat.index <= 4 }}"
+          - condition: state
+            entity_id: switch.water_valve
+            state: "off"
+        sequence:
+          - action: script.scr_say_phrase
+            data:
+              priority: "high"
+              message: "Water Leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
+          - delay:
+              seconds: 30
+
+#
+# LAUNDRY DONE ANNOUNCEMENT & SUPPORTING AUTOMATIONS
+#
+# {{ (state_attr('sensor.dryer', 'remain_time')).split(':')[1]  | int(default=0) }}
+- id: aut_washer_done_announce
+  alias: "aut washer done"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.top_load_washer_run_completed
+      from: "off"
+      to: "on"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: >
+          {% if state_attr('sensor.dryer', 'remain_time') == '0:00:00' %}
+            The washer cycle has finished and the dryer is available
+          {% else %}
+            {% if (state_attr('sensor.dryer', 'remain_time').split(':')[0]) == '0' %}
+              The washer cycle has finished.  The dryer will be available in {{ (state_attr('sensor.dryer', 'remain_time').split(':')[1] | int(default=0)) }}
+              minutes
+            {% else %}
+              The washer cycle has fnished,  The dryer will be available in {{ (state_attr('sensor.dryer', 'remain_time').split(':')[0] | int(default=0)) }}
+              hours and {{ (state_attr('sensor.dryer', 'remain_time').split(':')[1] | int(default=0)) }} minutes
+            {% endif %}
+          {% endif %}
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "The washer cycle has finished"
+
+- id: aut_dryer_done_announce
+  alias: "aut dryer done"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.dryer_run_completed
+      from: "off"
+      to: "on"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "The dryer cycle has finished"
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "The dryer cycle has finished"
+
+#
+# VACUUM DONE NOTIFICATION
+#
+
+- id: aut_vacuum_done_announce
+  alias: "aut vacuum done"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: vacuum.rosie
+      from: "cleaning"
+      to: "docked"
+  actions:
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "Rosie is a dirty girl"
+
+#
+# WEBER iGRILL SUPPORTING AUTOMATIONS
+#
+
+- alias: "Probe 1 Target Temp"
+  initial_state: "off"
+  trigger:
+    - platform: state
+      entity_id: sensor.target_alert_temp_probe_1
+      to: "Alert"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "Probe 1 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_1') }} °F"
+    - action: notify.mobile_app_ys_cell
+      data:
+        message: TTS
+        data:
+          tts_text: "Probe 1 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_1') }} °F"
+          data:
+            car_ui: true
+
+- alias: "Probe 2 Target Temp"
+  initial_state: "off"
+  trigger:
+    - platform: state
+      entity_id: sensor.target_alert_temp_probe_2
+      to: "Alert"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "Probe 2 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_2') }} °F"
+    - action: notify.mobile_app_ys_cell
+      data:
+        message: TTS
+        data:
+          tts_text: "Probe 2 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_2') }} °F"
+          data:
+            car_ui: true
+
+- alias: "Probe 3 Target Temp"
+  initial_state: "off"
+  trigger:
+    - platform: state
+      entity_id: sensor.target_alert_temp_probe_3
+      to: "Alert"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "Probe 3 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_3') }} °F"
+    - action: notify.mobile_app_ys_cell
+      data:
+        message: TTS
+        data:
+          tts_text: "Probe 3 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_3') }} °F"
+          data:
+            car_ui: true
+
+- alias: "Probe 4 Target Temp"
+  initial_state: "off"
+  trigger:
+    - platform: state
+      entity_id: sensor.target_alert_temp_probe_4
+      to: "Alert"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "Probe 4 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_4') }} °F"
+    - action: notify.mobile_app_ys_cell
+      data:
+        message: TTS
+        data:
+          tts_text: "Probe 4 has reached the target temp. Currently {{ states('sensor.igrill_70918f19e8d1_probe_4') }} °F"
+          data:
+            car_ui: true
+
+- alias: "Monitor iGrill Device Connectivity"
+  initial_state: "on"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.igrill_70918f19e8d1_connectivity
+      from: "on"
+      to: "off"
+      for:
+        minutes: 5
+    - platform: state
+      entity_id: binary_sensor.igrill_70918f19e8d1_sensor
+      from: "on"
+      to: "off"
+      for:
+        minutes: 5
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "I Grill Device Disconnected"
+
+#
+# AUTO LIVING AREA LIGHTING - MOTION
+#
+- id: aut_auto_living_area_motion
+  alias: "aut auto living area motion"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.living_area_motion
+      to: "on"
+  actions:
+    - action: script.scr_check_if_suspicious
+    - choose:
+        - alias: "Turn on pathway lighting if sleeping"
+          conditions:
+            - condition: or
+              conditions:
+                - condition: state
+                  entity_id: input_boolean.inp_bool_sleeping # if in bed or
+                  state: "on"
+                - condition: time # after midnight (for guests if owners not home)
+                  after: "00:01"
+                  before: "07:00"
+          sequence:
+            - action: script.scr_pathway_motion_lighting_on
+      default:
+        - action: script.scr_motion_lighting_on # living room only
+
+#
+# AUTO LIVING AREA LIGHTING - LUMINOSITY BASED
+#
+
+- id: aut_auto_on_living_area_luminosity
+  alias: "aut auto on living area luminosity"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lv_rm_suggested_brightness
+      above: 0
+      for: # in motion activated lighting
+        minutes: "{{ states('input_number.inp_num_lvrm_lights_on_delay') | int(default=0) }}"
+  conditions:
+    - condition: and
+      conditions:
+        - condition: template # lvrm sensor can be zero & not broken
+          value_template: "{{ states('sensor.filtered_living_rm_visible_light') != 'unknown' }}" # sensor broken if 'unknown'
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: binary_sensor.living_area_motion
+              state: "on"
+            - condition: state
+              entity_id: media_player.tv_livingrm
+              state: "on"
+            - condition: state
+              entity_id: media_player.tv_livingrm
+              state: "unknown"
+  actions:
+    - action: script.scr_motion_lighting_on
+
+- id: aut_auto_off_living_area_luminosity
+  alias: "aut auto off living area luminosity"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lv_rm_suggested_brightness
+      below: 1
+      for:
+        minutes: "{{ states('input_number.inp_num_lvrm_lights_off_delay') | int(default=0) }}"
+  condition: # only auto-off if daylight outside
+    - condition: state
+      entity_id: input_boolean.party_mode
+      state: "off"
+    - condition: numeric_state #  prevent auto-off when light inside exceeds the above lux trigger
+      entity_id: sun.sun #  light turns off when motion times out (below)
+      value_template: "{{ state_attr('sun.sun', 'elevation') }}"
+      above: 14.0 # house behind blocks sun at this angle, so above it is "daylight"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.living_room_lights
+
+#
+# GREAT ROOM MOTION INACTIVITY TIMEOUT
+#
+- id: aut_living_area_lights_motion_timeout
+  alias: "aut living area lights motion timeout"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.living_area_motion
+      to: "off"
+      for:
+        minutes: 30
+  conditions:
+    - condition: state
+      entity_id: media_player.tv_livingrm
+      state: "off"
+    - condition: state
+      entity_id: light.eating_area_lights # if the eating area lights are on, we might be dining or
+      state: "off" # have guests and want the great room to remain lighted
+  actions:
+    - action: script.scr_great_room_motion_lighting_off
+
+#
+# LIVING AREA PATHWAY LIGHTING MOTION INACTIVE
+#
+- id: aut_living_area_pathway_motion_inactive
+  alias: "aut living area pathway motion inactive"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.living_area_motion
+      to: "off"
+      for:
+        minutes: 5
+  actions:
+    - action: script.scr_pathway_motion_lighting_off
+
+#
+# CLOSE MASTER BEDROOM OUTER SHADES WHEN SOLAR NOON REACHED
+#
+- id: aut_masterbdrm_outer_shades_down_solar_noon
+  alias: "aut masterbdrm outer shades down solar noon"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: "{{ state_attr('sun.sun', 'rising') == false }}"
+  actions:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.master_bedroom_outer_shades
+
+#
+# CLOSE SUN RM SHADES BASED ON SUN ANGLE, & AZMUTH IN THE AFTERNOON IF WINDOWS CLOSED & DARK ENOUGH, ETC.
+# Calculations based on manual simulations at suncalc.com - place locator at rear neighbor roof peak
+# Assumptions:  Rear neighbor roof height is 20ft, distance from roof peak to outer sunroom edge is 30ft
+#
+- id: aut_sunrm_shades_down_afternoon
+  alias: "aut sunroom shades down afternoon"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sun.sun
+      value_template: "{{ state_attr('sun.sun', 'elevation') }}"
+      above: 14.1 # house behind blocks sun
+      #    below: 58.0  # sun reaches back of sunroom couch
+      below: 32.5 # sun reaches laminate flooring creating glare
+  conditions:
+    condition: and
+    conditions:
+      - condition: state
+        entity_id: input_boolean.inp_bool_inhibit_shades # do not execute if manual inhibited
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.inp_bool_extended_absence_mode # do not execute unless Extended Absence is OFF
+        state: "off"
+      - condition: template # check if dark enough to bother closing
+        value_template: >
+          {{ states('sensor.filtered_kflwildw56_bu_local_rad_lx') | int(default=0) >  
+          (states('input_number.inp_num_sunrm_shades_part_close_min_reqd_trig_lux') | int(default=0)) }}
+      - condition: numeric_state
+        entity_id: sun.sun
+        value_template: "{{ state_attr('sun.sun', 'azimuth') }}"
+        above: 199 # estimate of when sun direction penetrates
+        below: 280 # the house through the sun room most
+  actions:
+    - action: script.scr_check_sunrm_windows # be sure no windows are open
+    - action: script.scr_partial_close_sunrm_shades
+      data:
+        position: "40" # drop shades to X% open
+
+#
+# OPEN SUN RM SHADES BASED ON SUN ALTITUDE, & AZMUTH IN THE AFTERNOON
+# Calculations based on manual simulations at suncalc.com - place locator at rear neighbor roof peak
+# Assumptions:  Rear neighbor roof height is 20ft, distance from roof peak to outer sunroom edge is 30ft
+#
+- id: aut_sunrm_shades_up_afternoon
+  alias: "aut sunroom shades up afternoon"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sun.sun
+      value_template: "{{ state_attr('sun.sun', 'elevation') }}"
+      above: 0
+      below: 14.0 # house behind blocks sun
+    - platform: numeric_state
+      entity_id: sun.sun
+      value_template: "{{ state_attr('sun.sun', 'azimuth') }}"
+      above: 204 # estimate of when sun direction penetrates
+      below: 267 # the house through the sun room most
+  conditions:
+    condition: and
+    conditions:
+      - condition: state
+        entity_id: input_boolean.inp_bool_inhibit_shades # do not execute if manuall inhibited
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.inp_bool_extended_absence_mode # do not execute unless Extended Absence is OFF
+        state: "off"
+      - condition: time # do not execute at sunrise
+        after: "12:00:00"
+      - condition: state # don't bother if too dark
+        entity_id: binary_sensor.lum_sunrm_shades_trig
+        state: "on"
+  actions:
+    - action: cover.open_cover
+      target:
+        entity_id: cover.sun_room_shades
+
+#
+# CLOSE SUN RM SHADES BASED ON SUNSET OR LUMINOSITY FOR THE EVENING
+#
+- id: aut_sunrm_shades_down_evening
+  alias: "aut sunroom shades down evening"
+  initial_state: true
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "-00:10:00"
+    - platform: state # also lower if too dark before sunset (stormy day)
+      entity_id: binary_sensor.lum_sunrm_shades_trig
+      to: "off"
+      for:
+        minutes: "{{ states('input_number.inp_num_sunrm_shades_close_low_lux_trig_delay') | int(default=0) }}"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.inp_bool_inhibit_shades # do not execute if manuall inhibited
+      state: "off"
+  actions:
+    - action: script.scr_check_sunrm_windows
+    - action: script.scr_close_sunrm_shades
+
+#
+# CLOSE MASTER BEDROOM SHADES AT SUNSET
+#
+- id: aut_masterbdrm_shades_down_evening
+  alias: "aut masterbdrm shades down evening"
+  initial_state: true
+  trigger:
+    - platform: sun
+      event: sunset
+  actions:
+    - action: cover.close_cover
+      target:
+        entity_id: cover.master_bedroom_shades
+
+#
+# OPEN SUN RM SHADES IN THE MORNING OR BRIGHT
+#
+- id: aut_sunrm_shades_up_morningorbright
+  alias: "aut sunroom shades up morningorbright"
+  initial_state: true
+  trigger:
+    - platform: sun
+      event: sunrise
+    - platform: state # also open if previously closed due to dark skies (stormy) & now bright
+      entity_id: binary_sensor.lum_sunrm_shades_trig
+      to: "on"
+      for:
+        minutes: "{{ states('input_number.inp_num_sunrm_shades_open_delay') | int(default=0) }}"
+  conditions:
+    condition: and
+    conditions:
+      - condition: state
+        entity_id: input_boolean.inp_bool_inhibit_shades # do not execute if manuall inhibited
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.inp_bool_extended_absence_mode # do not execute unless Extended Absence is OFF
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.inp_bool_guest_in_sunroom # do not execute unless Overnight Guest is OFF
+        state: "off"
+  actions:
+    - action: cover.open_cover
+      entity_id: cover.sun_room_shades
+
+#
+# PROXIMITY ARRIVAL TRIGGER
+#
+- id: aut_arrival_proximity
+  alias: "aut arrival proximity"
+  mode: single
+  max_exceeded: silent
+  initial_state: true
+  trigger: # trigger on each indiv in case one is already home
+    - platform: template # default=99 if proximity is non-numeric
+      value_template: >-
+        {{ ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) <= 0.2)
+        and ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) > 0)
+        and (states('sensor.home_yang_direction_of_travel') == 'towards')}}
+    - platform: template # default=99 if proximity is non-numeric
+      value_template: >-
+        {{ ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) <= 0.2)
+        and ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) > 0)
+        and (states('sensor.home_karen_direction_of_travel') == 'towards')}}
+  actions:
+    - action: script.scr_front_door_lights_on
+    - action: script.scr_say_phrase
+      data:
+        message: "Someone special will be home soon"
+
+#
+# GARAGE DOORS OPEN/CLOSE TRIGGERS
+#
+- id: aut_large_garage_door_opening
+  alias: "aut large garage door opening"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: cover.large_garage_door
+      to: "open"
+  conditions: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "The large garage door has opened"
+    - action: timer.start
+      target:
+        entity_id: timer.timer_lg_garage_door
+    - action: script.scr_front_door_lights_on
+    - action: script.scr_check_if_suspicious
+
+- id: aut_small_garage_door_opening
+  alias: "aut small garage door opening"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: cover.small_garage_door
+      to: "open"
+  conditions: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "The small garage door has opened"
+    - action: timer.start
+      target:
+        entity_id: timer.timer_sm_garage_door
+    - action: script.scr_front_door_lights_on
+    - action: script.scr_check_if_suspicious
+
+- id: aut_large_garage_door_closed
+  alias: "aut large garage door closed"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: cover.large_garage_door
+      to: "closed"
+  actions:
+    - action: timer.cancel
+      target:
+        entity_id: timer.timer_lg_garage_door
+
+- id: aut_small_garage_door_closed
+  alias: "aut small garage door closed"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: cover.small_garage_door
+      to: "closed"
+  actions:
+    - action: timer.cancel
+      target:
+        entity_id: timer.timer_sm_garage_door
+
+#
+# FRONT & BACK DOOR OPENING ACTIVITY TRIGGERS
+#
+- id: aut_front_door_opening
+  alias: "aut front door opening"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.front_door_window_door_is_open
+      from: "off"
+      to: "on"
+  actions:
+    - action: script.scr_front_door_lights_on
+
+- id: aut_back_door_opening
+  alias: "aut back door opening"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.back_door_window_door_is_open
+      from: "off"
+      to: "on"
+  actions:
+    - action: script.scr_back_door_lights_on
+
+#
+# DRIVEWAY CAMERA ZONE ACTIVITY TRIGGERS
+#
+- id: aut_driveway_camera_zone_activity
+  alias: "aut driveway camera zone activity"
+  mode: single
+  max_exceeded: silent
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.driveway_zone_person_occupancy
+        - binary_sensor.driveway_zone_car_occupancy
+      to: "on"
+  actions:
+    - action: script.scr_front_door_lights_on
+
+#
+# FRONT PORCH CAMERA ZONE ACTIVITY TRIGGERS
+#
+- id: aut_frontporch_camera_zone_actvity
+  alias: "aut frontporch camera zone activity"
+  mode: single
+  max_exceeded: silent
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.frontporch_zone_book_occupancy
+      to: "on"
+    - platform: state
+      entity_id: binary_sensor.frontporch_zone_suitcase_occupancy
+      to: "on"
+    - platform: state
+      entity_id: binary_sensor.frontporch_zone_handbag_occupancy
+      to: "on"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "You have a package at the front door"
+    - action: notify.alexa_yellow_ring
+      data:
+        message: "You have a package at the front door"
+
+#
+# FRONT PORCH INGRESS SENSORS ACTIVITY TRIGGERS
+#
+- id: aut_frontporch_activity
+  alias: "aut frontporch activity"
+  mode: single
+  max_exceeded: silent
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ (is_state('binary_sensor.doorbell_zone_person_occupancy', 'on')) and (is_state('binary_sensor.front_ent_soffit_uwave', 'on')) }}
+    - platform: template
+      value_template: >-
+        {{ (is_state('binary_sensor.frontporch_motion', 'on')) and (is_state('binary_sensor.doorbell_zone_person_occupancy', 'on')) }}
+  conditions:
+    - condition: state
+      entity_id: binary_sensor.front_door_window_door_is_open
+      state: "off"
+      for: "00:02:00"
+    - condition: template # debounce
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(state_attr('automation.aut_frontporch_activity', 
+        'last_triggered'), '') | float(default=0)) ) | int(default=0) ) > 14 }}
+  actions:
+    - action: script.scr_front_door_lights_on
+    - action: script.scr_frontporch_activity
+
+#
+# FRONT DOOR LIGHTS INACTIVITY & ARRIVAL TIMEOUT
+#
+- id: aut_front_door_lights_timeout
+  alias: "aut front door light timeout"
+  initial_state: true
+  mode: restart
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.driveway_zone_car_occupancy
+      to: "off"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: binary_sensor.driveway_zone_person_occupancy
+      to: "off"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: binary_sensor.front_ent_attic_uwave
+      to: "off"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: cover.large_garage_door
+      to: "closed"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: cover.small_garage_door
+      to: "closed"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: lock.front_door_lock
+      to: "locked"
+      for:
+        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
+    - platform: state
+      entity_id: person.yang
+      to: "home"
+      for:
+        minutes: "{{ (states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) + 5) | int(default=0) }}"
+    - platform: state
+      entity_id: person.karen
+      to: "home"
+      for:
+        minutes: "{{ (states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) + 5) | int(default=0) }}"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.front_door_lights
+
+#
+# BACK DOOR LIGHTS INACTIVITY TIMEOUT
+#
+- id: aut_back_door_lights_timeout
+  alias: "aut back door light timeout"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: lock.back_door_lock
+      to: "locked"
+      for:
+        minutes: "{{ states('input_number.inp_num_back_door_lights_off_delay') | int(default=0) }}"
+  actions:
+    - action: light.turn_off
+      target:
+        entity_id: light.back_door_lights
+
+#
+# OUTDOOR LIGHTS AUTO OFF
+#
+- id: aut_outdoor_lighting_auto_off
+  alias: "aut outdoor lighting auto off"
+  initial_state: true
+  trigger:
+    - platform: sun
+      event: sunrise
+      offset: "+00:10:00"
+    - platform: state
+      entity_id: binary_sensor.lum_outdoor_lights_solar_trig
+      to: "off"
+  actions:
+    - action: homeassistant.turn_off
+      target:
+        entity_id: group.outdoor_lights
+
+#
+# MOOD LIGHTS AUTO ON BASED ON LUMINOSITY
+#
+- id: aut_mood_lights_luminosity_auto_on
+  alias: "aut mood lights luminosity auto on"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: sun
+      event: sunset
+      offset: "-00:30:00"
+    - platform: state
+      entity_id: binary_sensor.lum_mood_lights_f_solar_trig
+      to: "on"
+      for:
+        minutes: 10
+  conditions:
+    - condition: or
+      conditions:
+        - condition: template
+          value_template: "{{ states('sensor.kflwildw56_backed_up_local_solar_rad_lx') != 'unknown' }}"
+        - condition: state
+          entity_id: input_boolean.inp_bool_extended_absence_mode # do not execute unless Extended Absence is OFF
+          state: "off"
+  actions:
+    - action: script.scr_mood_lighting_on # use a script here because LED strips are on mood_light outlet
+
+#
+# TURN OFF MOOD LIGHTS BASED ON LUMINOSITY
+#  Note pathway lighting using mood lights is handled independently - see "pathway"
+#
+- id: aut_mood_lighting_luminosity_auto_off
+  alias: "aut mood lighting luminosity auto off"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.lum_mood_lights_f_solar_trig
+      to: "off"
+      for:
+        minutes: 10
+  actions:
+    - action: script.scr_reset_mood_lights_to_default
+    - action: homeassistant.turn_off
+      target:
+        entity_id:
+          - light.sun_room_uplights
+          - switch.candles
+          - light.kitchen_leds_upper_master
+          - switch.christmas_tree
+
+#
+# GARAGE DOOR LEFT OPEN WHILE HOME
+#
+- id: aut_garage_left_open_while_home
+  alias: "aut garage door left open while home"
+  initial_state: true
+  trigger:
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.timer_lg_garage_door
+    - platform: event
+      event_type: timer.finished
+      event_data:
+        entity_id: timer.timer_sm_garage_door
+  actions:
+    - action: script.scr_repeat_say_garage_open
+
+# Reset timer if moving in/out of garage
+- id: aut_reset_garage_timers
+  alias: "aut reset garage timers"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: device_tracker.ys_cell_ble
+      from: "garage"
+    - platform: state
+      entity_id: device_tracker.kt_cell_ble
+      from: "garage"
+  conditions:
+    condition: or
+    conditions:
+      - condition: state
+        entity_id: cover.large_garage_door
+        state: "open"
+      - condition: state
+        entity_id: cover.small_garage_door
+        state: "open"
+  actions:
+    - action: timer.start # timer.start is the same as a timer reset/restart
+      target:
+        entity_id:
+          - timer.timer_lg_garage_door
+          - timer.timer_sm_garage_door
+
+#
+# AUTO DOOR LOCK ON DOOR INACTIVITY
+#
+- id: aut_auto_front_door_lock
+  alias: "aut auto front door lock"
+  initial_state: true
+  trigger:
+    - platform: template # calculate time since last door open activity  & check expiration
+      value_template: >
+        {{ ( (((as_timestamp(strptime(states('sensor.date_time'),'%Y-%m-%d, %H:%M'), '') | int(default=0)) - 
+        (as_timestamp(as_timestamp(state_attr('binary_sensor.front_door_window_door_is_open', 'last_tripped_time'), '') | timestamp_local(''), '') | int(default=0)))/60) | int(default=0) ) > 
+        (states('input_number.inp_num_auto_front_door_lock_trig_delay') | int(default=0)) }}
+    - platform: state # cover case where unlocked, but door never opened
+      entity_id: lock.front_door_lock
+      to: "unlocked"
+      for:
+        minutes: "{{ (states('input_number.inp_num_auto_front_door_lock_trig_delay') | int(default=0)) + 30 }}"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.party_mode
+      state: "off"
+    - condition: state
+      entity_id: lock.front_door_lock
+      state: "unlocked" # May not be unlocked if using door activity trigger
+      for: # This check prevents immediate notification from 1st trigger
+        minutes: 2 #   when last activity > delay time at boot
+    - condition: state
+      entity_id: binary_sensor.front_door_window_door_is_open
+      state: "off" # be sure door is closed
+  actions:
+    - action: lock.lock
+      target:
+        entity_id: lock.front_door_lock
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Front door automatically locked"
+        message: "Oops. Someone left it unlocked!"
+        data:
+          car_ui: true
+
+- id: aut_auto_front_door_lock_party_mode
+  alias: "aut auto front door lock party mode"
+  initial_state: true
+  trigger:
+    - platform: template # calculate time since last door open activity  & check expiration
+      value_template: >
+        {{ ( (((as_timestamp(strptime(states('sensor.date_time'),'%Y-%m-%d, %H:%M'), '') | int(default=0)) - 
+        (as_timestamp(as_timestamp(state_attr('binary_sensor.front_door_window_door_is_open', 'last_tripped_time'), '') | timestamp_local(''), '') | int(default=0)))/60) | int(default=0) ) > 
+        (states('input_number.inp_num_auto_front_door_lock_trig_party_delay') | int(default=0)) }}
+    - platform: state # cover case where unlocked, but door never opened
+      entity_id: lock.front_door_lock
+      to: "unlocked"
+      for:
+        minutes: "{{ (states('input_number.inp_num_auto_front_door_lock_trig_party_delay') | int(default=0)) + 30 }}"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.party_mode
+      state: "on"
+    - condition: state
+      entity_id: lock.front_door_lock
+      state: "unlocked" # May not be unlocked if using door activity trigger
+      for: # This check prevents immediate notification from 1st trigger
+        minutes: 2 #   when last activity > delay time at boot
+    - condition: state
+      entity_id: binary_sensor.front_door_window_door_is_open
+      state: "off" # be sure door is closed
+  actions:
+    - action: lock.lock
+      target:
+        entity_id: lock.front_door_lock
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Front door automatically locked"
+        message: "The party's over!"
+        data:
+          car_ui: true
+
+- id: aut_auto_back_door_lock
+  alias: "aut auto back door lock"
+  initial_state: true
+  trigger:
+    - platform: template # calculate time since last activity & check expiration
+      value_template: >
+        {{ ( (((as_timestamp(strptime(states('sensor.date_time'),'%Y-%m-%d, %H:%M'), '') | int(default=0)) - 
+        (as_timestamp(as_timestamp(state_attr('binary_sensor.back_door_window_door_is_open', 'last_tripped_time'), '') | timestamp_local(''), '') | int(default=0)))/60) | int(default=0) ) > 
+        (states('input_number.inp_num_auto_back_door_lock_trig_delay') | int(default=0)) }}
+    - platform: state
+      entity_id: lock.back_door_lock
+      to: "unlocked"
+      for:
+        minutes: "{{ (states('input_number.inp_num_auto_back_door_lock_trig_delay') | int(default=0)) + 30 }}"
+  conditions:
+    - condition: state
+      entity_id: lock.back_door_lock
+      state: "unlocked" # may not be unlocked if using first trigger
+      for:
+        minutes: 2 # this check prevents immediate notification on reboot from 1st trigger
+    - condition: state
+      entity_id: binary_sensor.back_door_window_door_is_open
+      state: "off" # be sure door is closed
+  actions:
+    - action: lock.lock
+      target:
+        entity_id: lock.back_door_lock
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Back door automatically locked"
+        message: "Oops. Someone left it unlocked!"
+        data:
+          car_ui: true
+
+#
+# WINDOW TRIGGERED ACTIONS
+#
+- id: aut_any_window_open
+  alias: "aut_any_window_open"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: group.window_sensors
+      to: "on"
+      for:
+        minutes: 2
+  actions:
+    - action: climate.turn_off
+      target:
+        entity_id: climate.local_ecobee
+    - action: input_select.select_option
+      entity_id: input_select.inp_sel_saved_sunroom_hvac
+      data:
+        option: "{{ states('climate.sunroom_ac') }}"
+    - action: climate.turn_off
+      target:
+        entity_id: climate.sunroom_ac
+    - action: script.scr_say_phrase
+      data:
+        message: "A window is open. Climate control is now turned off"
+
+- id: aut_all_windows_closed
+  alias: "aut_all_windows_closed"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: group.window_sensors
+      to: "off"
+      for:
+        minutes: 2
+  actions:
+    - action: climate.turn_on
+      target:
+        entity_id: climate.local_ecobee
+    - action: climate.set_hvac_mode
+      entity_id: climate.sunroom_ac
+      data:
+        hvac_mode: "{{ states('input_select.inp_sel_saved_sunroom_hvac') }}"
+    - action: script.scr_say_phrase
+      data:
+        message: "Windows are all closed. Climate control is restored"
+
+#
+# BEDROOM/OFFICE FAN AUTOMATION
+#
+
+# Master bedroom fan on/off
+- id: aut_master_bedroom_fan_trig_on
+  alias: "aut master bedroom fan trig on"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.espresense_masterbdrm_ds18b20_temperature
+      above: input_number.inp_num_masterbdrmfan_on_temp
+      for:
+        minutes: 10
+  conditions:
+    condition: state
+    entity_id: fan.master_bedroom_fan
+    state: "off"
+  actions:
+    action: fan.set_percentage
+    target:
+      entity_id: fan.master_bedroom_fan
+    data:
+      percentage: 30
+
+- id: aut_master_bedroom_fan_trig_off
+  alias: "aut master bedroom fan trig off"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.espresense_masterbdrm_ds18b20_temperature
+      below: input_number.inp_num_masterbdrmfan_off_temp
+      for:
+        minutes: 10
+  conditions:
+    condition: state
+    entity_id: fan.master_bedroom_fan
+    state: "on"
+  actions:
+    action: fan.turn_off
+    target:
+      entity_id: fan.master_bedroom_fan
+
+# Office fan changes speed
+- id: aut_office_fan_trig_50pct
+  alias: "aut office fan trig 50pct"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.espresense_office_ds18b20_temperature
+      above: input_number.inp_num_officefan_50pct_temp
+      for:
+        minutes: 5
+  conditions:
+    condition: state
+    entity_id: input_boolean.inp_bool_guest_mode
+    state: "on"
+  actions:
+    action: fan.set_percentage
+    target:
+      entity_id: fan.office_fan
+    data:
+      percentage: 50
+
+- id: aut_office_fan_trig_25pct
+  alias: "aut office fan trig 25pct"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.espresense_office_ds18b20_temperature
+      above: input_number.inp_num_officefan_25pct_temp
+      for:
+        minutes: 5
+    - platform: numeric_state
+      entity_id: sensor.espresense_office_ds18b20_temperature
+      below: input_number.inp_num_officefan_50pct_temp
+      for:
+        minutes: 5
+  conditions:
+    condition: state
+    entity_id: input_boolean.inp_bool_guest_mode
+    state: "on"
+  actions:
+    action: fan.set_percentage
+    target:
+      entity_id: fan.office_fan
+    data:
+      percentage: 25
+
+- id: aut_office_fan_trig_off
+  alias: "aut office fan trig off"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.espresense_office_ds18b20_temperature
+      below: input_number.inp_num_officefan_off_temp
+      for:
+        minutes: 5
+  conditions:
+    condition: state
+    entity_id: input_boolean.inp_bool_guest_mode
+    state: "off"
+  actions:
+    action: fan.turn_off
+    target:
+      entity_id: fan.office_fan
+
+#
+# HOME DEPARTURE SECURITY/GARAGE CHECK
+#
+- id: aut_departure_security_check
+  alias: "aut departure security check"
+  mode: single
+  max_exceeded: silent
+  initial_state: true
+  trigger:
+    - platform: template # default=99 if proximity is non-numeric (e.g. unknown)
+      value_template: >-
+        {{ (states('person.yang') == 'not_home') and (states('person.karen') == 'not_home')
+            and ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) >= 0.2) 
+            and ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) >= 0.2) }}
+  actions:
+    - action: script.scr_check_garage_open
+    - action: script.scr_nobody_home
+
+#
+# HOME ARRIVAL/DEPARTURE ANNOUNCEMENTS
+#
+- id: aut_arrival_announcement
+  alias: "aut arrival announcement"
+  initial_state: true
+  mode: queued
+  trigger: # any trigger will fire the automation (logical OR)
+    - platform: state
+      entity_id: person.yang
+      id: "yang"
+      to: "home"
+    - platform: state
+      entity_id: person.karen
+      id: "karen"
+      to: "home"
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - wait_for_trigger:
+        - platform: state
+          entity_id: sensor.kt_cell_ble_room
+          to: "kitchen"
+          for: 00:00:05
+        - platform: state
+          entity_id: sensor.kt_cell_ble_room
+          to: "greatrm"
+          for: 00:00:05
+        - platform: state
+          entity_id: sensor.ys_cell_ble_room
+          to: "kitchen"
+          for: 00:00:05
+        - platform: state
+          entity_id: sensor.ys_cell_ble_room
+          to: "greatrm"
+          for: 00:00:05
+      timeout:
+        seconds: 60
+    - action: script.scr_arrival_announcement
+      data:
+        person: "{{ trigger.id }}"
+
+#
+# HOME DEPARTURE ANNOUNCEMENT
+#
+- id: aut_departure_announcement
+  alias: "aut departure announcement"
+  initial_state: true
+  mode: queued
+  trigger: # either trigger will fire the automation (logical OR)
+    - platform: state
+      entity_id: person.yang
+      from: home
+      for: "00:01:00"
+    - platform: state
+      entity_id: person.karen
+      from: home
+      for: "00:01:00"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.inhibit_presence_announcements
+      state: "off"
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: >
+          {% if (trigger.entity_id|replace('person.', '')) == "karen" %}
+            "Mistress Karen is away"
+          {% else %}
+            "Master Yang is away"
+          {% endif %}
+
+#"{{ trigger.entity_id|replace('person.', '') }} is away"
+
+#
+# CONDITIONS REQUIRING ATTENTION
+#
+
+- id: aut_hvac_fault
+  alias: "aut hvac fault"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.main_hvac_fault
+      from: "off"
+      to: "on"
+    - platform: state
+      entity_id: binary_sensor.sunroom_hvac_fault
+      from: "off"
+      to: "on"
+  actions:
+    - action: notify.alexa_yellow_ring
+      data:
+        message: >-
+          "{{ (trigger.entity_id) | replace('climate.sunroom_ac', 'sun room') 
+              | replace('binary_sensor.main_hvac_fault', 'main house')
+              | replace('binary_sensor.sunroom_hvac_fault', 'sun room')
+              }} temperature is outside of tolerance!"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "HVAC system fault detected"
+        message: >-
+          "{{ (trigger.entity_id) | replace('climate.sunroom_ac', 'sun room') 
+              | replace('binary_sensor.main_hvac_fault', 'main house')
+              | replace('binary_sensor.sunroom_hvac_fault', 'sun room')
+              }} temperature is outside of tolerance!"
+        data:
+          car_ui: true
+    - action: script.scr_say_phrase
+      data:
+        message: >-
+          "{{ (trigger.entity_id) | replace('climate.sunroom_ac', 'sun room') 
+              | replace('binary_sensor.main_hvac_fault', 'main house')
+              | replace('binary_sensor.sunroom_hvac_fault', 'sun room')
+              }} temperature is outside of tolerance!"
+
+- id: aut_lab_rack_fan_fault
+  alias: "aut rack fan fault"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lab_rack_fan1_speed
+      below: 550
+      for: "00:10:00"
+    - platform: numeric_state
+      entity_id: sensor.lab_rack_fan2_speed
+      below: 550
+      for: "00:10:00"
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "{{ trigger.entity_id | replace('sensor.', '') }} fault"
+        message: >
+          {{ trigger.entity_id | replace('sensor.', '') }} fault: 
+              currently {{ states('{{trigger.entity_id}}') }} RPM
+
+- id: aut_low_battery_notification
+  alias: "aut low battery notification"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.irrig_battery_percent
+      below: 30
+    - platform: numeric_state
+      entity_id: sensor.drybox_battery_percent
+      below: 30
+    - platform: numeric_state
+      entity_id: sensor.govee_display_battery
+      below: 25
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.freezer_sensor_battery
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.front_door_lock_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.back_door_lock_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.living_area_motion_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_1_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_2_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_3_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_4_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_5_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_window_6_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.front_door_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.back_door_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.garagehouse_door_battery_level
+      below: 30
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.guest_suite_display_battery_percent
+      below: 20
+      for: "02:00:00" # display reports once per hour so wait for 2 reports
+    - platform: numeric_state
+      entity_id: sensor.leak_karens_sink_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_yangs_sink_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_guest_sink_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_guest_toilet_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_master_toilet_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_kitchen_sink_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_laundry_sink_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.leak_washer_battery # leak detector battery
+      below: 15
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_remote_1_battery_level
+      below: 10 # lower threshhold since battery affected by outside temp
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_remote_2_battery_level
+      below: 10 # lower threshhold since battery affected by outside temp
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_remote_3_battery_level
+      below: 10 # lower threshhold since battery affected by outside temp
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.sun_room_remote_4_battery_level
+      below: 10 # lower threshhold since battery affected by outside temp
+      for: "00:30:00"
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_1_inner_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_1_outer_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_2_inner_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_2_outer_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_3_inner_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_3_outer_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_4_inner_battery
+      below: 20
+    - platform: numeric_state
+      entity_id: sensor.master_bedroom_shade_4_outer_battery
+      below: 20
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        title: "Low batteries: {{ trigger.entity_id }}"
+        message: "Low batteries: {{ trigger.entity_id }}  {{ states(trigger.entity_id) }}%"
+
+#
+# SOFTWARE UPDATE NOTIFICATION
+#
+- id: aut_software_update_available
+  alias: "aut software update available"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.home_assistant_website_update_available
+      from: "off"
+      to: "on"
+      for: 00:10:00
+  actions:
+    - action: notify.gmail_to_yang
+      data:
+        message: |
+          Home Assistant {{states("sensor.home_assistant_website")}} is now available.
+            Your current version is {{states("sensor.current_version")}}.
+            See https://github.com/home-assistant/home-assistant/releases
+
+# - id: aut_new_hacs_updates
+#   alias: New HACS Updates (Persistent Notification)"
+#   mode: single
+#   trigger:
+#     - platform: state
+#       entity_id:
+#         - update.hacs_update
+#   conditions:
+#     - condition: template
+#       value_template: '{{ states("update.hacs_update") | int != 0 }}'
+#   actions:
+#     - action: persistent_notification.create
+#       data:
+#         message: >
+#           New HACS Updates:{{ "\n\n" }} {%- for rep in state_attr('update.hacs_update',
+#           'repositories') -%} - {{rep.display_name }}
+#               {{ "&nbsp;&nbsp;&nbsp;&nbsp;" }}Current: {{rep.installed_version }}
+#               {{ "&nbsp;&nbsp;&nbsp;&nbsp;" }}Latest: {{rep.available_version }}
+#           {%- endfor -%}
+
+#####################################
+#    Security & House Modes         #
+#####################################
+
+#
+#  GUEST MODE
+#
+- id: aut_guest_mode_on
+  alias: "aut guest mode on"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_guest_mode
+      from: "off"
+      to: "on"
+  actions:
+    - action: script.scr_common_guest_mode_on
+
+- id: aut_guest_mode_off
+  alias: "aut guest mode off"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_guest_mode
+      from: "on"
+      to: "off"
+  actions:
+    - action: script.scr_common_guest_mode_off
+
+- id: aut_datetime_guest_mode_on
+  alias: "aut datetime guest mode on"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.guest_arrives
+  conditions:
+    - condition: state # only bother if currently OFF
+      entity_id: input_boolean.inp_bool_guest_mode
+      state: "off"
+  actions:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.inp_bool_guest_mode
+    - action: script.scr_common_guest_mode_on
+
+- id: aut_datetime_guest_mode_off
+  alias: "aut datetime guest mode off"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.guest_departs
+  conditions:
+    - condition: state # only bother if currently ON
+      entity_id: input_boolean.inp_bool_guest_mode
+      state: "on"
+  actions:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.inp_bool_guest_mode
+    - action: script.scr_common_guest_mode_off
+
+#
+# EXTENDED ABSENCE MODE
+#
+
+# EXTENDED ABSENCE SET MANUALLY
+- id: aut_extended_absence_on
+  alias: "aut extended absence on"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      from: "off"
+      to: "on"
+  conditions:
+    - condition: state
+      entity_id: input_boolean.inp_bool_guest_mode # do not execute unless Overnight Guest is OFF
+      state: "off" # in case we have a guest while we are gone
+  actions:
+    - action: script.scr_say_phrase
+      data:
+        message: "Extended absence mode enabled"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Extended absence mode has been enabled"
+        message: "Home Assistant: Extended absence mode enabled"
+        data:
+          car_ui: true
+    - action: notify.gmail_to_yang
+      data:
+        title: "Extended absence mode has been enabled"
+        message: "Extended absence mode enabled"
+    - action: script.scr_common_extended_absence_on
+
+- id: aut_extended_absence_off
+  alias: "aut extended absence off"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      from: "on"
+      to: "off"
+  actions:
+    - action: script.scr_common_extended_absence_off
+    - action: script.scr_say_phrase
+      data:
+        message: "Extended absence mode disabled"
+    - action: notify.gmail_to_yang
+      data:
+        title: "Home Assistant: Extended Absence Mode disabled"
+        message: "Extended absence mode disabled"
+    - action: notify.mobile_app_yskt_cell
+      data:
+        title: "Extended absence mode has been disabled"
+        message: "Home Assistant: Extended absence mode disabled"
+        data:
+          car_ui: true
+
+# EXTENDED ABSENCE DETERMINED BY DISTANCE & TIME AWAY
+- id: aut_extended_absence_auto_on
+  alias: "aut extended absence auto on"
+  initial_state: true
+  trigger:
+    - platform: template # distance is in miles - BOTH must be > this distance away
+      value_template: >
+        {{ (states('sensor.home_ys_cell_gps_distance') | float(default=0) > 100) and
+        (states('sensor.home_kt_cell_gps_distance') | float(default=0) > 100) }}
+      for: "00:30:00"
+  conditions:
+    condition: and
+    conditions:
+      - condition: state # only bother if currently OFF
+        entity_id: input_boolean.inp_bool_extended_absence_mode
+        state: "off"
+      - condition: state
+        entity_id: input_boolean.inp_bool_guest_mode # do not execute unless Overnight Guest is OFF
+        state: "off" # in case we have a guest while we are gone
+  actions:
+    - action: input_boolean.turn_on # This action triggers aut_extended_absence_on
+      target:
+        entity_id: input_boolean.inp_bool_extended_absence_mode # since it is triggered by off-to-on input_boolean change
+
+- id: aut_extended_absence_auto_off
+  alias: "aut extended absence auto off"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.home_ys_cell_gps_distance
+      value_template: "{{ states('sensor.home_ys_cell_gps_distance') | float(default=0) }}"
+      below: 30 # distance is in miles
+      for:
+        minutes: 10
+    - platform: numeric_state
+      entity_id: sensor.home_kt_cell_gps_distance
+      value_template: "{{ states('sensor.home_kt_cell_gps_distance') | float(default=0) }}"
+      below: 30 # distance is in miles
+      for:
+        minutes: 10
+    - platform: state
+      entity_id: group.whereis_kt
+      to: "home"
+    - platform: state
+      entity_id: group.whereis_ys
+      to: "home"
+  conditions:
+    - condition: state # only bother if currently ON
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "on"
+  actions:
+    - action: input_boolean.turn_off # This action triggers aut_extended_absence_off
+      entity_id: input_boolean.inp_bool_extended_absence_mode # since it is triggered by on-to-off input_boolean change
+
+# EXTENDED ABSENCE DETERMINED BY DATE/TIME
+- id: aut_datetime_extended_absence_on
+  alias: "aut datetime extended absence on"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.extended_absence_start
+  conditions:
+    - condition: state # only bother if currently OFF
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "off"
+  actions:
+    - action: input_boolean.turn_on # This action triggers aut_extended_absence_on
+      target:
+        entity_id: input_boolean.inp_bool_extended_absence_mode # since it is triggered by off-to-on input_boolean change
+
+- id: aut_datetime_extended_absence_off
+  alias: "aut datetime extended absence off"
+  initial_state: true
+  trigger:
+    - platform: time
+      at: input_datetime.extended_absence_end
+  conditions:
+    - condition: state # only bother if currently ON
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "on"
+  actions:
+    - action: input_boolean.turn_off # This action triggers aut_extended_absence_off
+      target:
+        entity_id: input_boolean.inp_bool_extended_absence_mode # since it is triggered by on-to-off input_boolen change
+
+#
+# Simulate home occupied in evening if Extended Absence Mode is ON
+#
+- id: aut_security_occupied_sim
+  alias: "aut security occupied sim"
+  initial_state: true
+  trigger:
+    - platform: sun
+      event: sunset
+  conditions:
+    - condition: state
+      entity_id: input_boolean.inp_bool_extended_absence_mode
+      state: "on"
+  actions:
+    - action: script.scr_occupied_sim
+
+#
+# THEATER MODE
+#
+- id: aut_theater_mode_on
+  alias: "aut theater mode on"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_theater_mode
+      from: "off"
+      to: "on"
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_room_theater_mode
+
+- id: aut_theater_mode_off
+  alias: "aut theater mode off"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: input_boolean.inp_bool_theater_mode
+      from: "on"
+      to: "off"
+  actions:
+    - action: scene.turn_on
+      target:
+        entity_id: scene.living_room_normal_mode
+
+#
+# KITCHEN UPPER CABINET MOOD LIGHTING
+#
+
+# turn on Kitchen Mood lights 100% Bright White if rest are ON
+- id: aut_kitchen_mood_100_bright_white
+  alias: "aut kitchen mood 100 bright white"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >-
+        {{ is_state('light.island_lights', 'on') and is_state('light.kitchen_cabinet_lights', 'on') and 
+        is_state('light.kitchen_leds_lower', 'on') }}
+  actions:
+    - action: light.turn_on
+      target:
+        entity_id: light.kitchen_leds_upper_master
+    - action: light.turn_on
+      target:
+        entity_id: light.kitchen_leds_upper
+    - action: select.select_option
+      target:
+        entity_id: select.kitchen_leds_upper_preset
+      data:
+        option: "All Seg Bright Wht 100%"
+
+# return kitchen mood lights to "normal" if rest are off based on luminosity
+- id: aut_kitchen_mood_normal
+  alias: "aut kitchen mood normal"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: light.island_lights
+      to: "off"
+    - platform: state
+      entity_id: light.kitchen_cabinet_lights
+      to: "off"
+    - platform: state
+      entity_id:
+        - light.kitchen_leds_lower
+      to: "off"
+  actions:
+    - if:
+        - condition: state
+          entity_id: input_boolean.inp_bool_lum_mood_lights_f_solar_trig
+          state: "on"
+      then:
+        - action: script.scr_turn_on_kitchen_leds_upper
+      else:
+        - action: light.turn_off
+          target:
+            entity_id:
+              - light.kitchen_leds_upper
+              - light.kitchen_leds_upper_master
+
+#################################
+#                               #
+#  Utility & testing functions  #
+#                               #
+#################################
+
+#
+# AUTO TURN OFF HVAC CLOSET LIGHTS AFTER DELAY
+#
+- id: hvac_closet_auto_off
+  alias: hvac_closet_auto_off
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id: light.hvac_closet_lights
+      to: "on"
+  actions:
+    - delay: 02:00:00
+    - action: light.turn_off
+      target:
+        entity_id: light.hvac_closet_lights
+
+#
+# AUTO RESET KITCHEN WLED LIGHTS
+#
+- id: kitchen_wled_reset
+  alias: "kitchen wled reset"
+  initial_state: true
+  trigger:
+    - platform: state
+      entity_id:
+        - light.kitchen_leds_upper_master
+        - light.kitchen_leds_lower
+      to: "unavailable"
+      for: 00:00:10
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.kitchen_wled_reset
+    - delay: 00:00:10
+    - action: switch.turn_on
+      target:
+        entity_id: switch.kitchen_wled_reset
+
+#
+# PROXIMITY TESTING
+#
+- id: aut_half_mile_departure
+  alias: "aut half mile departure"
+  initial_state: true
+  trigger:
+    - platform: template
+      value_template: >
+        {{ (states('sensor.home_ys_cell_gps_distance') | float(default=0) > 0.5) }}
+  conditions:
+    - condition: state # only notify if test switch is ON
+      entity_id: input_boolean.inp_bool_half_mi_trig_test
+      state: "on"
+    - condition: state
+      entity_id: sensor.home_ys_cell_gps_direction_of_travel
+      state: "away_from"
+  actions:
+    - action: notify.mobile_app_ys_cell
+      data:
+        message: "TTS"
+        data:
+          tts_text: "Half mile exceeded"
+          data:
+            car_ui: true

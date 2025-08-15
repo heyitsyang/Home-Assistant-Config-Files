@@ -1,0 +1,75 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+
+homeassistant:
+  # name: Norcoose # Name where Home Assistant is running
+  #  latitude: !secret latitude # Location for sun rises and set calc
+  #  longitude: !secret longitude
+  #  elevation: 23 # (meters) needed for weather/sunrise functions
+  #  unit_system: imperial # 'metric' for Metric, 'imperial' for Imperial
+  #  time_zone: America/New_York # google "List of TZ database time zones"
+  # currency: USD
+  # external_url: !secret external_url  # now configured in Settings>System>Networks
+  # internal_url: !secret internal_url  # now configured in Settings>System>Networks
+  allowlist_external_dirs:
+    - /config # this is required for filesize sensor to work on the home assistant db
+  customize: !include customize.yaml # customize, customize_domain, & customize_glob
+  customize_domain: !include customize_domain.yaml # must be under the homeassistant: section
+  customize_glob: !include customize_glob.yaml # or it will not work
+
+  packages: !include_dir_named packages
+  #  Contents of packages:
+  #  - keymaster_basic.yaml - look for door lock configs for entry code assignments and notification here
+
+http:
+  # server_port: 61615                                 #  default port 8123 is used for local network unencrypted http
+
+  # NOTE: ssl_certiciate and ssl_key are now configured in the NGINX SSL Proxy add-on
+  # ssl_certificate: /ssl/fullchain.pem               #  WAN port 443 must pass thru to 443 on HA for cert renewal
+  # ssl_key: /ssl/privkey.pem                         #  ssl keys are renewed by either DuckDNS or NGINX Proxy Manager (not sure which)
+
+  use_x_forwarded_for: true # required for
+  trusted_proxies: # reverse proxy
+    - 10.27.0.44 #   home assistant address
+    - 172.0.0.0/8 #   internal network for docker
+
+default_config:
+
+frontend: # Enables the frontend
+  themes: !include_dir_merge_named themes # themes go in the themes directory
+
+############################################
+# INCLUDES
+############################################
+
+# note the customize: & packages:  !include is required
+# to be in the homeassitant: section
+
+automation: !include automations.yaml # hassio generated yaml goes here
+automation non-gui: !include_dir_merge_list hand_coded_automations # hand coded yaml goes in this dir to preserve comments, order, etc.
+alexa: !include alexa.yaml
+#alert: !include alerts.yaml
+#binary_sensor: !include binary_sensors.yaml
+camera: !include cameras.yaml
+command_line: !include command_line.yaml
+cover: !include covers.yaml
+#climate: !include climate.yaml
+group: !include groups.yaml
+influxdb: !include influxdb.yaml
+input_boolean: !include input_booleans.yaml
+input_number: !include input_numbers.yaml # configuring this in helpers is now preferred
+input_select: !include input_selects.yaml
+#input_text: !include input_text.yaml      # configuring this in helpers is now preferred
+light: !include lights.yaml
+logger: !include logger.yaml
+mqtt: !include mqtt.yaml
+#media_player: !include media_players.yaml
+notify: !include notifiers.yaml
+recorder: !include recorder.yaml # history graphing settings
+scene: !include scenes.yaml # hassio generated yaml goes here
+script: !include scripts.yaml
+sensor: !include sensors.yaml
+shell_command: !include shell_commands.yaml
+switch: !include switches.yaml
+template: !include templates.yaml
+tts: !include tts.yaml
+zone: !include zones.yaml

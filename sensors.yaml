@@ -1,0 +1,211 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+### SENSORS  ###
+
+#
+# Filters are considered a type of sensor
+#
+
+- platform: statistics
+  name: "7 Day Avg Soil Temperature"
+  entity_id: sensor.soil_probe_ds18b20_temperature # probe reports every hour
+  state_characteristic: average_linear
+  sampling_size: 168 # 7 days = 168 hours
+  precision: 1
+
+- platform: statistics
+  name: "24hr Avg Water Pressure"
+  entity_id: sensor.water_pressure
+  state_characteristic: mean
+  sampling_size: 1440 # allow for reporting every minute for 24 hours
+  max_age:
+    hours: 24
+  precision: 2
+
+- platform: statistics
+  name: "24hr Max Water Pressure"
+  entity_id: sensor.water_pressure
+  state_characteristic: value_max
+  max_age:
+    hours: 24
+
+- platform: statistics
+  name: "24hr Min Water Pressure"
+  entity_id: sensor.water_pressure
+  state_characteristic: value_min
+  max_age:
+    hours: 24
+
+# - platform: statistics
+#   name: "10m Avg Master Bedroom Temperature"
+#   entity_id: sensor.espresense_masterbdrm_ds18b20_temperature
+#   state_characteristic: mean
+#   sampling_size: 600 # default state value is the running average of this many samples
+#   precision: 2 # number of decimal places
+
+- platform: filter
+  name: "Filtered Living Rm Visible Light"
+  unique_id: filtered_living_rm_visible_light
+  entity_id: sensor.raw_living_rm_visible_light # sensor is set to update every minute
+  filters:
+    - filter: outlier
+      radius: 5 # default radius is 2 if unspecified
+      window_size: 5 # num of prev states to define median (default = 1)
+    - filter: lowpass
+      time_constant: 5 # Loosely relates to the amount of time it takes for a state to influence the output
+      precision: 0
+
+- platform: filter
+  name: "Filtered KFLWILDW56 BU Local Rad Lx"
+  unique_id: filtered_kflwildw56_bu_local_rad_lx
+  entity_id: sensor.kflwildw56_backed_up_local_solar_rad_lx # sensor provides mean value every minute
+  filters:
+    - filter: outlier
+      radius: 1000 # default radius is 2 if unspecified
+      window_size: 10 # num of prev states to define median (default = 1)
+    - filter: lowpass
+      time_constant: 10 # Loosely relates to the amount of time it takes for a state to influence the output
+      precision: 0
+
+#
+# MQTT_ROOM- room of device/beacon location
+#            Add one entry for each device tracked
+#
+- platform: mqtt_room
+  device_id: !secret ys_UUID_device_id
+  name: "YS cell BLE room"
+  state_topic: !secret ys_UUID_state_topic
+  timeout: 60
+  away_timeout: 120
+
+- platform: mqtt_room
+  device_id: !secret kt_UUID_device_id
+  name: "KT cell BLE room"
+  state_topic: !secret kt_UUID_state_topic
+  timeout: 60
+  away_timeout: 120
+
+#
+# SNMP sensors
+#
+- platform: snmp
+  unique_id: junior_temperature
+  name: "junior temperature"
+  device_class: temperature
+  host: junior.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.2.0
+  scan_interval: 3600
+  accept_errors: true
+  unit_of_measurement: "°C"
+
+- platform: snmp
+  unique_id: junior_system_fan_status
+  name: "junior system fan status"
+  host: junior.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.4.1.0
+  scan_interval: 3600
+  accept_errors: true
+  value_template: >
+    {% if value | int(default=0) == 1 %}
+    OK
+    {% else %}
+    FAULT
+    {% endif %}
+
+- platform: snmp
+  unique_id: junior_cpu_fan_status
+  name: "junior CPU fan status"
+  host: junior.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.4.2.0
+  scan_interval: 3600 # one hour
+  accept_errors: true
+  value_template: >
+    {% if value | int(default=0) == 1 %}
+    OK
+    {% else %}
+    FAULT
+    {% endif %}
+
+- platform: snmp
+  unique_id: bacman_temperature
+  name: "bacman temperature"
+  device_class: temperature
+  host: bacman.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.2.0
+  scan_interval: 3600 # one hour
+  accept_errors: true
+  unit_of_measurement: "°C"
+
+- platform: snmp
+  unique_id: bacman_system_fan_status
+  name: "bacman system fan status"
+  host: bacman.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.4.1.0
+  scan_interval: 3600 # one hour
+  accept_errors: true
+  value_template: >
+    {% if value | int(default=0) == 1 %}
+    OK
+    {% else %}
+    FAULT
+    {% endif %}
+
+- platform: snmp
+  unique_id: bacman_cpu_fan_status
+  name: "bacman CPU fan status"
+  host: bacman.shencentral.net
+  baseoid: 1.3.6.1.4.1.6574.1.4.2.0
+  scan_interval: 3600 # one hour
+  accept_errors: true
+  value_template: >
+    {% if value | int(default=0) == 1 %}
+    OK
+    {% else %}
+    FAULT
+    {% endif %}
+
+#
+# Time & Date
+#
+- platform: time_date
+  display_options:
+    - "time"
+    - "date"
+    - "date_time"
+    - "time_date"
+    - "time_utc"
+    #- 'beat'
+
+#
+# INFLUXDB SENSORS
+#
+
+- platform: influxdb
+  host: a0d7b954-influxdb
+  port: 8086
+  username: !secret influxdb_user
+  password: !secret influxdb_pwd
+  scan_interval: 3600
+  queries:
+    - name: "InfluxDB DB size"
+      unit_of_measurement: MB
+      value_template: "{{ (value|float / 1024 /1024)|round(1) }}"
+      group_function: sum
+      measurement: '"monitor"."shard"'
+      database: _internal
+      where: "time > now() - 10s"
+      field: diskBytes
+
+#
+#  RESTful sensors
+#
+- platform: rest
+  resource: !secret ip_geo_location_secret
+  name: ip_geo_location
+  scan_interval: 300
+  value_template: "OK"
+  json_attributes:
+    - moonrise
+    - moonset
+    - moon_altitude
