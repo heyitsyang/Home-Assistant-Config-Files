@@ -115,7 +115,7 @@ sensor:
   # GET TEMP/HUMIDITY FROM DHT22
   - platform: dht
     pin: GPIO23
-    update_interval: 60s
+    update_interval: 60s      # the DHT22 can only be read every 1s
     temperature:
       name: "Mid Rack Temperature C"
       id: lab_rack_dht1_temperature_c
@@ -130,12 +130,10 @@ sensor:
       name: "Mid Rack Humidity"
       id: lab_rack_dht1_humidity
       accuracy_decimals: 0
-      # the DHT22 can only be read every 1s. Use 1.3s to be safe.
-      # update_interval: 1.3s
 
   - platform: dht
     pin: GPIO21
-    update_interval: 60s
+    update_interval: 60s       # the DHT22 can only be read every 1s
     temperature:
       name: "Upper Rack Temperature C"
       id: lab_rack_dht2_temperature_c
@@ -150,8 +148,6 @@ sensor:
       name: "Upper Rack Humidity"
       id: lab_rack_dht2_humidity
       accuracy_decimals: 0
-      # the DHT22 can only be read every 1s. Use 1.3s to be safe.
-      # update_interval: 1.3s
 
 # CREATE °F VERSIONS
   - platform: template
