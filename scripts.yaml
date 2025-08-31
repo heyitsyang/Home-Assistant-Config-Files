@@ -77,6 +77,8 @@ scr_goodmorning:
         entity_id:
           - input_boolean.inp_bool_sleeping
           - input_boolean.inp_bool_visitor_while_sleeping_flag
+    - delay:
+        seconds: 30
     - action: cover.set_cover_position
       target:
         entity_id: cover.master_bedroom_inner_shades
