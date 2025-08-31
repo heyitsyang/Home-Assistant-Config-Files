@@ -265,7 +265,7 @@
 
 - trigger:
     - trigger: time_pattern
-      hours: /1
+      minutes: 58 # Matches every hour at 58 minutes
     - trigger: homeassistant
       event: start
   action:
