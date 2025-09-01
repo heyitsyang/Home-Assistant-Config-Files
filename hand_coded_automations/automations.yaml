@@ -212,7 +212,7 @@
   actions:
     - action: input_boolean.turn_off
       data:
-        entity_id: 
+        entity_id:
           - input_boolean.inp_bool_sleeping
           - input_boolean.inp_bool_visitor_while_sleeping_flag
 
@@ -251,7 +251,7 @@
         entity_id: input_boolean.inp_bool_announcements
 
 #
-# HOURLY TIME ANNOUNCEMENT
+# TIME TRIGGERED ACTIONS
 #
 - id: aut_hourly_actions
   alias: "aut hourly actions"
@@ -260,16 +260,30 @@
     - trigger: time_pattern
       minutes: 00 # Matches every hour at 00 minutes
   actions:
-    - action: script.scr_say_phrase       # time announcement
+    - action: script.scr_say_phrase # time announcement
       data:
         message: >-
           'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
           | regex_replace(":0(\\d)", " oh \\1") }}'
-    - action: notify.send_message         # send wx forecast to mesh
+    - action: notify.send_message # send wx forecast to mesh
       data:
         entity_id: notify.mesh_channel_telemetry
         message: "001:{{states('sensor.weather_hourly_next_8')}}"
 
+- id: aut_daily_reboot_wx_observerip
+  alias: "aut daily reboot wx observerip"
+  trigger:
+    - trigger: time
+      at: "15:45:00"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.wx_observerip
+    - delay:
+        minutes: 1
+    - action: switch.turn_on
+      target:
+        entity_id: switch.wx_observerip
 
 #
 # EXTINGUISH MOOD LIGHTS DAILY
