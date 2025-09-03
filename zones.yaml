@@ -54,6 +54,12 @@
   radius: 60 # in meters
   icon: mdi:home
 
+- name: near_home
+  latitude: !secret home_latitude
+  longitude: !secret home_longitude
+  radius: 1500 # in meters
+  icon: mdi:home
+
 - name: Church@Springs - Ocala
   latitude: 29.13195
   longitude: -82.05666
