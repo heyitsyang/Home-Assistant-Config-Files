@@ -265,10 +265,10 @@
         message: >-
           'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
           | regex_replace(":0(\\d)", " oh \\1") }}'
-    - action: notify.send_message # send wx forecast to mesh
+    - action: notify.send_message   # send wx forecast to mesh in different format than weather_hourly_next_8
       data:
         entity_id: notify.mesh_channel_telemetry
-        message: "001:{{states('sensor.weather_hourly_next_8')}}"
+        message: "001:{{states('sensor.kflwildw56_local_temperature')}}:{{states('sensor.weather_hourly_next_4')}}"
 
 - id: aut_daily_reboot_wx_observerip
   alias: "aut daily reboot wx observerip"
