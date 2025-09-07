@@ -92,7 +92,7 @@ scr_goodmorning:
 
 #
 # COVER SCRIPTS
-#  These scripts are to avoid having to use ON and OFF for covers (shades, garage doors, etc.)
+#  These scripts are to avoid having to use ON and OFF for covers (shades, garage doors, etc.) w Alexa
 #
 scr_open_garage_doors:
   mode: single
