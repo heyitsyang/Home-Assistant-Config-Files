@@ -269,8 +269,8 @@
       data:
         entity_id: notify.mesh_channel_telemetry
         message: "\0x01\0x01:{{states('sensor.kflwildw56_local_temperature')}}:{{states('sensor.weather_hourly_next_4_font_mapped')}}"
-        # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <start of message> control character and <message type>
-        # the <start of message> is always /0x01 but the message type is assigned based on message type - wx is \0x01
+        # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
+        # the <msgStart> is always /0x01 but <msgType> is a community assigned number - wx is \0x01
 - id: aut_daily_reboot_wx_observerip
   alias: "aut daily reboot wx observerip"
   trigger:
