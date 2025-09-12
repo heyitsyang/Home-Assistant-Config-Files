@@ -44,8 +44,6 @@ gr5:
   hours_to_show: 24
   refresh: 60
   entities:
-    - binary_sensor.front_ent_soffit_uwave
-    - binary_sensor.front_ent_attic_uwave
     - lock.front_door_lock
     - lock.back_door_lock
     - cover.large_garage_door
