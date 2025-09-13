@@ -251,42 +251,6 @@
         entity_id: input_boolean.inp_bool_announcements
 
 #
-# TIME TRIGGERED ACTIONS
-#
-- id: aut_hourly_actions
-  alias: "aut hourly actions"
-  initial_state: true
-  trigger:
-    - trigger: time_pattern
-      minutes: 00 # Matches every hour at 00 minutes
-  actions:
-    - action: script.scr_say_phrase # time announcement
-      data:
-        message: >-
-          'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
-          | regex_replace(":0(\\d)", " oh \\1") }}'
-    - action: notify.send_message # send wx forecast to mesh and prefix packet type and current temp
-      data:
-        entity_id: notify.mesh_channel_telemetry
-        message: "\0x01\0x01:{{states('sensor.kflwildw56_local_temperature')}}:{{states('sensor.weather_hourly_next_4_font_mapped')}}"
-        # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
-        # the <msgStart> is always /0x01 but <msgType> is a community assigned number - wx is \0x01
-- id: aut_daily_reboot_wx_observerip
-  alias: "aut daily reboot wx observerip"
-  trigger:
-    - trigger: time
-      at: "15:45:00"
-  actions:
-    - action: switch.turn_off
-      target:
-        entity_id: switch.wx_observerip
-    - delay:
-        minutes: 1
-    - action: switch.turn_on
-      target:
-        entity_id: switch.wx_observerip
-
-#
 # EXTINGUISH MOOD LIGHTS DAILY
 #
 - id: aut_mood_lights_daily_off
@@ -460,6 +424,53 @@
       data:
         entity_id: light.living_room_lights
         brightness_pct: "{{ states('sensor.lv_rm_suggested_brightness') | int(default=0) }}"
+
+#
+# MISC
+#
+- id: aut_hourly_actions
+  alias: "aut hourly actions"
+  initial_state: true
+  trigger:
+    - trigger: time_pattern
+      minutes: 00 # Matches every hour at 00 minutes
+  actions:
+    - action: script.scr_say_phrase # time announcement
+      data:
+        message: >-
+          'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
+          | regex_replace(":0(\\d)", " oh \\1") }}'
+
+- id: aut_daily_reboot_wx_observerip
+  alias: "aut daily reboot wx observerip"
+  trigger:
+    - trigger: time
+      at: "15:45:00"
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.wx_observerip
+    - delay:
+        minutes: 1
+    - action: switch.turn_on
+      target:
+        entity_id: switch.wx_observerip
+
+- id: aut_mesh_wx_broadcast
+  alias: "auto mesh wx broadcast"
+  trigger:
+    - trigger: time_pattern
+      minutes: "/15"
+  actions:
+    - action: notify.send_message # send wx forecast to mesh and prefix packet type and current temp
+      data:
+        entity_id: notify.mesh_channel_telemetry
+        message: "|#01#{{states('sensor.kflwildw56_local_temperature') | int}}#{{states('sensor.weather_hourly_next_4_font_mapped')}}"
+        # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
+        # the <msgStart> is always "|"" but <msgType> is a community assigned number - wx is "01"
+        # example:  #01#76#10am,4,10.0#11am,4,0.0#12pm,7,0.03#1pm,7,0.01#
+
+
 
 ###########################################################
 #      Test luminosity based triggers and save states     #
@@ -1644,7 +1655,7 @@
     - condition: state
       entity_id: binary_sensor.front_door_window_door_is_open
       state: "off"
-      for: "00:02:00"
+      for: "00:02:00"     # do not trigger if someone just closed the door (e.g. to get newspaper)
     - condition: template # debounce
       value_template: >-
         {{ ( ( as_timestamp(now(), '') - (as_timestamp(state_attr('automation.aut_frontporch_activity', 
@@ -1662,27 +1673,18 @@
   mode: restart
   trigger:
     - platform: state
-      entity_id: binary_sensor.driveway_zone_car_occupancy
+      entity_id: 
+        - binary_sensor.driveway_zone_car_occupancy
+        - binary_sensor.driveway_zone_person_occupancy
+        - binary_sensor.doorbell_zone_person_occupancy
+        - binary_sensor.frontporch_zone_person_occupancy
       to: "off"
       for:
         minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
     - platform: state
-      entity_id: binary_sensor.driveway_zone_person_occupancy
-      to: "off"
-      for:
-        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
-    - platform: state
-      entity_id: binary_sensor.front_ent_attic_uwave
-      to: "off"
-      for:
-        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
-    - platform: state
-      entity_id: cover.large_garage_door
-      to: "closed"
-      for:
-        minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
-    - platform: state
-      entity_id: cover.small_garage_door
+      entity_id: 
+        - cover.large_garage_door
+        - cover.small_garage_door
       to: "closed"
       for:
         minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
@@ -1692,15 +1694,23 @@
       for:
         minutes: "{{ states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) }}"
     - platform: state
-      entity_id: person.yang
+      entity_id: 
+        - person.yang
+        - person.karen
       to: "home"
       for:
         minutes: "{{ (states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) + 5) | int(default=0) }}"
-    - platform: state
-      entity_id: person.karen
-      to: "home"
-      for:
-        minutes: "{{ (states('input_number.inp_num_front_door_lights_off_delay') | int(default=0) + 5) | int(default=0) }}"
+  conditions:  # leave lights on if person still present & wait for last person trigger to turn "off"
+    - and:
+        - condition: state
+          entity_id: binary_sensor.doorbell_zone_person_occupancy
+          state: "off"
+        # - condition: state
+        #   entity_id: binary_sensor.frontporch_zone_person_occupancy   # this has false positives, so not including it
+        #   state: "off"
+        - condition: state
+          entity_id: binary_sensor.driveway_zone_person_occupancy
+          state: "off"
   actions:
     - action: light.turn_off
       target:
