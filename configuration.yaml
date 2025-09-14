@@ -12,6 +12,7 @@ homeassistant:
   # internal_url: !secret internal_url  # now configured in Settings>System>Networks
   allowlist_external_dirs:
     - /config # this is required for filesize sensor to work on the home assistant db
+    - /share/scripts # shell scripts are kept here
   customize: !include customize.yaml # customize, customize_domain, & customize_glob
   customize_domain: !include customize_domain.yaml # must be under the homeassistant: section
   customize_glob: !include customize_glob.yaml # or it will not work
