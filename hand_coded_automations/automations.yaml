@@ -456,7 +456,7 @@
       target:
         entity_id: switch.wx_observerip
 
-- id: aut_mesh_wx_broadcast
+- id: aut_mesh_wx_broadcast        # HoT msgType 01
   alias: "auto mesh wx broadcast"
   trigger:
     - trigger: time_pattern
@@ -471,7 +471,7 @@
         # wx example:  |#01#76#10am,4,10.0#11am,4,0.0#12pm,7,0.03#1pm,7,0.01#
 
 - id: aut_mesh_now_playing_broadcast
-  alias: "auto mesh now playing broadcast"
+  alias: "auto mesh now playing broadcast"   # HoT msgType 02
   trigger:
     - trigger: time_pattern
       minutes: "/17" # interval
@@ -481,7 +481,7 @@
         entity_id: notify.mesh_channel_telemetry
         message: "|#02#{{states('sensor.now_playing')}}"
         # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
-        # now_playing example:  |#02#Spanish Springs Town Square,Cable Cars#Brownwood Paddock Square,SocietY Band#Sawgrass Grove,The Voodoo Gypsies#
+        # now_playing example:  |#02#Spanish Springs Town Square,FiddleRat#Brownwood Paddock Square,5.0.1.#Sawgrass Grove,Dance Express#Lake Sumter Landing Market Square,Bourbon Street Brass#
 
 ###########################################################
 #      Test luminosity based triggers and save states     #
@@ -2731,7 +2731,8 @@
 # KITCHEN UPPER CABINET MOOD LIGHTING
 #
 
-# turn on Kitchen Mood lights 100% Bright White if rest are ON
+# Turn on Kitchen Mood lights 100% Bright White if rest are ON
+# NOTE:  this doesn't work if any lights or broken - ie. unavailable
 - id: aut_kitchen_mood_100_bright_white
   alias: "aut kitchen mood 100 bright white"
   initial_state: true
@@ -2753,7 +2754,7 @@
       data:
         option: "All Seg Bright Wht 100%"
 
-# return kitchen mood lights to "normal" if rest are off based on luminosity
+# return kitchen mood lights to "normal" if rest are off - based on luminosity
 - id: aut_kitchen_mood_normal
   alias: "aut kitchen mood normal"
   initial_state: true
