@@ -456,7 +456,7 @@
       target:
         entity_id: switch.wx_observerip
 
-- id: aut_mesh_wx_broadcast        # HoT msgType 01
+- id: aut_mesh_wx_broadcast # HoT msgType 01
   alias: "auto mesh wx broadcast"
   trigger:
     - trigger: time_pattern
@@ -471,7 +471,7 @@
         # wx example:  |#01#76#10am,4,10.0#11am,4,0.0#12pm,7,0.03#1pm,7,0.01#
 
 - id: aut_mesh_now_playing_broadcast
-  alias: "auto mesh now playing broadcast"   # HoT msgType 02
+  alias: "auto mesh now playing broadcast" # HoT msgType 02
   trigger:
     - trigger: time_pattern
       minutes: "/17" # interval
@@ -2732,15 +2732,16 @@
 #
 
 # Turn on Kitchen Mood lights 100% Bright White if rest are ON
-# NOTE:  this doesn't work if any lights or broken - ie. unavailable
+#   Allow "unavailable"  in addition to "on" so it works in case of light switch failure
 - id: aut_kitchen_mood_100_bright_white
   alias: "aut kitchen mood 100 bright white"
   initial_state: true
   trigger:
     - platform: template
       value_template: >-
-        {{ is_state('light.island_lights', 'on') and is_state('light.kitchen_cabinet_lights', 'on') and 
-        is_state('light.kitchen_leds_lower', 'on') }}
+        {{ (is_state('light.island_lights', 'on') or is_state('light.island_lights', 'unavailable'))
+        and (is_state('light.kitchen_cabinet_lights', 'on') or is_state('light.kitchen_cabinet_lights', 'unavailable'))
+        and (is_state('light.kitchen_leds_lower', 'on') or is_state('light.kitchen_leds_lower', 'unavailable')) }}
   actions:
     - action: light.turn_on
       target:
