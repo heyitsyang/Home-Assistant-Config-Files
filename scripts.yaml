@@ -323,7 +323,9 @@ scr_arrival_announcement:
       state: "off"
     - action: google_generative_ai_conversation.generate_content
       data:
-        prompt: In one sentence, welcome a person back home in a warm way as a singular entity. Do not use special characters.
+        prompt: >-
+          In no more than two short sentences, welcome a person back home in a warm way with you being a singular entity. 
+          Do not use special characters. 
       response_variable: ai_response
     - action: script.scr_say_phrase
       data: # ai_response['text'] gets the value of the text key from the response
