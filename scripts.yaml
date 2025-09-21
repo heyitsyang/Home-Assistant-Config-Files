@@ -325,7 +325,7 @@ scr_arrival_announcement:
       data:
         prompt: >-
           In no more than two short sentences, welcome a person back home in a warm way with you being a singular entity. 
-          Do not use special characters. 
+          Use "I" instead of "we".  Do not use special characters. 
       response_variable: ai_response
     - action: script.scr_say_phrase
       data: # ai_response['text'] gets the value of the text key from the response
