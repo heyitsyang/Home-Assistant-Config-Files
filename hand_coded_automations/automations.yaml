@@ -1522,12 +1522,12 @@
       value_template: >-
         {{ ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) <= 0.2)
         and ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) > 0)
-        and (states('sensor.home_yang_direction_of_travel') == 'towards')}}
+        and (states('sensor.home_ys_cell_gps_direction_of_travel') == 'towards')}}
     - platform: template # default=99 if proximity is non-numeric
       value_template: >-
         {{ ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) <= 0.2)
         and ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) > 0)
-        and (states('sensor.home_karen_direction_of_travel') == 'towards')}}
+        and (states('sensor.home_kt_cell_gps_direction_of_travel') == 'towards')}}
   actions:
     - action: script.scr_front_door_lights_on
     - action: script.scr_say_phrase
