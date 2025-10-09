@@ -23,8 +23,8 @@ homeassistant:
 
 http:
   # server_port: 61615                                 #  default port 8123 is used for local network unencrypted http
-
   # NOTE: ssl_certiciate and ssl_key are now configured in the NGINX SSL Proxy add-on
+  # Do not enable these next two lines when using NGINX
   # ssl_certificate: /ssl/fullchain.pem               #  WAN port 443 must pass thru to 443 on HA for cert renewal
   # ssl_key: /ssl/privkey.pem                         #  ssl keys are renewed by either DuckDNS or NGINX Proxy Manager (not sure which)
 
