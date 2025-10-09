@@ -321,7 +321,7 @@ scr_arrival_announcement:
     - condition: state # continue if not inhibited
       entity_id: input_boolean.inhibit_presence_announcements
       state: "off"
-    - action: google_generative_ai_conversation.generate_content
+    - action: ai_task.generate_data
       data:
         prompt: >-
           In no more than two short sentences, welcome a person back home in a warm way with you being a singular entity. 

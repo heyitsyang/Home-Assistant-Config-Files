@@ -53,3 +53,4 @@ zigbee.db-journal
 zigbee.db-shm
 zigbee.db-wal
 
+.ha_run.lock
