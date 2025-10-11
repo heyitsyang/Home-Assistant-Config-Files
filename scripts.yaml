@@ -321,11 +321,11 @@ scr_arrival_announcement:
     - condition: state # continue if not inhibited
       entity_id: input_boolean.inhibit_presence_announcements
       state: "off"
-    - action: ai_task.generate_data
+    - action: google_generative_ai_conversation.generate_content
       data:
         prompt: >-
           In no more than two short sentences, welcome a person back home in a warm way with you being a singular entity. 
-          Use "I" instead of "we".  Do not use special characters. 
+          Use "I" instead of "we".  Do not use special characters.
       response_variable: ai_response
     - action: script.scr_say_phrase
       data: # ai_response['text'] gets the value of the text key from the response
