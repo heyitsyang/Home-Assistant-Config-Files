@@ -14,7 +14,7 @@
       response_variable: python_string
   sensor:
     - name: "now playing"
-      unique_id: now_playing     # the string length of 30 below is an arbirary number
+      unique_id: now_playing     # the string length of 30 below is an arbirary number to see if populated
       state: >-
         {% set json_string = (python_string | replace("'", '"')) %}
         {% set result = (json_string | from_json).stdout %}
@@ -27,7 +27,7 @@
 # IRRIGATION LEAK
 #
 - sensor:
-    - name: "irrig_zone_0_gals" # leakaage while all vbalves off = zone zero
+    - name: "irrig_zone_0_gals" # leakaage while all valves off = zone zero
       unique_id: irrig_zone_0_gals
       device_class: "volume"
       unit_of_measurement: "gal"
@@ -305,7 +305,7 @@
         forecast: "{{ hourly['weather.openweathermap'].forecast }}"
     - name: weather_hourly_next_8
       unique_id: weather_hourly_next_8
-      # in below for loop, use slice [1:] to skip 1st element
+      # in below for loop, we use slice [1:] to skip 1st element
       state: >-
         {%- for hour in state_attr('sensor.openweathermap_forecast_hourly', 'forecast')[1:] -%} 
           {%- if( loop.index <= 8 ) -%}
@@ -335,7 +335,7 @@
         {%- for hour in state_attr('sensor.openweathermap_forecast_hourly', 'forecast')[1:] -%}
           {%- if( loop.index <= 4 ) -%}
             {%- set weather_code = weather_mapping.get(hour.condition, hour.condition) -%}
-            {{( as_timestamp(hour.datetime ) | timestamp_custom('%-I%p')) | lower}},{{ weather_code }},{{ hour.precipitation }}#
+            {{( as_timestamp(hour.datetime ) | timestamp_custom('%-I%p')) | lower}},{{ weather_code }},{{hour.temperature}},{{ hour.precipitation }}#
           {%- endif -%}
         {%- endfor -%}
 
