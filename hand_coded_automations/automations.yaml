@@ -1520,14 +1520,14 @@
   trigger: # trigger on each indiv in case one is already home
     - platform: template # default=99 if proximity is non-numeric
       value_template: >-
-        {{ ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) <= 0.2)
-        and ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) > 0)
-        and (states('sensor.home_ys_cell_gps_direction_of_travel') == 'towards')}}
+        {{ ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) <= 0.25)
+        and ((states( 'sensor.home_ys_cell_gps_distance') | float(default=99)) > 0.1)
+        and (states('sensor.home_ys_cell_gps_direction_of_travel') == 'Towards')}}
     - platform: template # default=99 if proximity is non-numeric
       value_template: >-
-        {{ ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) <= 0.2)
-        and ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) > 0)
-        and (states('sensor.home_kt_cell_gps_direction_of_travel') == 'towards')}}
+        {{ ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) <= 0.25)
+        and ((states( 'sensor.home_kt_cell_gps_distance') | float(default=99)) > 0.1)
+        and (states('sensor.home_kt_cell_gps_direction_of_travel') == 'Towards')}}
   actions:
     - action: script.scr_front_door_lights_on
     - action: script.scr_say_phrase
