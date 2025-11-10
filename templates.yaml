@@ -79,6 +79,10 @@
 #
 # HVAC FAULT
 #
+# Fault threshold is 3 degrees
+# Enabling heat_cool mode when actual temperature is
+# ouside of this tolerance will trigger an immediate error notification
+#
 - binary_sensor:
     - name: "Main HVAC Fault"
       unique_id: main_hvac_fault
