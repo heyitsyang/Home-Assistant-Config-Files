@@ -101,7 +101,7 @@
                   | float | round(2)) > 3 ) 
               ) or
               (
-                ( (states('sensor.sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'target_temp_low')
+                ( (states('sensor.local_ecobee_current_temperature') | float(default=0) - state_attr('climate.local_ecobee', 'target_temp_low')
                   | float | round(2)) < -3 ) 
               )
           }}
