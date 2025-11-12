@@ -38,9 +38,9 @@ inp_bool_guest_in_sunroom:
   name: "Guest in Sunroom"
   icon: mdi:account-plus
 
-inp_bool_vacuum_every_sunday:
-  name: "Vacuum every Sunday"
-  icon: mdi:robot-vacuum-variant
+# inp_bool_vacuum_every_sunday:
+#   name: "Vacuum every Sunday"
+#   icon: mdi:robot-vacuum-variant
 
 inp_bool_visitor_while_out_flag:
   name: "Visitor while out"

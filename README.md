@@ -29,7 +29,6 @@ Note my hand written yaml automations are in the file *config/hand_coded_automat
 **Other fun stuff working with Home Assistant**
 - Amazon Echo
 - Ecobee Lite Thermostat & remote sensors
-- Neato Botvac D5 Connected
 - OPNSense Router
 - Sonos WiFi/Ethernet Speakers
 - Ambient Weather WS-0900-IP Weather Station
@@ -38,4 +37,3 @@ Note my hand written yaml automations are in the file *config/hand_coded_automat
 - Flux LED strip controllers
 - LG washer & dryer
 - Xiaomi/Aquara zigbee buttons
-- Weber iGrill

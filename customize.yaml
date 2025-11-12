@@ -240,18 +240,18 @@ script.scr_manual_say_time:
 script.scr_occupied_sim:
   friendly_name: Simulate occupation
   icon: mdi:home-lightbulb
-script.scr_vacuum_start_custom_cleaning:
-  friendly_name: Start/resume cleaning
-  icon: mdi:play
-script.scr_vacuum_pause:
-  friendly_name: Pause cleaning
-  icon: mdi:pause
-script.scr_vacuum_stop:
-  friendly_name: Stop cleaning - requires manual return to base
-  icon: mdi:stop
-script.scr_vacuum_return_to_base:
-  friendly_name: Return to base
-  icon: mdi:home-map-marker
+# script.scr_vacuum_start_custom_cleaning:
+#   friendly_name: Start/resume cleaning
+#   icon: mdi:play
+# script.scr_vacuum_pause:
+#   friendly_name: Pause cleaning
+#   icon: mdi:pause
+# script.scr_vacuum_stop:
+#   friendly_name: Stop cleaning - requires manual return to base
+#   icon: mdi:stop
+# script.scr_vacuum_return_to_base:
+#   friendly_name: Return to base
+#   icon: mdi:home-map-marker
 sensor.last_static_pressure_test:
   icon: mdi:calendar-clock
 sensor.front_door_lock_battery:
