@@ -464,7 +464,7 @@
   actions:
     - action: notify.send_message # send wx forecast to mesh and prefix packet type and current temp
       data:
-        entity_id: notify.mesh_channel_telemetry
+        entity_id: notify.mesh_channel_golfcart
         message: "|#01#{{states('sensor.kflwildw56_local_temperature') | int(0)}}#{{states('sensor.weather_hourly_next_4_font_mapped')}}"
         # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
         # the <msgStart> is always "|"" but <msgType> is a community assigned number - wx is "01"
@@ -478,7 +478,7 @@
   actions:
     - action: notify.send_message # send wx forecast to mesh and prefix packet type and current temp
       data:
-        entity_id: notify.mesh_channel_telemetry
+        entity_id: notify.mesh_channel_golfcart
         message: "|#02#{{states('sensor.now_playing')}}"
         # NOTE ON ABOVE MESSAGE FORMAT: the first two bytes of the message are the <msgStart> control character and <msgType>
         # now_playing example:  |#02#Spanish Springs Town Square,FiddleRat#Brownwood Paddock Square,5.0.1.#Sawgrass Grove,Dance Express#Lake Sumter Landing Market Square,Bourbon Street Brass#
