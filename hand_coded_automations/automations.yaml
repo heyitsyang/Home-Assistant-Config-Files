@@ -568,6 +568,38 @@
 ##################################################
 
 #
+# HVAC SYCHRONIZATION
+#
+
+- id: aut_sync_hvac_cool_off
+  alias: aut sync hvac cool off
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: climate.local_ecobee
+      from: "cool" # i.e. if switched to heat or heat_cool mode
+  actions:
+    - action: climate.turn_off
+      target:
+        entity_id: climate.sunroom_ac
+
+- id: aut_sync_hvac_cool_on
+  alias: aut sync hvac cool on
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: state
+      entity_id: climate.local_ecobee
+      to: "cool"
+  actions:
+    - action: climate.turn_on
+      target:
+        entity_id: climate.sunroom_ac
+
+#
 # OFFICE MOOD LIGHTS
 #
 - id: aut_office_mood_lights_auto_on
