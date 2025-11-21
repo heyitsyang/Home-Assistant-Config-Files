@@ -17,7 +17,6 @@ gr2:
   refresh: 300
   entities:
     - sensor.filtered_living_rm_visible_light
-    - sensor.statistical_mean_living_rm_visible_light
     - sensor.raw_living_rm_visible_light
 
 gr3:
@@ -25,19 +24,26 @@ gr3:
   hours_to_show: 24
   refresh: 300
   entities:
-    - sensor.dark_sky_temperature
+    - sensor.kflwildw56_aws_temp
+    - sensor.local_ecobee_current_temperature
+    - sensor.actual_sunroom_temperature
     - sensor.attic_temperature
-    - sensor.garage_temperature
-    - sensor.rack_exhaust_temperature
+    - sensor.garage_controller_temperature
+    - sensor.upper_rack_temperature_f
+    - sensor.mid_rack_temperature_f
 
 gr4:
   name: "Humidity"
   hours_to_show: 24
   refresh: 300
   entities:
-    - sensor.dark_sky_humidity
+    - sensor.kflwildw56_aws_humidity
+    - sensor.local_ecobee_current_humidity
+    - sensor.sunroom_ac_sunroom_ac_indoor_humidity
     #  - sensor.attic_humidity
-    - sensor.rack_exhaust_humidity
+    - sensor.upper_rack_humidity
+    - sensor.mid_rack_humidity
+    - sensor.drybox_relative_humidity
 
 gr5:
   name: "Activity"
@@ -49,9 +55,9 @@ gr5:
     - cover.large_garage_door
     - cover.small_garage_door
     - binary_sensor.living_area_motion
-    - binary_sensor.front_door_opened
-    - binary_sensor.garagehouse_door_opened
-    - binary_sensor.back_door_opened
+    - binary_sensor.front_door_window_door_is_open
+    - binary_sensor.garagehouse_door_window_door_is_open
+    - binary_sensor.back_door_window_door_is_open
 
 gr6:
   name: "Location"
@@ -60,7 +66,7 @@ gr6:
   entities:
     - person.karen
     - device_tracker.kt_cell_gps
-    - person._yang
+    - person.yang
     - device_tracker.ys_cell_gps
 
 gr7:
@@ -68,8 +74,8 @@ gr7:
   hours_to_show: 24
   refresh: 60
   entities:
-    - proximity.home_ys
-    - proximity.home_kt
+    - sensor.home_ys_cell_gps_distance
+    - sensor.home_kt_cell_gps_distance
 
 gr8:
   name: "Announcements"
@@ -100,7 +106,7 @@ gr10:
     - light.guest_room_lights
     - light.island_lights
     - light.living_room_lights
-    - light.master_bedroon_lights
+    - light.master_bedroom_lights
     - light.office_lights
     - light.sun_room_lights
     - light.track_lights
