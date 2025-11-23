@@ -46,6 +46,16 @@ scr_goodmorning:
   mode: single
   max_exceeded: silent
   sequence:
+    - action: cover.set_cover_position
+      target:
+        entity_id: cover.master_bedroom_inner_shades
+      data:
+        position: 30
+    - delay:
+        minutes: 15
+    - action: cover.open_cover
+      target:
+        entity_id: cover.master_bedroom_inner_shades
     - action: alexa_devices.send_text_command # this continues on the end of the weather from the alexa good morning routine
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c # find the alexa device_id by creating this action in Developer Tools>Actions
@@ -77,18 +87,6 @@ scr_goodmorning:
         entity_id:
           - input_boolean.inp_bool_sleeping
           - input_boolean.inp_bool_visitor_while_sleeping_flag
-    - delay:
-        seconds: 30
-    - action: cover.set_cover_position
-      target:
-        entity_id: cover.master_bedroom_inner_shades
-      data:
-        position: 30
-    - delay:
-        minutes: 15
-    - action: cover.open_cover
-      target:
-        entity_id: cover.master_bedroom_inner_shades
 
 #
 # COVER SCRIPTS
