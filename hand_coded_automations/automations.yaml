@@ -2574,10 +2574,10 @@
       for:
         minutes: 10
     - platform: state
-      entity_id: group.whereis_kt
+      entity_id: person.karen
       to: "home"
     - platform: state
-      entity_id: group.whereis_ys
+      entity_id: person.yang
       to: "home"
   conditions:
     - condition: state # only bother if currently ON
