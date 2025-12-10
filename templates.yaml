@@ -2,27 +2,27 @@
 ###    TEMPLATES    ###
 #######################
 
-- trigger:
-    - trigger: time
-      at: "05:05:00"
-    - trigger: event
-      event_type: homeassistant_started
-  action:
-    - delay:
-        minutes: 1
-    # - action: shell_command.villages_square_events
-    #   response_variable: python_string
-  sensor:
-    - name: "now playing"
-      unique_id: now_playing     # the string length of 30 below is an arbirary number to see if populated
-      state: >-
-        {% set json_string = (python_string | replace("'", '"')) %}
-        {% set result = (json_string | from_json).stdout %}
-        {% if result | length < 30 %}
-          Spanish Springs Town Square,NA#Lake Sumter Landing,NA#Brownwood Paddock Square,NA#Sawgrass Grove,NA#
-        {% else %}
-          {{ result }}
-        {% endif %}
+# - trigger:
+#     - trigger: time
+#       at: "05:05:00"
+#     - trigger: event
+#       event_type: homeassistant_started
+#   action:
+#     - delay:
+#         minutes: 1
+#     # - action: shell_command.villages_square_events
+#     #   response_variable: python_string
+#   sensor:
+#     - name: "now playing"
+#       unique_id: now_playing     # the string length of 30 below is an arbirary number to see if populated
+#       state: >-
+#         {% set json_string = (python_string | replace("'", '"')) %}
+#         {% set result = (json_string | from_json).stdout %}
+#         {% if result | length < 30 %}
+#           Spanish Springs Town Square,NA#Lake Sumter Landing,NA#Brownwood Paddock Square,NA#Sawgrass Grove,NA#
+#         {% else %}
+#           {{ result }}
+#         {% endif %}
 
 # IRRIGATION LEAK
 #
