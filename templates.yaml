@@ -268,32 +268,32 @@
             {{( as_timestamp(hour.datetime ) | timestamp_custom('%-I%p')) | lower}},{{ hour.condition }},{{ hour.precipitation }}#
           {%- endif -%}
         {%- endfor -%}
-    - name: weather_hourly_next_4_font_mapped # used for meshtastic broadcast
-      unique_id: weather_hourly_next_4_font_mapped
-      # in below for loop, use slice [1:] to skip 1st element
-      # weather_mapping assumes corect order in CartFont.ttf used in GolfCart Computer display
-      state: >-
-        {%- set weather_mapping = {
-          'cloudy': '0',
-          'fog': '1', 
-          'hail': '2',
-          'snowy-rainy': '3',
-          'partlycloudy': '4',
-          'lightning': '5',
-          'pouring': '6',
-          'rainy': '7',
-          'snowy': '8',
-          'sunny': '9',
-          'clear-night': ':',
-          'windy': ';',
-          'exceptional': '<'
-        } -%}
-        {%- for hour in state_attr('sensor.openweathermap_forecast_hourly', 'forecast')[1:] -%}
-          {%- if( loop.index <= 4 ) -%}
-            {%- set weather_code = weather_mapping.get(hour.condition, hour.condition) -%}
-            {{( as_timestamp(hour.datetime ) | timestamp_custom('%-I%p')) | lower}},{{ weather_code }},{{hour.temperature}},{{ hour.precipitation }}#
-          {%- endif -%}
-        {%- endfor -%}
+    # - name: weather_hourly_next_4_font_mapped # used for meshtastic broadcast
+    #   unique_id: weather_hourly_next_4_font_mapped
+    #   # in below for loop, use slice [1:] to skip 1st element
+    #   # weather_mapping assumes corect order in CartFont.ttf used in GolfCart Computer display
+    #   state: >-
+    #     {%- set weather_mapping = {
+    #       'cloudy': '0',
+    #       'fog': '1', 
+    #       'hail': '2',
+    #       'snowy-rainy': '3',
+    #       'partlycloudy': '4',
+    #       'lightning': '5',
+    #       'pouring': '6',
+    #       'rainy': '7',
+    #       'snowy': '8',
+    #       'sunny': '9',
+    #       'clear-night': ':',
+    #       'windy': ';',
+    #       'exceptional': '<'
+    #     } -%}
+    #     {%- for hour in state_attr('sensor.openweathermap_forecast_hourly', 'forecast')[1:] -%}
+    #       {%- if( loop.index <= 4 ) -%}
+    #         {%- set weather_code = weather_mapping.get(hour.condition, hour.condition) -%}
+    #         {{( as_timestamp(hour.datetime ) | timestamp_custom('%-I%p')) | lower}},{{ weather_code }},{{hour.temperature}},{{ hour.precipitation }}#
+    #       {%- endif -%}
+    #     {%- endfor -%}
 
 # GET FORECASTED HI/LOW TEMPERATURES WEATHER
 - trigger:
