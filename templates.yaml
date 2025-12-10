@@ -10,8 +10,8 @@
   action:
     - delay:
         minutes: 1
-    - action: shell_command.villages_square_events
-      response_variable: python_string
+    # - action: shell_command.villages_square_events
+    #   response_variable: python_string
   sensor:
     - name: "now playing"
       unique_id: now_playing     # the string length of 30 below is an arbirary number to see if populated
