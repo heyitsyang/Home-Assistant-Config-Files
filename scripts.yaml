@@ -916,7 +916,7 @@ scr_say_phrase:
     - action: sonos.snapshot
       data:
         entity_id:
-          - all
+          - media_player.greatroom_speakers
         with_group: true
     - choose:
         - conditions: # high priority - ignores announce & sleeping conditions & boost volume
@@ -1012,7 +1012,7 @@ scr_say_phrase:
     - action: sonos.restore # premature restore will cut off speech before it has started or during play
       data:
         entity_id:
-          - all
+          - media_player.greatroom_speakers
         with_group: true
 
 #
