@@ -46,23 +46,17 @@ scr_goodmorning:
   mode: single
   max_exceeded: silent
   sequence:
-    - action: cover.set_cover_position
+    - action: input_boolean.turn_on
       target:
-        entity_id: cover.master_bedroom_inner_shades
-      data:
-        position: 30
-    - delay:
-        minutes: 15
-    - action: cover.open_cover
+        entity_id: input_boolean.semaphore_good_morning_was_used
+    - action: input_boolean.turn_off
       target:
-        entity_id: cover.master_bedroom_inner_shades
+        entity_id:
+          - input_boolean.inp_bool_sleeping
     - action: alexa_devices.send_text_command # this continues on the end of the weather from the alexa good morning routine
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c # find the alexa device_id by creating this action in Developer Tools>Actions
         text_command: when will it rain today # by using UI mode, select the alexa device, then switch to editor to see id
-    - action: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.semaphore_good_morning_was_used
     - if:
         - condition: state
           entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
@@ -80,13 +74,22 @@ scr_goodmorning:
             message: >
               While you asleep, there was a visitor at the front door.
               You might want to check for packages.
-        - delay:
-            seconds: 3 # delay to reduce noise cometition from shades
+    - delay:
+        seconds: 3 # delay to reduce noise competition from shades
+    - action: cover.set_cover_position
+      target:
+        entity_id: cover.master_bedroom_inner_shades
+      data:
+        position: 30
     - action: input_boolean.turn_off
       target:
         entity_id:
-          - input_boolean.inp_bool_sleeping
           - input_boolean.inp_bool_visitor_while_sleeping_flag
+    - delay:
+        minutes: 15
+    - action: cover.open_cover
+      target:
+        entity_id: cover.master_bedroom_inner_shades
 
 #
 # COVER SCRIPTS
