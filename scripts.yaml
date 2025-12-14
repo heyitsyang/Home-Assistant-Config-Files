@@ -990,7 +990,8 @@ scr_say_phrase:
                     entity_id:
                       - media_player.greatroom_speakers
                       - media_player.garage_speakers
-                    media_content_id: media-source://tts/tts.piper?message="{{ message | regex_replace('.$', '') }}"
+                    # remove trailing punctuation to prevent "cough" sound (piper bug)
+                    media_content_id: media-source://tts/tts.piper?message="{{ message | regex_replace(find='[[:punct:]]+$', replace='') }}"
                     media_content_type: music
           default:
             - action: media_player.play_media
