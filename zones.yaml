@@ -252,6 +252,12 @@
   longitude: -81.968650
   radius: 100 # meters
   icon: mdi:blank
+  
+- name: Olympia RRC
+  latitude: 28.763438
+  longitude: -81.982517
+  radius: 90 # unverified
+  icon: mdi:blank
 
 #
 # VILLAGES REC CENTERS (VRC)
@@ -444,6 +450,36 @@
   longitude: -82.02577
   radius: 96 # meters
   icon: mdi:blank
+  
+- name: Franklin VRC
+  latitude: 28.768958
+  longitude: -81.946123
+  radius: 90 # unverified
+  icon: mdi:blank
+
+- name: Homestead VRC
+  latitude: 28.78284730758595
+  longitude: -81.95430532451718
+  radius: 90 # unverified
+  icon: mdi:blank
+
+- name: Lake Okahumpka VRC
+  latitude: 28.824668
+  longitude: -82.016039
+  radius: 90 # unverified
+  icon: mdi:blank
+
+- name: Saluki VRC
+  latitude: 28.750286
+  longitude: -81.990781
+  radius: 90 # unverified
+  icon: mdi:blank
+
+- name: St. Tropez VRC
+  latitude: 28.783555
+  longitude: -81.986164
+  radius: 90 # unverified
+  icon: mdi:blank
 
 # to be added when more info avaialble:
 # Clarendon VRC
@@ -455,10 +491,460 @@
 # Note: Regional Rec CEnters (RRC) and Villages Rec Centers (VRC)
 # do not go in this section
 #
+- name: Alden Bungalows NRC
+  latitude: 28.847796
+  longitude: -82.026377
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Amelia NRC
+  latitude: 28.885469
+  longitude: -81.960843
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Antrim Dells NRC
+  latitude: 28.841663
+  longitude: -82.014792
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Ashland NRC
+  latitude: 28.914976
+  longitude: -82.007255
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Belvedere NRC
+  latitude: 28.921108
+  longitude: -82.022858
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Blue Heron NRC
+  latitude: 28.794482
+  longitude: -82.027804
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Bonita NRC
+  latitude: 28.874543
+  longitude: -81.976175
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Bonnybrook NRC
+  latitude: 28.954183707463457
+  longitude: -81.9412588893394
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Bradford NRC
+  latitude: 28.803304
+  longitude: -81.978531
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Buttonwood NRC
+  latitude: 28.884269
+  longitude: -82.011814
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Calumet Grove NRC
+  latitude: 28.973924
+  longitude: -82.021416
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Caroline NRC
+  latitude: 28.902435
+  longitude: -81.959937
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Cason Hammock NRC
+  latitude: 28.789123
+  longitude: -81.973254
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Cattail NRC
+  latitude: 28.806241
+  longitude: -82.024379
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Charlotte NRC
+  latitude: 28.854093
+  longitude: -81.968204
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Chitty Chatty NRC
+  latitude: 28.813774
+  longitude: -81.975413
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Citrus Grove NRC
+  latitude: 28.783401
+  longitude: -81.960903
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Clarendon NRC
+  latitude: 28.833769567390302
+  longitude: -82.02512835127084
+  radius: 30 # unverified
+  icon: mdi:blank
+  
 - name: Collier NRC
   latitude: 28.85197
   longitude: -82.01149
   radius: 26 # meters
+  icon: mdi:blank
+
+- name: Cordoba NRC
+  latitude: 28.944754728150617
+  longitude: -81.96327444675721
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Creekside Landing NRC
+  latitude: 28.907385
+  longitude: -81.980445
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Dabney NRC
+  latitude: 28.753264
+  longitude: -81.917530
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: DeLuna NRC
+  latitude: 28.827917
+  longitude: -82.038381
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Dudley NRC
+  latitude: 28.789938
+  longitude: -82.016166
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Dunedin NRC
+  latitude: 28.846377
+  longitude: -81.980220
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Duval NRC
+  latitude: 28.871639
+  longitude: -81.984171
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Edenfield NRC
+  latitude: 28.770834
+  longitude: -81.994064
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Fernandina NRC
+  latitude: 28.858041
+  longitude: -81.976466
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Gilchrist NRC
+  latitude: 28.857081
+  longitude: -81.989361
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Haciendas of Mission Hills NRC
+  latitude: 28.918280
+  longitude: -81.964588
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hadley NRC
+  latitude: 28.875288
+  longitude: -81.962575
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hawkins NRC
+  latitude: 28.792761
+  longitude: -81.982317
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hemingway NRC
+  latitude: 28.869775
+  longitude: -81.973349
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hillsborough NRC
+  latitude: 28.847704
+  longitude: -81.998034
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hilltop NRC
+  latitude: 28.954183707463457
+  longitude: -81.9412588893394
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Hummingbird NRC
+  latitude: 28.791953
+  longitude: -82.051590
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: LaBelle NRC
+  latitude: 28.846406
+  longitude: -81.962124
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Lake Deaton NRC
+  latitude: 28.954183707463457
+  longitude: -81.9412588893394
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Lake Miona Shores NRC
+  latitude: 28.907430
+  longitude: -82.008855
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Lake Shore Cottages NRC
+  latitude: 28.909808
+  longitude: -81.971436
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Largo NRC
+  latitude: 28.885217
+  longitude: -81.973940
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Liberty Park NRC
+  latitude: 28.884532
+  longitude: -81.986153
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Lynnhaven NRC
+  latitude: 28.913583360037574
+  longitude: -82.01706559682367
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Mallory Square NRC
+  latitude: 28.893864
+  longitude: -81.961041
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Moultrie Creek NRC
+  latitude: 28.744344
+  longitude: -82.000105
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Oak Hollow NRC
+  latitude: 28.770834
+  longitude: -81.994064
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Osceola Hills NRC
+  latitude: 28.831962
+  longitude: -81.966319
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Pennecamp NRC
+  latitude: 28.888556
+  longitude: -82.003742
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Phillips NRC
+  latitude: 28.978495
+  longitude: -82.002300
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Pine Hills NRC
+  latitude: 28.850284
+  longitude: -81.949657
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Pine Ridge NRC
+  latitude: 28.85686224626833
+  longitude: -81.94277373926298
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Pinellas NRC
+  latitude: 28.861698
+  longitude: -82.005285
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Poinciana NRC
+  latitude: 28.887084
+  longitude: -81.993973
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Richmond NRC
+  latitude: 28.832552
+  longitude: -82.029093
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Rio Grande NRC
+  latitude: 28.929112
+  longitude: -81.950516
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Sabal Chase NRC
+  latitude: 28.890087060837875
+  longitude: -81.97384570598129
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Sanibel NRC
+  latitude: 28.859743299204233
+  longitude: -81.96791370283516
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Shady Brook NRC
+  latitude: 28.749473
+  longitude: -81.988337
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Soulliere NRC
+  latitude: 28.979065
+  longitude: -82.030097
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Spanish Moss NRC
+  latitude: 28.798804
+  longitude: -82.037072
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Springdale NRC
+  latitude: 28.966418
+  longitude: -82.000406
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: St. Catherine NRC
+  latitude: 28.793125
+  longitude: -81.965755
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: St. Charles NRC
+  latitude: 28.881768
+  longitude: -81.996096
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: St. James NRC
+  latitude: 28.874015
+  longitude: -82.006375
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: St. Johns NRC
+  latitude: 28.801642
+  longitude: -81.991635
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Sugar Cane NRC
+  latitude: 28.790775
+  longitude: -82.020410
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Summerhill NRC
+  latitude: 28.935213
+  longitude: -82.012637
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Sunset Pointe NRC
+  latitude: 28.894031
+  longitude: -81.991240
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Swallowtail NRC
+  latitude: 28.788570
+  longitude: -81.991674
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Tall Trees NRC
+  latitude: 28.921502
+  longitude: -82.004938
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Tamarind Grove NRC
+  latitude: 28.873129
+  longitude: -82.013060
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Virginia Trace NRC
+  latitude: 28.901341
+  longitude: -81.972581
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Waters Edge NRC
+  latitude: 28.756366
+  longitude: -81.982406
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Well Point NRC
+  latitude: 28.781077
+  longitude: -81.994222
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Willow Tree NRC
+  latitude: 28.795119
+  longitude: -82.008616
+  radius: 30 # unverified
+  icon: mdi:blank
+
+- name: Winifred NRC
+  latitude: 28.918215
+  longitude: -81.998651
+  radius: 30 # unverified
   icon: mdi:blank
 
 #
