@@ -66,10 +66,10 @@
   radius: 145 # meters
   icon: mdi:church
 
-- name: Church@Springs - Lady Lake
-  latitude: 28.939792
-  longitude: -81.927593
-  radius: 61 # meters
+- name: Church@Springs - Middleton
+  latitude: 28.73909375384542
+  longitude: -82.00351799396454
+  radius: 120 # meters
   icon: mdi:church
 
 - name: First Baptist - Village Park
