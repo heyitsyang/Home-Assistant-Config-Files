@@ -1506,14 +1506,14 @@
         {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
             | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
-    - action: script.scr_say_phrase
-      data:
-        message: "The large garage door has opened"
+    - action: script.scr_front_door_lights_on
     - action: timer.start
       target:
         entity_id: timer.timer_lg_garage_door
-    - action: script.scr_front_door_lights_on
     - action: script.scr_check_if_suspicious
+    - action: script.scr_say_phrase
+      data:
+        message: "The large garage door has opened"
 
 - id: aut_small_garage_door_opening
   alias: "aut small garage door opening"
@@ -1528,14 +1528,14 @@
         {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
             | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
-    - action: script.scr_say_phrase
-      data:
-        message: "The small garage door has opened"
+    - action: script.scr_front_door_lights_on
     - action: timer.start
       target:
         entity_id: timer.timer_sm_garage_door
-    - action: script.scr_front_door_lights_on
     - action: script.scr_check_if_suspicious
+    - action: script.scr_say_phrase
+      data:
+        message: "The small garage door has opened"
 
 - id: aut_large_garage_door_closed
   alias: "aut large garage door closed"
