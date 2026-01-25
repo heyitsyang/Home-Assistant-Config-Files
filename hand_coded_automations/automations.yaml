@@ -438,8 +438,8 @@
     - action: script.scr_say_phrase # time announcement
       data:
         message: >-
-          'The time is {{ now().time().strftime("%-I:%M")  | replace(":00", " o'clock") 
-          | regex_replace(":0(\\d)", " oh \\1") }}'
+          "The time is {{ now().time().strftime('%-I:%M')  | replace(':00', ' o clock') 
+          | regex_replace(':0(\\d)', ' oh \\1') }}"
 
 - id: aut_daily_reboot_wx_observerip
   alias: "aut daily reboot wx observerip"
