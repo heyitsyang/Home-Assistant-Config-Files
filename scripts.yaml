@@ -72,7 +72,7 @@ scr_goodmorning:
         - action: notify.alexa_yellow_ring
           data:
             message: >
-              While you asleep, there was a visitor at the front door.
+              While you were asleep, there was a visitor at the front door.
               You might want to check for packages.
     - delay:
         seconds: 3 # delay to reduce noise competition from shades
@@ -856,7 +856,7 @@ scr_frontporch_activity:
             entity_id: input_boolean.inp_bool_visitor_while_out_flag
         - action: notify.alexa_yellow_ring
           data:
-            message: "While you out, there was a visitor at the front door"
+            message: "While you were out, there was a visitor at the front door"
         - action: notify.mobile_app_yskt_cell
           data:
             title: Front door activity
