@@ -1030,7 +1030,7 @@ scr_manual_say_time:
     - action: script.scr_say_phrase
       data:
         message: >-
-          "The time is {{ now().time().strftime('%-I:%M')  | replace(':00', ' o clock') 
+          "The time is {{ now().time().strftime('%-I:%M')  | replace(':00', " o'clock") 
           | regex_replace(':0(\\d)', ' oh \\1') }}"
 
 # # VACUUM COMMANDS
