@@ -10,13 +10,15 @@
 ##                                             ##
 #################################################
 
-host: a0d7b954-influxdb
-port: 8086
-database: homeassistant
-username: !secret influxdb_user
-password: !secret influxdb_pwd
-max_retries: 5
-default_measurement: state
+# This section now in UI
+#
+# host: a0d7b954-influxdb
+# port: 8086
+# database: homeassistant
+# username: !secret influxdb_user
+# password: !secret influxdb_pwd
+# max_retries: 5
+# default_measurement: state
 
 #
 # INCLUDES & EXCLUDES
