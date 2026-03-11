@@ -331,3 +331,5 @@ sensor.hamstation_energy_reactivepower:
   device_class: reactive_power
 sensor.hamstation_energy_apparentpower:
   device_class: apparent_power
+device_tracker.meshtastic_ys0_400605850_node_position:
+  entity_picture: /local/images/golf-cart.jpg
