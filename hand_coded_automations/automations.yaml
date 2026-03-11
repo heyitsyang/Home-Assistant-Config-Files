@@ -202,7 +202,7 @@
 #
 # Note spleeping hours and announcement hours are not the same
 #
-- id: aut_assume_awake # sleeping also set by sensors - see aut_sleeping_mode_off
+- id: aut_assume_awake # awake also set by scr_goodmorning
   alias: "aut assume awake"
   initial_state: true
   trigger: # in timestamp_custom() below, the local time flag is set to false since
