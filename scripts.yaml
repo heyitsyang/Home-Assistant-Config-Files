@@ -54,6 +54,7 @@ scr_goodmorning:
         entity_id:
           - input_boolean.inp_bool_sleeping
     - action: alexa_devices.send_text_command # this continues on the end of the weather from the alexa good morning routine
+      continue_on_error: true
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c # find the alexa device_id by creating this action in Developer Tools>Actions
         text_command: when will it rain today # by using UI mode, select the alexa device, then switch to editor to see id
@@ -63,6 +64,7 @@ scr_goodmorning:
           state: "on"
       then:
         - action: notify.send_message
+          continue_on_error: true
           data:
             message: >
               While you were asleep, there was a visitor at the front door.  
@@ -70,6 +72,7 @@ scr_goodmorning:
           target:
             entity_id: notify.echo_masterbdrm_speak
         - action: notify.alexa_yellow_ring
+          continue_on_error: true
           data:
             message: >
               While you were asleep, there was a visitor at the front door.
