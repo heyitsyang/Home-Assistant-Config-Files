@@ -457,16 +457,16 @@ scr_check_sunrm_windows:
     - condition: or
       conditions:
         - condition: state
-          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_1_open
           state: "on"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_2_open
           state: "on"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_3_open
           state: "on"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_4_open
           state: "on"
         - condition: state
           entity_id: binary_sensor.sun_room_window_5_window_door_is_open
@@ -492,16 +492,16 @@ scr_close_sunrm_shades:
           entity_id: input_boolean.inp_bool_inhibit_shades
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_1_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_2_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_3_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_4_open
           state: "off"
         - condition: state
           entity_id: binary_sensor.sun_room_window_5_window_door_is_open
@@ -540,16 +540,16 @@ scr_partial_close_sunrm_shades:
           entity_id: input_boolean.inp_bool_inhibit_shades
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_1_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_1_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_2_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_2_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_3_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_3_open
           state: "off"
         - condition: state
-          entity_id: binary_sensor.sun_room_window_4_window_door_is_open
+          entity_id: binary_sensor.sun_room_window_4_open
           state: "off"
         - condition: state
           entity_id: binary_sensor.sun_room_window_5_window_door_is_open
