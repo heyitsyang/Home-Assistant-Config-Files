@@ -17,8 +17,8 @@
 # database: homeassistant
 # username: !secret influxdb_user
 # password: !secret influxdb_pwd
-# max_retries: 5
-# default_measurement: state
+max_retries: 5
+default_measurement: state
 
 #
 # INCLUDES & EXCLUDES
