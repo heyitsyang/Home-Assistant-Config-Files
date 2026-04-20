@@ -18,10 +18,10 @@ sensor:
     unit_of_measurement: "%"
     qos: 0
 
-  - unique_id: drybox_report_timestamp
-    name: "Drybox Last Report Time"
-    state_topic: "drybox/time_stamp"
-    qos: 0
+  # - unique_id: drybox_report_timestamp
+  #   name: "Drybox Last Report Time"
+  #   state_topic: "drybox/time_stamp"
+  #   qos: 0
 
   - unique_id: drybox_relative_humidity
     name: "Drybox Relative Humidity"
