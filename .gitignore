@@ -12,6 +12,7 @@
 .git
 .storage
 .cloud
+.cache
 custom_components
 tts
 www
