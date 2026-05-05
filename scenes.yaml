@@ -187,7 +187,7 @@
 - id: "1658840138818"
   name: Kitchen Mood Spots 50% Warm White
   entities:
-    light.kitchen_leds_upper_master:
+    light.kitchen_leds_upper:
       supported_color_modes:
         - brightness
       icon: mdi:led-strip-variant
@@ -1880,7 +1880,7 @@
 - id: "1658840532694"
   name: Kitchen Mood Trash Night
   entities:
-    light.kitchen_leds_upper_master:
+    light.kitchen_leds_upper:
       supported_color_modes:
         - brightness
       icon: mdi:led-strip-variant
@@ -3573,7 +3573,7 @@
 - id: "1658840593905"
   name: Kitchen Mood Spots 20% Warm White
   entities:
-    light.kitchen_leds_upper_master:
+    light.kitchen_leds_upper:
       supported_color_modes:
         - brightness
       icon: mdi:led-strip-variant
@@ -5266,7 +5266,7 @@
 - id: "1658840677125"
   name: Kitchen Mood  All Seg 100% Bright White
   entities:
-    light.kitchen_leds_upper_master:
+    light.kitchen_leds_upper:
       supported_color_modes:
         - brightness
       color_mode: brightness

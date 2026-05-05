@@ -742,9 +742,6 @@ scr_turn_on_kitchen_leds_upper:
         - action: light.turn_on
           target:
             entity_id: light.kitchen_leds_upper
-        - action: light.turn_on
-          target:
-            entity_id: light.kitchen_leds_upper_master
         - action: select.select_option
           target:
             entity_id: select.kitchen_leds_upper_preset
@@ -753,7 +750,7 @@ scr_turn_on_kitchen_leds_upper:
       else:
         - action: light.turn_on
           target:
-            entity_id: light.kitchen_leds_upper_master
+            entity_id: light.kitchen_leds_upper
         - action: script.scr_reset_mood_lights_to_default
 
 scr_reset_mood_lights_to_default:
@@ -790,9 +787,6 @@ scr_pathway_motion_lighting_on:
     - condition: state
       entity_id: binary_sensor.lum_mood_lights_f_solar_trig
       state: "on"
-    - action: light.turn_on
-      target:
-        entity_id: light.kitchen_leds_upper_master
     - action: light.turn_on
       target:
         entity_id: light.kitchen_leds_upper
