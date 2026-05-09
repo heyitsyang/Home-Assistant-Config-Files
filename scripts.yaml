@@ -762,7 +762,7 @@ scr_reset_mood_lights_to_default:
       target:
         entity_id: select.kitchen_leds_upper_preset
       data:
-        option: "Spots Warm Wht 50%"
+        option: "50% Spots Warm Wht"
 
 #
 # MOTION LIGHTING - if luminosity is low and motion is detected
@@ -800,7 +800,7 @@ scr_pathway_motion_lighting_on:
       target:
         entity_id: select.kitchen_leds_upper_preset
       data:
-        option: "Spots Warm Wht 20%"
+        option: "20% Spots Warm Wht"
     - action: homeassistant.turn_on
       target:
         entity_id: group.pathway_lights

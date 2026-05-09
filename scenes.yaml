@@ -1874,7 +1874,7 @@
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
-      state: Spots Warm Wht 50%
+      state: 50% Spots Warm Wht
   icon: mdi:led-strip-variant
   metadata: {}
 - id: "1658840532694"
@@ -5260,7 +5260,7 @@
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
-      state: Spots Warm Wht 20%
+      state: 20% Spots Warm Wht
   icon: mdi:led-strip-variant
   metadata: {}
 - id: "1658840677125"
@@ -6953,7 +6953,7 @@
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
-      state: All Seg Bright Wht 100%
+      state: 100% All Seg Bright Wht
   icon: mdi:led-strip-variant
 - id: "1659055074226"
   name: Living Room 100%

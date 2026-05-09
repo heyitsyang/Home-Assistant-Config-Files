@@ -2709,7 +2709,7 @@
       target:
         entity_id: select.kitchen_leds_upper_preset
       data:
-        option: "All Seg Bright Wht 100%"
+        option: "100% All Seg Bright Wht"
 
 # return kitchen mood lights to "normal" if rest are off - based on luminosity
 - id: aut_kitchen_mood_normal
