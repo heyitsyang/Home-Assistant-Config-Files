@@ -1866,11 +1866,11 @@
       state: "on"
     select.kitchen_leds_upper_preset:
       options:
-        - All Seg Bright Wht 100%
-        - Spots Bright Wht 50%
-        - Spots Warm Wht 100%
-        - Spots Warm Wht 20%
-        - Spots Warm Wht 50%
+        - 20% Spots Warm Wht
+        - 50% Spots Bright Wht
+        - 50% Spots Warm Wht
+        - 100% All Seg Bright Wht
+        - 100% Spots Warm Wht
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
@@ -3559,11 +3559,11 @@
       state: "on"
     select.kitchen_leds_upper_preset:
       options:
-        - All Seg Bright Wht 100%
-        - Spots Bright Wht 50%
-        - Spots Warm Wht 100%
-        - Spots Warm Wht 20%
-        - Spots Warm Wht 50%
+        - 20% Spots Warm Wht
+        - 50% Spots Bright Wht
+        - 50% Spots Warm Wht
+        - 100% All Seg Bright Wht
+        - 100% Spots Warm Wht
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
@@ -5252,11 +5252,11 @@
       state: "on"
     select.kitchen_leds_upper_preset:
       options:
-        - All Seg Bright Wht 100%
-        - Spots Bright Wht 50%
-        - Spots Warm Wht 100%
-        - Spots Warm Wht 20%
-        - Spots Warm Wht 50%
+        - 20% Spots Warm Wht
+        - 50% Spots Bright Wht
+        - 50% Spots Warm Wht
+        - 100% All Seg Bright Wht
+        - 100% Spots Warm Wht
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
@@ -6945,11 +6945,11 @@
       state: "on"
     select.kitchen_leds_upper_preset:
       options:
-        - All Seg Bright Wht 100%
-        - Spots Bright Wht 50%
-        - Spots Warm Wht 100%
-        - Spots Warm Wht 20%
-        - Spots Warm Wht 50%
+        - 20% Spots Warm Wht
+        - 50% Spots Bright Wht
+        - 50% Spots Warm Wht
+        - 100% All Seg Bright Wht
+        - 100% Spots Warm Wht
         - Trash Night
       icon: mdi:playlist-play
       friendly_name: kitchen-leds-upper Preset
