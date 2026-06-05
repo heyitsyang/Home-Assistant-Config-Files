@@ -330,7 +330,7 @@ scr_arrival_announcement:
         task_name: "welcome home message"
         entity_id: ai_task.google_ai_task
         instructions: >-
-          In no more than two short sentences, welcome a person back home in a warm way with you being a singular entity. 
+          In no more than two very short sentences, welcome a person back home in a warmly with you being a singular entity. 
           Use "I" instead of "we".  Do not use special characters.
       response_variable: ai_welcome_text
     - action: script.scr_say_phrase
