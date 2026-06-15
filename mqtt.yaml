@@ -49,9 +49,26 @@ sensor:
     state_topic: "irrig_leak/idle/time_stamp"
     qos: 0
 
+  - unique_id: irrig_wifi_ssid
+    name: "Irrig WiFi SSID"
+    state_topic: "irrig_leak/wifi_ssid"
+    qos: 0
+
   - unique_id: irrig_wifi_dbm
     name: "Irrig WiFi Signal Strength"
     state_topic: "irrig_leak/wifi_dbm"
+    unit_of_measurement: "dBm"
+    qos: 0
+
+  - unique_id: irrig_wifi_primary_dbm
+    name: "Irrig WiFi Primary SSID RSSI"
+    state_topic: "irrig_leak/wifi_primary_dbm"
+    unit_of_measurement: "dBm"
+    qos: 0
+
+  - unique_id: irrig_wifi_primary_dbm
+    name: "Irrig WiFi Secondary SSID RSSI"
+    state_topic: "irrig_leak/wifi_secondary_dbm"
     unit_of_measurement: "dBm"
     qos: 0
 
