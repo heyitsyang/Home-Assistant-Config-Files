@@ -44,20 +44,6 @@ sensor:
     qos: 0
 
   # irrigation leak sensors
-  - unique_id: irrig_battery_voltage
-    name: "Irrig Battery Voltage"
-    device_class: voltage
-    state_topic: "irrig_leak/battery_volts"
-    unit_of_measurement: "V"
-    qos: 0
-
-  - unique_id: irrig_battery_percent
-    name: "Irrig Battery Percent"
-    device_class: battery
-    state_topic: "irrig_leak/battery_percent"
-    unit_of_measurement: "%"
-    qos: 0
-
   - unique_id: irrig_last_idle_heartbeat
     name: "Irrig Last Idle Heartbeat"
     state_topic: "irrig_leak/idle/time_stamp"
