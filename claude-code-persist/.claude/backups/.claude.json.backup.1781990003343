@@ -1,0 +1,59 @@
+{
+  "firstStartTime": "2026-06-20T20:45:48.490Z",
+  "machineID": "4567db554339906507f2f7f1993a4f34f30bdc72ce59603983f0544f0cd0a3fa",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "seenNotifications": {},
+  "migrationVersion": 13,
+  "userID": "8bb97ace85624cd365e12909d61c5003f142341b8bb95c2fde12a47697a3adea",
+  "projects": {
+    "/config": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": false,
+      "projectOnboardingSeenCount": 0,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false,
+      "hasUnseenTeamArtifacts": false
+    }
+  },
+  "changelogLastFetched": 1781989309170,
+  "oauthAccount": {
+    "accountUuid": "210e1ded-34a1-4b18-b9a4-ac72e28e467c",
+    "emailAddress": "yang@shen.us",
+    "organizationUuid": "8535973f-1268-4b93-8e36-243e91fbee77",
+    "hasExtraUsageEnabled": false,
+    "billingType": "stripe_subscription",
+    "accountCreatedAt": "2025-09-07T18:46:52.549256Z",
+    "subscriptionCreatedAt": "2025-09-15T15:26:13.958228Z",
+    "ccOnboardingFlags": {},
+    "claudeCodeTrialEndsAt": null,
+    "claudeCodeTrialDurationDays": null,
+    "seatTier": null,
+    "displayName": "Yang",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "yang@shen.us's Organization",
+    "organizationType": "claude_pro",
+    "organizationRateLimitTier": "default_claude_ai",
+    "userRateLimitTier": null
+  },
+  "claudeCodeFirstTokenDate": "2026-02-27T13:51:26.321794Z",
+  "clientDataCache": null,
+  "additionalModelOptionsCache": [
+    {
+      "value": "claude-fable-5[1m]",
+      "label": "Fable (disabled)",
+      "description": "Claude Fable 5 is currently unavailable. Learn more: https://www.anthropic.com/news/fable-mythos-access",
+      "disabled": true
+    }
+  ],
+  "additionalModelCostsCache": {},
+  "autoCompactWindowsCache": null,
+  "shiftEnterKeyBindingInstalled": true,
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "2.1.185"
+}
