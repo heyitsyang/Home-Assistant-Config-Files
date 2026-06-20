@@ -70,12 +70,6 @@ smart_home:
     exclude_entities:
       - light.kitchen_leds_upper # using ..._master instead
       - light.office_cabinet_leds # using ..._master instead
-      - light.office_fan
-      - light.guest_room_fan
-      - light.master_bedroom_fan
-      - light.living_room_fan
-      - light.sun_room_fan_1
-      - light.sun_room_fan_2
       - switch.front_door_lights # mapped to lights.xxx
       - switch.back_door_lights # mapped to lights.xxx
       - switch.entryway_lights # mapped to lights.xxx
