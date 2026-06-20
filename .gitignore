@@ -21,6 +21,7 @@ image
 NOTES
 zigbee2mqtt
 ccab4aaf_frigate
+claude-code-persist
 
 # Ignore files
 watchman_report.txt
@@ -45,6 +46,7 @@ google_calendars.yaml
 *.log
 *.log.*
 *.db
+claude-code-persist/.claude/.credentials.json
 
 
 blueprints/automation/homeassistant/motion_light.yaml
