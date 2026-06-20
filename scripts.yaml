@@ -526,7 +526,7 @@ scr_partial_close_masterbdrm_outer_shades:
 scr_partially_close_masterbdrm_outer_shades:
   mode: single
   sequence:
-    - action: script.scr_partial_close_master_bedroom_outer_shades
+    - action: script.scr_partial_close_masterbdrm_outer_shades
       data:
         position: "30" # drop shades to X% open
 #
