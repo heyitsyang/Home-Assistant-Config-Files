@@ -162,15 +162,15 @@ script:
                 json::parse_json(body, [](JsonObject root) -> bool {
                   auto owm_cond = [](int wid, bool day) -> std::string {
                     if (wid == 800) return day ? "sunny" : "clear-night";
-                    if (wid <= 802) return "partlycloudy";
-                    if (wid <= 804) return "cloudy";
-                    if (wid < 300) return "lightning";
-                    if (wid < 400) return "rainy";
-                    if (wid < 502) return "rainy";
-                    if (wid < 505) return "pouring";
-                    if (wid < 600) return "rainy";
-                    if (wid < 700) return "snowy";
-                    if (wid < 800) return "fog";
+                    if (wid >= 801 && wid <= 802) return "partlycloudy";
+                    if (wid >= 803) return "cloudy";
+                    if (wid >= 700) return "fog";
+                    if (wid >= 600) return "snowy";
+                    if (wid >= 505) return "rainy";
+                    if (wid >= 502) return "pouring";
+                    if (wid >= 500) return "rainy";
+                    if (wid >= 300) return "rainy";
+                    if (wid >= 200) return "lightning";
                     return "cloudy";
                   };
                   std::string forecast = "";
@@ -286,10 +286,10 @@ display:                    # note display update settings only applies in deep_
             {"windy-variant", "\U000F059E"},
           };
         it.printf(5, 3, id(large_glyph), TextAlign::TOP_LEFT, weather_icon_map[id(weather_state).state.c_str()].c_str());
-        if (id(weather_hourly_next_8).has_state()) {
+        if (!id(wx_hourly).empty()) {
           char *token, *next8;
           int count = 1, glyph_x = 0, hour_x = 4, precip_x = 8;
-          next8 = strdup(id(weather_hourly_next_8).state.c_str());
+          next8 = strdup(id(wx_hourly).c_str());
           token = strtok (next8,",#");
           ESP_LOGI("main","pre while glyph_x = %d",glyph_x);
           while (token != NULL)
@@ -316,8 +316,6 @@ display:                    # note display update settings only applies in deep_
         }
 
       }
-
-      // ESP_LOGI("main", id(weather_hourly_next_8).state.c_str());
 
       // Print outside temperature (from homeassistant sensor)
       if (id(outside_temperature).has_state()) {
