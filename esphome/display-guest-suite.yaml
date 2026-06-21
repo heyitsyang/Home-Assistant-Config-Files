@@ -16,6 +16,7 @@ esphome:
             wifi.connected
           timeout: 20s                   # add time if wifi needs it
       - component.update: homeassistant_time
+      - script.execute: fetch_weather    # async: runs during the HA-sensor-push delay below
       - delay: 20s                       # allow time to execute
       - wait_until:
           condition:
@@ -49,6 +50,17 @@ wifi:
   domain: ".shencentral.net"
   reboot_timeout: 180s
   fast_connect: on
+
+http_request:
+  useragent: esphome/display-guest-suite
+  verify_ssl: false
+  timeout: 10s
+
+globals:
+  - id: wx_hourly
+    type: std::string
+    restore_value: false
+    initial_value: '""'
 
 spi:
   clk_pin: 18
@@ -134,10 +146,57 @@ text_sensor:
     entity_id: sensor.openweathermap_condition
     internal: true
 
-  - platform: homeassistant
-    id: weather_hourly_next_8
-    entity_id: sensor.weather_hourly_next_8
-    internal: true
+
+script:
+  - id: fetch_weather
+    then:
+      - http_request.get:
+          url: !secret owm_hourly_url
+          capture_response: true
+          on_response:
+            - lambda: |-
+                if (response->status_code != 200) {
+                  ESP_LOGW("wx", "OWM HTTP error: %d", response->status_code);
+                  return;
+                }
+                json::parse_json(body, [](JsonObject root) -> bool {
+                  auto owm_cond = [](int wid, bool day) -> std::string {
+                    if (wid == 800) return day ? "sunny" : "clear-night";
+                    if (wid <= 802) return "partlycloudy";
+                    if (wid <= 804) return "cloudy";
+                    if (wid < 300) return "lightning";
+                    if (wid < 400) return "rainy";
+                    if (wid < 502) return "rainy";
+                    if (wid < 505) return "pouring";
+                    if (wid < 600) return "rainy";
+                    if (wid < 700) return "snowy";
+                    if (wid < 800) return "fog";
+                    return "cloudy";
+                  };
+                  std::string forecast = "";
+                  JsonArray data = root["data"].as<JsonArray>();
+                  int limit = std::min((int)data.size(), 9);
+                  for (int i = 1; i < limit; i++) {
+                    JsonObject h = data[i];
+                    time_t ts = h["dt"].as<long>();
+                    struct tm tm_info;
+                    localtime_r(&ts, &tm_info);
+                    int hr = tm_info.tm_hour;
+                    bool am = hr < 12;
+                    if (hr == 0) hr = 12; else if (hr > 12) hr -= 12;
+                    int wid = h["weather"][0]["id"].as<int>();
+                    const char* icon = h["weather"][0]["icon"] | "01d";
+                    bool day = icon[strlen(icon) - 1] == 'd';
+                    float precip = h["rain"]["1h"].as<float>() + h["snow"]["1h"].as<float>();
+                    char entry[64];
+                    snprintf(entry, sizeof(entry), "%d%s,%s,%.1f#",
+                             hr, am ? "am" : "pm", owm_cond(wid, day).c_str(), precip);
+                    forecast += entry;
+                  }
+                  id(wx_hourly) = forecast;
+                  ESP_LOGI("wx", "Hourly: %s", id(wx_hourly).c_str());
+                  return true;
+                });
 
 font:
   - file: 'fonts/comic.ttf'
