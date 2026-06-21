@@ -18,6 +18,8 @@ esphome:
       - component.update: homeassistant_time
       - script.execute: fetch_weather    # async: runs during the HA-sensor-push delay below
       - delay: 20s                       # allow time to execute
+      - lambda: |-
+          ESP_LOGI("wx", "Boot-check: wx_hourly len=%d", (int)id(wx_hourly).size());
       - wait_until:
           condition:
             time.has_time
@@ -156,12 +158,14 @@ script:
           capture_response: true
           on_response:
             - lambda: |-
-                ESP_LOGI("wx", "HTTP %d body=%d bytes", response->status_code, (int)body.size());
+                ESP_LOGI("wx", "HTTP %d body=%d heap=%u", response->status_code, (int)body.size(), esp_get_free_heap_size());
                 if (response->status_code != 200) {
                   ESP_LOGW("wx", "OWM HTTP error: %d - body: %.200s", response->status_code, body.c_str());
                   return;
                 }
-                json::parse_json(body, [](JsonObject root) -> bool {
+                if (body.empty()) { ESP_LOGW("wx", "body empty"); return; }
+                ESP_LOGI("wx", "Body[0:120]: %.120s", body.c_str());
+                bool json_ok = json::parse_json(body, [](JsonObject root) -> bool {
                   auto owm_cond = [](int wid, bool day) -> std::string {
                     if (wid == 800) return day ? "sunny" : "clear-night";
                     if (wid >= 801 && wid <= 802) return "partlycloudy";
@@ -199,6 +203,7 @@ script:
                   ESP_LOGI("wx", "Hourly: %s", id(wx_hourly).c_str());
                   return true;
                 });
+                if (!json_ok) ESP_LOGW("wx", "JSON parse FAILED heap=%u", esp_get_free_heap_size());
 
 font:
   - file: 'fonts/comic.ttf'
