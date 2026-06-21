@@ -16,10 +16,7 @@ esphome:
             wifi.connected
           timeout: 20s                   # add time if wifi needs it
       - component.update: homeassistant_time
-      - script.execute: fetch_weather    # async: runs during the HA-sensor-push delay below
-      - delay: 20s                       # allow time to execute
-      - lambda: |-
-          ESP_LOGI("wx", "Boot-check: wx_hourly len=%d", (int)id(wx_hourly).size());
+      - delay: 20s                       # allow time for HA to push sensor states
       - wait_until:
           condition:
             time.has_time
@@ -52,18 +49,6 @@ wifi:
   domain: ".shencentral.net"
   reboot_timeout: 180s
   fast_connect: on
-
-http_request:
-  useragent: esphome/display-guest-suite
-  verify_ssl: false
-  timeout: 10s
-  buffer_size_rx: 8192
-
-globals:
-  - id: wx_hourly
-    type: std::string
-    restore_value: false
-    initial_value: '""'
 
 spi:
   clk_pin: 18
@@ -144,67 +129,15 @@ sensor:
   
 text_sensor:
   - platform: homeassistant
+    id: weather_hourly_next_8
+    entity_id: sensor.weather_hourly_next_8
+    internal: true
+
+  - platform: homeassistant
     id: weather_state
     name: "Current Weather Icon"
     entity_id: sensor.openweathermap_condition
     internal: true
-
-
-script:
-  - id: fetch_weather
-    then:
-      - lambda: ESP_LOGI("wx", "fetch_weather script starting");
-      - http_request.get:
-          url: !secret owm_hourly_url
-          capture_response: true
-          on_response:
-            - lambda: |-
-                ESP_LOGI("wx", "HTTP %d body=%d heap=%u", response->status_code, (int)body.size(), esp_get_free_heap_size());
-                if (response->status_code != 200) {
-                  ESP_LOGW("wx", "OWM HTTP error: %d - body: %.200s", response->status_code, body.c_str());
-                  return;
-                }
-                if (body.empty()) { ESP_LOGW("wx", "body empty"); return; }
-                ESP_LOGI("wx", "Body[0:120]: %.120s", body.c_str());
-                bool json_ok = json::parse_json(body, [](JsonObject root) -> bool {
-                  auto owm_cond = [](int wid, bool day) -> std::string {
-                    if (wid == 800) return day ? "sunny" : "clear-night";
-                    if (wid >= 801 && wid <= 802) return "partlycloudy";
-                    if (wid >= 803) return "cloudy";
-                    if (wid >= 700) return "fog";
-                    if (wid >= 600) return "snowy";
-                    if (wid >= 505) return "rainy";
-                    if (wid >= 502) return "pouring";
-                    if (wid >= 500) return "rainy";
-                    if (wid >= 300) return "rainy";
-                    if (wid >= 200) return "lightning";
-                    return "cloudy";
-                  };
-                  std::string forecast = "";
-                  JsonArray data = root["hourly"].as<JsonArray>();
-                  int limit = std::min((int)data.size(), 9);
-                  for (int i = 1; i < limit; i++) {
-                    JsonObject h = data[i];
-                    time_t ts = h["dt"].as<long>();
-                    struct tm tm_info;
-                    localtime_r(&ts, &tm_info);
-                    int hr = tm_info.tm_hour;
-                    bool am = hr < 12;
-                    if (hr == 0) hr = 12; else if (hr > 12) hr -= 12;
-                    int wid = h["weather"][0]["id"].as<int>();
-                    const char* icon = h["weather"][0]["icon"] | "01d";
-                    bool day = icon[strlen(icon) - 1] == 'd';
-                    float precip = h["rain"]["1h"].as<float>() + h["snow"]["1h"].as<float>();
-                    char entry[64];
-                    snprintf(entry, sizeof(entry), "%d%s,%s,%.1f#",
-                             hr, am ? "am" : "pm", owm_cond(wid, day).c_str(), precip);
-                    forecast += entry;
-                  }
-                  id(wx_hourly) = forecast;
-                  ESP_LOGI("wx", "Hourly: %s", id(wx_hourly).c_str());
-                  return true;
-                });
-                if (!json_ok) ESP_LOGW("wx", "JSON parse FAILED heap=%u", esp_get_free_heap_size());
 
 font:
   - file: 'fonts/comic.ttf'
@@ -275,7 +208,6 @@ display:                    # note display update settings only applies in deep_
     rotation: 90
     lambda: |-
 
-      ESP_LOGI("main", "wx_hourly len=%d", id(wx_hourly).size());
       if (id(weather_state).has_state()) {
         std::map<std::string, std::string> weather_icon_map
           {
