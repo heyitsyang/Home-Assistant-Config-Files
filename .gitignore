@@ -13,6 +13,7 @@
 .storage
 .cloud
 .cache*
+.addon-env
 custom_components
 tts
 www
