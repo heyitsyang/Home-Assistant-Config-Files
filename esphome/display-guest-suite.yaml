@@ -55,6 +55,7 @@ http_request:
   useragent: esphome/display-guest-suite
   verify_ssl: false
   timeout: 10s
+  buffer_size_rx: 8192
 
 globals:
   - id: wx_hourly
@@ -155,8 +156,9 @@ script:
           capture_response: true
           on_response:
             - lambda: |-
+                ESP_LOGI("wx", "HTTP %d body=%d bytes", response->status_code, (int)body.size());
                 if (response->status_code != 200) {
-                  ESP_LOGW("wx", "OWM HTTP error: %d", response->status_code);
+                  ESP_LOGW("wx", "OWM HTTP error: %d - body: %.200s", response->status_code, body.c_str());
                   return;
                 }
                 json::parse_json(body, [](JsonObject root) -> bool {
@@ -174,7 +176,7 @@ script:
                     return "cloudy";
                   };
                   std::string forecast = "";
-                  JsonArray data = root["data"].as<JsonArray>();
+                  JsonArray data = root["hourly"].as<JsonArray>();
                   int limit = std::min((int)data.size(), 9);
                   for (int i = 1; i < limit; i++) {
                     JsonObject h = data[i];
@@ -267,6 +269,7 @@ display:                    # note display update settings only applies in deep_
     rotation: 90
     lambda: |-
 
+      ESP_LOGI("main", "wx_hourly len=%d", id(wx_hourly).size());
       if (id(weather_state).has_state()) {
         std::map<std::string, std::string> weather_icon_map
           {
