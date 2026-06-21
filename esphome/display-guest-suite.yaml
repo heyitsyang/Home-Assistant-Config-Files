@@ -153,6 +153,7 @@ text_sensor:
 script:
   - id: fetch_weather
     then:
+      - lambda: ESP_LOGI("wx", "fetch_weather script starting");
       - http_request.get:
           url: !secret owm_hourly_url
           capture_response: true
