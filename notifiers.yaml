@@ -12,18 +12,18 @@
   data:
     accessCode: !secret notifyme_access_code
 
-# Gmail
-- name: gmail_to_yang
-  platform: smtp
-  server: smtp.gmail.com
-  port: 587
-  timeout: 15
-  sender: "hass@shencentral.net"
-  sender_name: "My Home Assistant"
-  encryption: starttls
-  username: !secret gmail_user
-  password: !secret gmail_pwd
-  recipient: !secret gmail_to_yang_recipient
+# # Gmail - moved to UI
+# - name: gmail_to_yang
+#   platform: smtp
+#   server: smtp.gmail.com
+#   port: 587
+#   timeout: 15
+#   sender: "hass@shencentral.net"
+#   sender_name: "My Home Assistant"
+#   encryption: starttls
+#   username: !secret gmail_user
+#   password: !secret gmail_pwd
+#   recipient: !secret gmail_to_yang_recipient
 
 #   # Pushover
 # - name: gmail_to_yskt_pushover
