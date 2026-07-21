@@ -9,7 +9,7 @@
 
 - platform: statistics
   name: "7 Day Avg Soil Temperature"
-  entity_id: sensor.soil_probe_ds18b20_temperature # probe reports every hour
+  entity_id: sensor.soil_probe_ds18s20_temperature # probe reports every hour
   state_characteristic: average_linear
   sampling_size: 168 # 7 days = 168 hours
   precision: 1
