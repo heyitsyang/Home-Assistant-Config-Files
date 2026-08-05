@@ -42,6 +42,7 @@ wifi:
   password: !secret wifi_password
   domain: ".shencentral.net"
   min_auth_mode: WPA2
+  post_connect_roaming: false
 
 ota:
   - platform: esphome
