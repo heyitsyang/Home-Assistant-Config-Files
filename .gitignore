@@ -25,6 +25,7 @@ NOTES
 zigbee2mqtt
 ccab4aaf_frigate
 claude-code-persist
+tmp_debug
 
 # Ignore files
 watchman_report.txt
