@@ -13,6 +13,7 @@
 .storage
 .cloud
 .cache*
+.cache
 .addon-env
 .claude
 .claudecode
