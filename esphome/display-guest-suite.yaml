@@ -16,11 +16,51 @@ esphome:
             wifi.connected
           timeout: 20s                   # add time if wifi needs it
       - component.update: homeassistant_time
-      - delay: 20s                       # allow time for HA to push sensor states
       - wait_until:
           condition:
             time.has_time
           timeout: 10s
+      - wait_until:
+          # give HA up to 15s to push all sensor states before we decide
+          # whether this cycle's data is usable
+          condition:
+            lambda: |-
+              return id(weather_state).has_state() &&
+                     id(outside_temperature).has_state() &&
+                     id(outside_humidity).has_state() &&
+                     id(feels_like_temperature).has_state() &&
+                     id(todays_forecast_high).has_state() &&
+                     id(todays_forecast_low).has_state() &&
+                     id(guest_suite_display_battery_voltage).has_state();
+          timeout: 15s
+      - lambda: |-
+          bool data_complete = id(weather_state).has_state() &&
+                                id(outside_temperature).has_state() &&
+                                id(outside_humidity).has_state() &&
+                                id(feels_like_temperature).has_state() &&
+                                id(todays_forecast_high).has_state() &&
+                                id(todays_forecast_low).has_state() &&
+                                id(guest_suite_display_battery_voltage).has_state();
+          id(force_blank) = false;
+          if (data_complete) {
+            if (id(homeassistant_time).now().is_valid()) {
+              id(last_good_update_epoch) = (int) id(homeassistant_time).now().timestamp;
+            }
+          } else if (id(homeassistant_time).now().is_valid()) {
+            int elapsed = (int) id(homeassistant_time).now().timestamp - id(last_good_update_epoch);
+            const int four_hours = 4 * 3600;
+            if (elapsed >= four_hours) {
+              id(force_blank) = true;
+            }
+          }
+          id(should_update_display) = data_complete || id(force_blank);
+      - if:
+          condition:
+            lambda: 'return id(should_update_display);'
+          then:
+            - component.update: epaper_display
+          # else: data is incomplete but still within the 4h grace window -
+          # skip the redraw so the eInk keeps showing its last good image
 
 esp32:
   board: esp32dev
@@ -57,6 +97,20 @@ spi:
 time:
   - platform: homeassistant
     id: homeassistant_time
+
+globals:
+  - id: last_good_update_epoch
+    type: int
+    restore_value: yes   # ESP32: kept in RTC memory, survives deep_sleep
+    initial_value: '0'
+  - id: force_blank
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: should_update_display
+    type: bool
+    restore_value: no
+    initial_value: 'false'
 
 deep_sleep:
   wakeup_pin: 
@@ -204,9 +258,15 @@ display:                    # note display update settings only applies in deep_
     model: 2.13in-ttgo-dke    
     # <full_update> every <update_interval> cycles
     full_update_every: 99  # purposely set high to avoid full update altogether
-    update_interval: 10s    # updates a few time during wake from deep sleep - low number minimizes waiting for user
+    update_interval: never  # only redraw when on_boot explicitly triggers it - see globals/should_update_display
     rotation: 90
     lambda: |-
+
+      // Data has been stale for 4+ hours with no successful refresh -
+      // show a blank screen rather than confidently-wrong old weather.
+      if (id(force_blank)) {
+        return;
+      }
 
       if (id(weather_state).has_state()) {
         std::map<std::string, std::string> weather_icon_map
