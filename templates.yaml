@@ -432,6 +432,24 @@
       unit_of_measurement: "m"
       state: "{{ state_attr('device_tracker.kt_cell_gps', 'gps_accuracy') }}"
 
+#
+# DEVICE TRACKER (BLE ROOM PRESENCE) - replaces deprecated device_tracker.see automations
+#
+
+- device_tracker:
+    - name: ys_cell_ble
+      unique_id: ys_cell_ble
+      icon: mdi:bluetooth-connect
+      in_zones: >-
+        {{ ['zone.home'] if states('sensor.ys_cell_ble_room') != 'not_home' else [] }}
+
+- device_tracker:
+    - name: kt_cell_ble
+      unique_id: kt_cell_ble
+      icon: mdi:bluetooth-connect
+      in_zones: >-
+        {{ ['zone.home'] if states('sensor.kt_cell_ble_room') != 'not_home' else [] }}
+
 - sensor:
     - name: validated_water_static_pressure_test_result
       unique_id: validated_static_pressure_test_result
