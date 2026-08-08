@@ -32,9 +32,11 @@
       device_class: "volume"
       unit_of_measurement: "gal"
       icon: mdi:waves-arrow-right
+      # Read the 'gallons' ATTRIBUTE, not the sensor state: the state is gated to 0 below
+      # MIN_LEAK_GALS so sub-threshold noise never alarms, while the attribute always
+      # carries true zone-0 volume - which is what this sensor is for.
       state: >-
-        {{ state_attr('sensor.irrig_report_avg_gpm_zone_0', 'preMeasureGallons') | int +
-            state_attr('sensor.irrig_report_avg_gpm_zone_0', 'measuredZoneGallons') | int}}
+        {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'gallons') | int(0) }}
 
 - sensor:
     - name: "irrig_zone_1_gals"
@@ -43,8 +45,7 @@
       unit_of_measurement: "gal"
       icon: mdi:waves-arrow-right
       state: >-
-        {{ state_attr('sensor.irrig_report_avg_gpm_zone_1', 'preMeasureGallons') | int +
-            state_attr('sensor.irrig_report_avg_gpm_zone_1', 'measuredZoneGallons') | int}}
+        {{ state_attr('sensor.irrig_report_median_gpm_zone_1', 'measuredZoneGallons') | int(0) }}
 
 - sensor:
     - name: "irrig_zone_2_gals"
@@ -53,8 +54,7 @@
       unit_of_measurement: "gal"
       icon: mdi:waves-arrow-right
       state: >-
-        {{ state_attr('sensor.irrig_report_avg_gpm_zone_2', 'preMeasureGallons') | int  +
-            state_attr('sensor.irrig_report_avg_gpm_zone_2', 'measuredZoneGallons') | int}}
+        {{ state_attr('sensor.irrig_report_median_gpm_zone_2', 'measuredZoneGallons') | int(0) }}
 
 - sensor:
     - name: "irrig_zone_3_gals"
@@ -63,8 +63,7 @@
       unit_of_measurement: "gal"
       icon: mdi:waves-arrow-right
       state: >-
-        {{ state_attr('sensor.irrig_report_avg_gpm_zone_3', 'preMeasureGallons') | int +
-            state_attr('sensor.irrig_report_avg_gpm_zone_3', 'measuredZoneGallons') | int }}
+        {{ state_attr('sensor.irrig_report_median_gpm_zone_3', 'measuredZoneGallons') | int(0) }}
 
 - sensor:
     - name: "irrig_zone_4_gals"
@@ -73,8 +72,7 @@
       unit_of_measurement: "gal"
       icon: mdi:waves-arrow-right
       state: >-
-        {{ state_attr('sensor.irrig_report_avg_gpm_zone_4', 'preMeasureGallons') | int  +
-            state_attr('sensor.irrig_report_avg_gpm_zone_4', 'measuredZoneGallons') | int}}
+        {{ state_attr('sensor.irrig_report_median_gpm_zone_4', 'measuredZoneGallons') | int(0) }}
 
 #
 # HVAC FAULT

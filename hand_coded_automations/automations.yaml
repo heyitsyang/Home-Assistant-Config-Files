@@ -729,13 +729,18 @@
 #
 # IRRIGATION LEAKS
 #
-- id: irrig_leak_while_valves_off
-  alias: "irrig leak while valves off"
+# NOTE: valves-off flow (formerly "irrig leak while valves off", which triggered on
+# sensor.irrig_report_avg_gpm_zone_0) is now handled solely by aut_irrig_valve_leak_notify
+# in the LEAK DETECTION section below. Zone 0 is no longer published as a zone - the
+# firmware reports it as gallons on irrig_leak/report/valve_leak instead.
+
+- id: irrig_leak_zone_1_front
+  alias: "irrig leak zone 1 front"
   initial_state: true
   trigger:
     - platform: template
       value_template: >-
-        {{ (states('sensor.irrig_report_avg_gpm_zone_0') | float(default=0)) > 0 }}
+        {{ (states('sensor.irrig_report_median_gpm_zone_1') | float(default=0)) > states('input_number.irrig_z1_front_yd_gpm_limit') | float(default=7) }}
   condition: # this prevents immediate triggering after home assistant startup
     - condition: template
       value_template: >-
@@ -748,49 +753,20 @@
           - notify.ys_cell
           - notify.kt_cell
       data:
-        title: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
-        message: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
+        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
         data:
           car_ui: true
     - action: notify.send_message
       target:
         entity_id: notify.gmail_to_yang
       data:
-        title: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
-        message: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
+        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
+        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
     - action: notify.persistent_notification
       data:
-        title: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
-        message: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
-
-- id: irrig_leak_zone_1_front
-  alias: "irrig leak zone 1 front"
-  initial_state: true
-  trigger:
-    - platform: template
-      value_template: >-
-        {{ (states('sensor.irrig_report_avg_gpm_zone_1') | float(default=0)) > states('input_number.irrig_z1_front_yd_gpm_limit') | float(default=7) }}
-  actions:
-    - action: notify.send_message
-      target:
-        entity_id:
-          - notify.ys_cell
-          - notify.kt_cell
-      data:
-        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
-        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
-        data:
-          car_ui: true
-    - action: notify.send_message
-      target:
-        entity_id: notify.gmail_to_yang
-      data:
-        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
-        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
-    - action: notify.persistent_notification
-      data:
-        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
-        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
+        title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
+        message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_median_gpm_zone_1') }} GPM"
 
 - id: irrig_leak_zone_2_drip
   alias: "irrig leak zone 2 drip"
@@ -798,7 +774,12 @@
   trigger:
     - platform: template
       value_template: >-
-        {{ (states('sensor.irrig_report_avg_gpm_zone_2') | float(default=0)) > states('input_number.irrig_z2_drip_gpm_limit') | float(default=5) }}
+        {{ (states('sensor.irrig_report_median_gpm_zone_2') | float(default=0)) > states('input_number.irrig_z2_drip_gpm_limit') | float(default=5) }}
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
     - action: notify.send_message
       target:
@@ -806,20 +787,20 @@
           - notify.ys_cell
           - notify.kt_cell
       data:
-        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
-        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
+        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
         data:
           car_ui: true
     - action: notify.send_message
       target:
         entity_id: notify.gmail_to_yang
       data:
-        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
-        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
+        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
     - action: notify.persistent_notification
       data:
-        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
-        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
+        title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
+        message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_median_gpm_zone_2') }} GPM"
 
 - id: irrig_leak_zone_3_right
   alias: "irrig leak zone 3 right"
@@ -827,7 +808,12 @@
   trigger:
     - platform: template
       value_template: >-
-        {{ (states('sensor.irrig_report_avg_gpm_zone_3') | float(default=0)) > states('input_number.irrig_z3_right_yd_gpm_limit') | float(default=10) }}
+        {{ (states('sensor.irrig_report_median_gpm_zone_3') | float(default=0)) > states('input_number.irrig_z3_right_yd_gpm_limit') | float(default=10) }}
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
     - action: notify.send_message
       target:
@@ -835,20 +821,20 @@
           - notify.ys_cell
           - notify.kt_cell
       data:
-        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
-        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
+        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
         data:
           car_ui: true
     - action: notify.send_message
       target:
         entity_id: notify.gmail_to_yang
       data:
-        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
-        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
+        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
     - action: notify.persistent_notification
       data:
-        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
-        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
+        title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
+        message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_median_gpm_zone_3') }} GPM"
 
 - id: irrig_leak_zone_4_left
   alias: "irrig leak zone 4 left"
@@ -856,7 +842,12 @@
   trigger:
     - platform: template
       value_template: >-
-        {{ (states('sensor.irrig_report_avg_gpm_zone_4') | float(default=0)) > states('input_number.irrig_z4_left_yd_gpm_limit') | float(default=13) }}
+        {{ (states('sensor.irrig_report_median_gpm_zone_4') | float(default=0)) > states('input_number.irrig_z4_left_yd_gpm_limit') | float(default=13) }}
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
     - action: notify.send_message
       target:
@@ -864,20 +855,20 @@
           - notify.ys_cell
           - notify.kt_cell
       data:
-        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
-        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
+        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
         data:
           car_ui: true
     - action: notify.send_message
       target:
         entity_id: notify.gmail_to_yang
       data:
-        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
-        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
+        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
     - action: notify.persistent_notification
       data:
-        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
-        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
+        title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
+        message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_median_gpm_zone_4') }} GPM"
 
 #
 # DRYBOX HUMIDITY TOO HIGH
@@ -997,6 +988,8 @@
         title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
         message: |
           Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
+          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
           were measured between watering cycles or when the valves should have been off.
         data:
           car_ui: true
@@ -1007,6 +1000,8 @@
         title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
         message: |
           Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
+          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
           were measured between watering cycles or when the valves should have been off.
 
 # WHOLE HOUSE WATER
