@@ -591,7 +591,11 @@ scr_check_if_suspicious:
             - condition: state
               entity_id: person.karen
               state: "home"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "SUSPICIOUS ACTIVITY at Norcoose"
         message: "PRESS to investigate"
@@ -607,10 +611,16 @@ scr_check_if_suspicious:
           ttl: 0
           data:
             car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         message: "SUSPICIOUS ACTIVITY detected in Norcoose home"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         message: "TTS"
         data:
@@ -632,7 +642,11 @@ scr_check_garage_open:
         - condition: state
           entity_id: cover.small_garage_door
           state: "open"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         message: "TTS"
         data:
@@ -642,7 +656,11 @@ scr_check_garage_open:
           ttl: 0
           data:
             car_ui: true
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "GARAGE DOOR LEFT OPEN"
         message: "Did you forget to close it?  PRESS to see."
@@ -860,13 +878,21 @@ scr_frontporch_activity:
         - action: notify.alexa_yellow_ring
           data:
             message: "While you were out, there was a visitor at the front door"
-        - action: notify.mobile_app_yskt_cell
+        - action: notify.send_message
+          target:
+            entity_id:
+              - notify.ys_cell
+              - notify.kt_cell
           data:
             title: Front door activity
             message: "Front door activity detected"
             data:
               clickAction: "lovelace/last-snaps"
-        - action: notify.mobile_app_yskt_cell
+        - action: notify.send_message
+          target:
+            entity_id:
+              - notify.ys_cell
+              - notify.kt_cell
           data:
             title: Front door activity
             message: TTS
@@ -882,7 +908,11 @@ scr_frontporch_activity:
         - action: input_boolean.turn_on
           target:
             entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
-        - action: notify.mobile_app_yskt_cell
+        - action: notify.send_message
+          target:
+            entity_id:
+              - notify.ys_cell
+              - notify.kt_cell
           data:
             title: Front door activity
             message: "Front door activity detected while asleep"

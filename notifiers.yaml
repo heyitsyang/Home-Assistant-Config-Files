@@ -64,7 +64,7 @@
 #         priority: 0
 
 - platform: group
-  name: mobile_app_yskt_cell
+  name: lock_notify_group
   services:
     - service: mobile_app_ys_cell
     - service: mobile_app_kt_cell

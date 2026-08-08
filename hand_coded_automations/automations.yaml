@@ -161,7 +161,9 @@
     - platform: template
       value_template: "{{ (state_attr('sensor.spt_data_status', 'consec_aborts') | int(default=0)) > 3 }}"
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "SPT consecutive aborts exceeds threshold"
         message: "SPT consecutive aborts: {{ state_attr('sensor.spt_data_status', 'consec_aborts') }}"
@@ -669,7 +671,9 @@
     condition: template # prevent false trigger from disconnected UPS comms
     value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "HA UPS on battery power"
         message: "HA UPS on battery mode: {{ states('sensor.rackups_status') }}"
@@ -686,7 +690,9 @@
     condition: template # prevent false trigger from disconnected UPS comms
     value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "HA grid power restored"
         message: "HA UPS on AC mode: {{ states('sensor.rackups_status') }}"
@@ -704,11 +710,15 @@
     condition: template
     value_template: "{{ states('sensor.rackups_status') != 'unavailable' }}"
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "HA UPS emergency shutdown"
         message: "UPS emergency shutdown: {{ states('sensor.rackups_battery_runtime') }} seconds remaining"
-    - action: notify.mobile_app_ys_cell
+    - action: notify.send_message
+      target:
+        entity_id: notify.ys_cell
       data:
         title: "HA UPS emergency shutdown"
         message: "UPS emergency shutdown: {{ states('sensor.rackups_battery_runtime') }} seconds remaining"
@@ -732,13 +742,19 @@
         {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
             | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
         message: "Irrig leak detected while all valves off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
         message: "Irrig leak detected while valves all off: {{ states('sensor.irrig_report_avg_gpm_zone_0') }} GPM"
@@ -755,13 +771,19 @@
       value_template: >-
         {{ (states('sensor.irrig_report_avg_gpm_zone_1') | float(default=0)) > states('input_number.irrig_z1_front_yd_gpm_limit') | float(default=7) }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
         message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
         message: "Irrig leak detected in zone 1 (front): {{ states('sensor.irrig_report_avg_gpm_zone_1') }} GPM"
@@ -778,13 +800,19 @@
       value_template: >-
         {{ (states('sensor.irrig_report_avg_gpm_zone_2') | float(default=0)) > states('input_number.irrig_z2_drip_gpm_limit') | float(default=5) }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
         message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
         message: "Irrig leak detected in zone 2 (drip): {{ states('sensor.irrig_report_avg_gpm_zone_2') }} GPM"
@@ -801,13 +829,19 @@
       value_template: >-
         {{ (states('sensor.irrig_report_avg_gpm_zone_3') | float(default=0)) > states('input_number.irrig_z3_right_yd_gpm_limit') | float(default=10) }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
         message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
         message: "Irrig leak detected in zone 3 (right): {{ states('sensor.irrig_report_avg_gpm_zone_3') }} GPM"
@@ -824,13 +858,19 @@
       value_template: >-
         {{ (states('sensor.irrig_report_avg_gpm_zone_4') | float(default=0)) > states('input_number.irrig_z4_left_yd_gpm_limit') | float(default=13) }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
         message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
         message: "Irrig leak detected in zone 4 (left): {{ states('sensor.irrig_report_avg_gpm_zone_4') }} GPM"
@@ -856,7 +896,9 @@
       data:
         title: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
         message: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
         message: "Drybox humidity out of tolerance: {{ states('sensor.drybox_relative_humidity') }} percent"
@@ -873,13 +915,19 @@
         - sensor.water_pressure
       above: 85
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
         message: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
         message: "Water expansion tank fault: {{ states('sensor.water_pressure') }} PSI"
@@ -898,13 +946,21 @@
       for:
         minutes: 90
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Freezer temperature too high"
         message: "Freezer temperature is {{ states('sensor.freezer_sensor_temperature') }} F"
         data:
           clickAction: "lovelace/graphs"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Freezer temperature too high"
         message: TTS
@@ -932,7 +988,11 @@
         {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
             | float(default=0)) ) | int(default=0) ) > 10 }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
         message: |
@@ -940,7 +1000,9 @@
           were measured between watering cycles or when the valves should have been off.
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
         message: |
@@ -969,7 +1031,11 @@
           ((states('input_number.loss_per_minute_alarm_threshold') | float(default=0)) 
             * (states('input_number.inp_num_spt_duration') | float(default=0))) }}
   actions:
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "SPT water leak detected"
         message: |
@@ -977,7 +1043,9 @@
           Test ended: {{ as_timestamp(states.sensor.spt_data_status.last_changed) | timestamp_custom('%d-%b-%Y, %I:%M:%S %p') }}
           Total pressure drop: {{ states('sensor.validated_water_static_pressure_test_result') | float(default=0) }}
           Drop per minute: {{ states('sensor.water_static_pressure_loss_per_minute') }}
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "SPT water leak detected"
         message: |
@@ -1027,7 +1095,11 @@
       data:
         priority: "high"
         message: "House water has been turned off.  Leak detected at {{ trigger.entity_id }}. Turn on manually when leak is resolved."
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "House water turned OFF. Leak detected at {{ trigger.entity_id }}."
         message: "House water is OFF.  Turn on manually when leak is resolved."
@@ -1036,7 +1108,11 @@
     - action: notify.alexa_yellow_ring
       data:
         message: "House water is OFF. Leak detected at {{ trigger.entity_id }}. Turn on manually when leak is resolved."
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         message: "TTS"
         data:
@@ -1046,7 +1122,11 @@
           media_stream: alarm_stream
           data:
             car_ui: true
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
         message: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
@@ -1060,7 +1140,9 @@
           ttl: 0
           data:
             car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         message: "Water leak detected at the {{ trigger.entity_id|replace('binary_sensor.leak_', '') | replace('_', '') }}"
     - repeat:
@@ -1802,7 +1884,11 @@
     - action: lock.lock
       target:
         entity_id: lock.front_door_lock
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Front door automatically locked"
         message: "Oops. Someone left it unlocked!"
@@ -1839,7 +1925,11 @@
     - action: lock.lock
       target:
         entity_id: lock.front_door_lock
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Front door automatically locked"
         message: "The party's over!"
@@ -1873,7 +1963,11 @@
     - action: lock.lock
       target:
         entity_id: lock.back_door_lock
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Back door automatically locked"
         message: "Oops. Someone left it unlocked!"
@@ -2164,7 +2258,11 @@
               | replace('binary_sensor.main_hvac_fault', 'main house')
               | replace('binary_sensor.sunroom_hvac_fault', 'sun room')
               }} temperature is outside of tolerance!"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "HVAC system fault detected"
         message: >-
@@ -2195,7 +2293,9 @@
       below: 550
       for: "00:10:00"
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "{{ trigger.entity_id | replace('sensor.', '') }} fault"
         message: >
@@ -2342,7 +2442,9 @@
       entity_id: sensor.master_bedroom_shade_4_outer_battery
       below: 20
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Low batteries: {{ trigger.entity_id }}"
         message: "Low batteries: {{ trigger.entity_id }}  {{ states(trigger.entity_id) }}%"
@@ -2360,7 +2462,9 @@
       to: "on"
       for: 00:10:00
   actions:
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         message: |
           Home Assistant {{states("sensor.home_assistant_website")}} is now available.
@@ -2469,13 +2573,19 @@
     - action: script.scr_say_phrase
       data:
         message: "Extended absence mode enabled"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Extended absence mode has been enabled"
         message: "Home Assistant: Extended absence mode enabled"
         data:
           car_ui: true
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Extended absence mode has been enabled"
         message: "Extended absence mode enabled"
@@ -2494,11 +2604,17 @@
     - action: script.scr_say_phrase
       data:
         message: "Extended absence mode disabled"
-    - action: notify.gmail_to_yang
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
       data:
         title: "Home Assistant: Extended Absence Mode disabled"
         message: "Extended absence mode disabled"
-    - action: notify.mobile_app_yskt_cell
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
       data:
         title: "Extended absence mode has been disabled"
         message: "Home Assistant: Extended absence mode disabled"
@@ -2755,7 +2871,9 @@
       entity_id: sensor.home_ys_cell_gps_direction_of_travel
       state: "away_from"
   actions:
-    - action: notify.mobile_app_ys_cell
+    - action: notify.send_message
+      target:
+        entity_id: notify.ys_cell
       data:
         message: "TTS"
         data:
