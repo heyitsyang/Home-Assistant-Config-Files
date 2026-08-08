@@ -729,10 +729,57 @@
 #
 # IRRIGATION LEAKS
 #
+
 # NOTE: valves-off flow (formerly "irrig leak while valves off", which triggered on
 # sensor.irrig_report_avg_gpm_zone_0) is now handled solely by aut_irrig_valve_leak_notify
-# in the LEAK DETECTION section below. Zone 0 is no longer published as a zone - the
-# firmware reports it as gallons on irrig_leak/report/valve_leak instead.
+# below. ny flow while valves are off trigger the notification
+
+- id: aut_irrig_valve_leak_notify
+  alias: "aut irrig valve leak notify"
+  initial_state: true
+  trigger:
+    - platform: numeric_state
+      entity_id:
+        - sensor.irrig_report_valve_leak_gallons
+      above: 0
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.ys_cell
+          - notify.kt_cell
+      data:
+        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
+        message: |
+          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
+          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
+          were measured between watering cycles or when the valves should have been off.
+        data:
+          car_ui: true
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
+      data:
+        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
+        message: |
+          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
+          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
+          were measured between watering cycles or when the valves should have been off.
+    - action: notify.persistent_notification
+      data:
+        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
+        message: |
+          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
+          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
+          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
+          were measured between watering cycles or when the valves should have been off.
 
 - id: irrig_leak_zone_1_front
   alias: "irrig leak zone 1 front"
@@ -960,49 +1007,6 @@
           data:
             car_ui: true
 
-#
-# LEAK DETECTION
-#
-
-# IRRIGATION SYSTEM
-- id: aut_irrig_valve_leak_notify
-  alias: "aut irrig valve leak notify"
-  initial_state: true
-  trigger:
-    - platform: numeric_state
-      entity_id:
-        - sensor.irrig_report_valve_leak_gallons
-      above: 0
-  condition: # this prevents immediate triggering after home assistant startup
-    - condition: template
-      value_template: >-
-        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
-            | float(default=0)) ) | int(default=0) ) > 10 }}
-  actions:
-    - action: notify.send_message
-      target:
-        entity_id:
-          - notify.ys_cell
-          - notify.kt_cell
-      data:
-        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
-        message: |
-          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
-          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
-          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
-          were measured between watering cycles or when the valves should have been off.
-        data:
-          car_ui: true
-    - action: notify.send_message
-      target:
-        entity_id: notify.gmail_to_yang
-      data:
-        title: "Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons"
-        message: |
-          Leaky irrigation valve detected: {{ states('sensor.irrig_report_valve_leak_gallons') }} gallons
-          at {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'medianGPM') }} GPM
-          (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
-          were measured between watering cycles or when the valves should have been off.
 
 # WHOLE HOUSE WATER
 - id: aut_spt_leak_notify
