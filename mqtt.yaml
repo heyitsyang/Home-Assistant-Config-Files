@@ -91,7 +91,7 @@ sensor:
 
   # Valves-off flow. State is GALLONS; the rate lives in the attributes (gallons/medianGPM/
   # maxGPM). Zone 0 is a fault condition, not a zone, so it is reported only here - there is
-  # deliberately no median_gpm_zone_0 or avg_psi_zone_0 sensor.
+  # deliberately no median_gpm_zone_0 or median_psi_zone_0 sensor.
   - unique_id: irrig_report_valve_leak_gallons
     name: "Irrig Report Valve Leak Gallons"
     state_topic: "irrig_leak/report/valve_leak"
@@ -129,41 +129,46 @@ sensor:
     qos: 0
     json_attributes_topic: "irrig_leak/report/median_gpm_zone_4/attributes"
 
-  - unique_id: irrig_report_avg_psi_zone_1
-    name: "Irrig Report Avg PSI Zone 1"
-    state_topic: "irrig_leak/report/avg_psi_zone_1"
+  # Zone pressure is the MEDIAN of the samples taken during the run, not the mean. Pressure is
+  # read on each flow pulse, so the pipe-fill dip at valve-open lands in the sample set; a mean
+  # averaged it in and understated operating pressure by up to 13.5 psi on a low-sample zone.
+  # Renamed from avg_psi_zone_N on 2026-08-13 - history before that date sits on the old
+  # entities, which are now orphaned in the registry.
+  - unique_id: irrig_report_median_psi_zone_1
+    name: "Irrig Report Median PSI Zone 1"
+    state_topic: "irrig_leak/report/median_psi_zone_1"
     state_class: measurement
     unit_of_measurement: "psi"
     device_class: pressure
     qos: 0
-    json_attributes_topic: "irrig_leak/report/avg_psi_zone_1/attributes"
+    json_attributes_topic: "irrig_leak/report/median_psi_zone_1/attributes"
 
-  - unique_id: irrig_report_avg_psi_zone_2
-    name: "Irrig Report Avg PSI Zone 2"
-    state_topic: "irrig_leak/report/avg_psi_zone_2"
+  - unique_id: irrig_report_median_psi_zone_2
+    name: "Irrig Report Median PSI Zone 2"
+    state_topic: "irrig_leak/report/median_psi_zone_2"
     state_class: measurement
     unit_of_measurement: "psi"
     device_class: pressure
     qos: 0
-    json_attributes_topic: "irrig_leak/report/avg_psi_zone_2/attributes"
+    json_attributes_topic: "irrig_leak/report/median_psi_zone_2/attributes"
 
-  - unique_id: irrig_report_avg_psi_zone_3
-    name: "Irrig Report Avg PSI Zone 3"
-    state_topic: "irrig_leak/report/avg_psi_zone_3"
+  - unique_id: irrig_report_median_psi_zone_3
+    name: "Irrig Report Median PSI Zone 3"
+    state_topic: "irrig_leak/report/median_psi_zone_3"
     state_class: measurement
     unit_of_measurement: "psi"
     device_class: pressure
     qos: 0
-    json_attributes_topic: "irrig_leak/report/avg_psi_zone_3/attributes"
+    json_attributes_topic: "irrig_leak/report/median_psi_zone_3/attributes"
 
-  - unique_id: irrig_report_avg_psi_zone_4
-    name: "Irrig Report Avg PSI Zone 4"
-    state_topic: "irrig_leak/report/avg_psi_zone_4"
+  - unique_id: irrig_report_median_psi_zone_4
+    name: "Irrig Report Median PSI Zone 4"
+    state_topic: "irrig_leak/report/median_psi_zone_4"
     state_class: measurement
     unit_of_measurement: "psi"
     device_class: pressure
     qos: 0
-    json_attributes_topic: "irrig_leak/report/avg_psi_zone_4/attributes"
+    json_attributes_topic: "irrig_leak/report/median_psi_zone_4/attributes"
 
   - unique_id: irrig_leak_report_run_dur_zone_1
     name: "Irrig Report Run Dur Zone 1"
