@@ -43,6 +43,14 @@ wifi:
   domain: ".shencentral.net"
   min_auth_mode: WPA2
   post_connect_roaming: false
+  power_save_mode: none
+
+# Disabled: LEAmDNS (mDNS on ESP8266) is a known cause of Hardware WDT
+# crashes when a WiFi RX interrupt races its malloc during packet handling,
+# especially under the mDNS query bursts HA sends on restart. Not needed
+# since HA reconnects via stored IP, not live mDNS browsing.
+mdns:
+  disable: true
 
 ota:
   - platform: esphome
