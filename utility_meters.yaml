@@ -1,0 +1,32 @@
+##  Note: leading spaces in each line are critical
+##  to yaml interpretation - do not delete them
+
+#########################
+###   UTILITY METERS  ###
+#########################
+
+## utility_meter takes a source sensor that only ever climbs and reports how much it rose
+## within a cycle, resetting itself at the cycle boundary. Its accumulator is stored on disk,
+## so a Home Assistant restart does not lose the current period.
+
+#
+# IRRIGATION SEEP DETECTION
+#
+# Gallons that flowed with every irrigation valve off, today.
+#
+# This catches the one failure the per-session leak test structurally cannot. The device counts
+# one pulse per gallon and ends a session after 90s of silence, so any seep slower than
+# 1 gal / 90s (~0.67 GPM) never accumulates two gallons inside a single session and never
+# reaches the firmware's MIN_LEAK_GALS threshold - no matter how long it runs. At 0.05 GPM that
+# is roughly 72 gallons a day, indefinitely, invisible to every other check.
+#
+# Source must be state_class: total_increasing - see mqtt.yaml. The device's odometer resets to
+# 0 on reboot and total_increasing reads that as a meter reset rather than a negative delta.
+#
+# Alert threshold is input_number.irrig_seep_gals_per_day_limit, acted on by
+# aut_irrig_seep_notify. Normal valve changeover contributes about 1 gallon per irrigation
+# session, so the default of 5 gal/day sits clear of that noise floor.
+#
+irrig_valve_leak_daily:
+  source: sensor.irrig_report_valve_leak_total
+  cycle: daily

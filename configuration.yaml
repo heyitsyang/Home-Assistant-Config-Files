@@ -75,4 +75,5 @@ shell_command: !include shell_commands.yaml
 switch: !include switches.yaml
 template: !include templates.yaml
 tts: !include tts.yaml
+utility_meter: !include utility_meters.yaml # cyclic totals from ever-climbing source sensors
 zone: !include zones.yaml

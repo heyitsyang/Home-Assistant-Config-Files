@@ -101,6 +101,23 @@ sensor:
     qos: 0
     json_attributes_topic: "irrig_leak/report/valve_leak/attributes"
 
+  # Odometer of valves-off gallons since the device booted - only ever climbs, and survives the
+  # per-session reset. It exists because a seep slower than ~0.67 GPM can never accumulate two
+  # gallons inside one 90s-timeout session, so it never reaches the firmware's leak threshold no
+  # matter how long it runs. What distinguishes a seep from a stray pulse is repetition, and this
+  # is the only thing that carries across sessions. utility_meters.yaml turns it into gal/day.
+  #
+  # total_increasing is REQUIRED, not cosmetic: the count lives in the device's RAM and returns
+  # to 0 on reboot. total_increasing reads that drop as a meter reset instead of a huge negative
+  # delta, which would otherwise corrupt the daily figure on every power cycle.
+  - unique_id: irrig_report_valve_leak_total
+    name: "Irrig Report Valve Leak Total"
+    state_topic: "irrig_leak/report/valve_leak_total"
+    state_class: total_increasing
+    device_class: water
+    unit_of_measurement: "gal"
+    qos: 0
+
   - unique_id: irrig_report_median_gpm_zone_1
     name: "Irrig Report Median GPM Zone 1"
     state_topic: "irrig_leak/report/median_gpm_zone_1"

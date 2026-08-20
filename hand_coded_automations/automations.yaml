@@ -785,6 +785,82 @@
           (peak {{ state_attr('sensor.irrig_report_valve_leak_gallons', 'maxGPM') }} GPM)
           were measured between watering cycles or when the valves should have been off.
 
+# Slow seep detection - catches what aut_irrig_valve_leak_notify above structurally cannot.
+#
+# The device counts one pulse per gallon and ends a session after 90s of silence, so a seep
+# slower than 1 gal / 90s (~0.67 GPM) never accumulates two gallons inside a single session and
+# never reaches the firmware's MIN_LEAK_GALS threshold - however long it runs. At 0.05 GPM that
+# is ~72 gallons a day, indefinitely. The valve_leak sensor above would sit at 0 the whole time.
+#
+# What separates a seep from a stray pulse is repetition, so this triggers on the accumulated
+# daily total (utility_meters.yaml) rather than on any single report.
+#
+# numeric_state fires only on CROSSING the threshold, so this alerts at most once per day even
+# though the source updates all day. mode/max_exceeded keep a burst from queueing repeats.
+- id: aut_irrig_seep_notify
+  alias: "aut irrig seep notify"
+  initial_state: true
+  mode: single
+  max_exceeded: silent
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.irrig_valve_leak_daily
+      above: input_number.irrig_seep_gals_per_day_limit
+  condition: # this prevents immediate triggering after home assistant startup
+    - condition: template
+      value_template: >-
+        {{ ( ( as_timestamp(now(), '') - (as_timestamp(states('sensor.uptime'), '')
+            | float(default=0)) ) | int(default=0) ) > 10 }}
+  actions:
+    # The rate is quoted alongside the volume because it is what makes a seep legible AS a seep -
+    # "6 gallons" sounds trivial until it reads as a leak that never stops.
+    - action: notify.mobile_app_ys_cell
+      data:
+        title: "Irrigation seep: {{ states('sensor.irrig_valve_leak_daily') }} gal today with valves off"
+        message: |
+          {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
+          irrigation valve off, against a limit of
+          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
+          sustained - too slow for the per-session leak test to ever catch.
+          Suspect a valve diaphragm not seating fully.
+        data:
+          car_ui: true
+    - action: notify.mobile_app_kt_cell
+      data:
+        title: "Irrigation seep: {{ states('sensor.irrig_valve_leak_daily') }} gal today with valves off"
+        message: |
+          {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
+          irrigation valve off, against a limit of
+          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
+          sustained - too slow for the per-session leak test to ever catch.
+          Suspect a valve diaphragm not seating fully.
+        data:
+          car_ui: true
+    - action: notify.send_message
+      target:
+        entity_id: notify.gmail_to_yang
+      data:
+        title: "Irrigation seep: {{ states('sensor.irrig_valve_leak_daily') }} gal today with valves off"
+        message: |
+          {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
+          irrigation valve off, against a limit of
+          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
+          sustained - too slow for the per-session leak test to ever catch.
+          Suspect a valve diaphragm not seating fully.
+    - action: notify.persistent_notification
+      data:
+        title: "Irrigation seep: {{ states('sensor.irrig_valve_leak_daily') }} gal today with valves off"
+        message: |
+          {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
+          irrigation valve off, against a limit of
+          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
+          sustained - too slow for the per-session leak test to ever catch.
+          Suspect a valve diaphragm not seating fully.
+
 - id: irrig_leak_zone_1_front
   alias: "irrig leak zone 1 front"
   initial_state: true
