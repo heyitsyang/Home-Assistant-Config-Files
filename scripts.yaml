@@ -671,7 +671,14 @@ scr_repeat_say_garage_open:
   sequence:
     - action: script.scr_say_phrase
       data:
-        message: "A garage door has been left open"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors have been left open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door has been left open
+          {% else %}A garage door has been left open
+          {% endif %}
     - delay: "00:10:00"
     - condition: or
       conditions:
@@ -683,7 +690,14 @@ scr_repeat_say_garage_open:
           state: "open"
     - action: script.scr_say_phrase
       data:
-        message: "A garage door is still open"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors are still open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door is still open
+          {% else %}A garage door is still open
+          {% endif %}
     - delay: "00:10:00"
     - condition: or
       conditions:
@@ -695,7 +709,14 @@ scr_repeat_say_garage_open:
           state: "open"
     - action: script.scr_say_phrase
       data:
-        message: "A garage door is still open"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors are still open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door is still open
+          {% else %}A garage door is still open
+          {% endif %}
     - delay: "00:10:00"
     - condition: or
       conditions:
@@ -707,7 +728,14 @@ scr_repeat_say_garage_open:
           state: "open"
     - action: script.scr_say_phrase
       data:
-        message: "A garage door is still open"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors are still open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door is still open
+          {% else %}A garage door is still open
+          {% endif %}
     - delay: "00:10:00"
     - condition: or
       conditions:
@@ -719,10 +747,25 @@ scr_repeat_say_garage_open:
           state: "open"
     - action: script.scr_say_phrase
       data:
-        message: "A garage door is still open.  This is your last reminder"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors are still open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door is still open
+          {% else %}A garage door is still open
+          {% endif %}
+          .  This is your last reminder
     - action: notify.alexa_yellow_ring
       data:
-        message: "A garage door is still open"
+        message: >-
+          {% set doors = [] %}
+          {% if is_state('cover.large_garage_door', 'open') %}{% set doors = doors + ['large'] %}{% endif %}
+          {% if is_state('cover.small_garage_door', 'open') %}{% set doors = doors + ['small'] %}{% endif %}
+          {% if doors | length == 2 %}Both garage doors are still open
+          {% elif doors | length == 1 %}The {{ doors[0] }} garage door is still open
+          {% else %}A garage door is still open
+          {% endif %}
 
 #
 # MOOD LIGHTING

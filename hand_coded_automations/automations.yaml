@@ -1659,7 +1659,7 @@
     - action: script.scr_front_door_lights_on
     - action: timer.start
       target:
-        entity_id: timer.timer_lg_garage_door
+        entity_id: timer.any_garage_door_open
     - action: script.scr_check_if_suspicious
     - action: script.scr_say_phrase
       data:
@@ -1681,35 +1681,36 @@
     - action: script.scr_front_door_lights_on
     - action: timer.start
       target:
-        entity_id: timer.timer_sm_garage_door
+        entity_id: timer.any_garage_door_open
     - action: script.scr_check_if_suspicious
     - action: script.scr_say_phrase
       data:
         message: "The small garage door has opened"
 
-- id: aut_large_garage_door_closed
-  alias: "aut large garage door closed"
+- id: aut_garage_doors_closed
+  alias: "aut garage doors closed"
   initial_state: true
   trigger:
     - platform: state
       entity_id: cover.large_garage_door
       to: "closed"
-  actions:
-    - action: timer.cancel
-      target:
-        entity_id: timer.timer_lg_garage_door
-
-- id: aut_small_garage_door_closed
-  alias: "aut small garage door closed"
-  initial_state: true
-  trigger:
     - platform: state
       entity_id: cover.small_garage_door
       to: "closed"
+  conditions: # only stop the timer/reminder once BOTH doors are closed
+    - condition: state
+      entity_id: cover.large_garage_door
+      state: "closed"
+    - condition: state
+      entity_id: cover.small_garage_door
+      state: "closed"
   actions:
     - action: timer.cancel
       target:
-        entity_id: timer.timer_sm_garage_door
+        entity_id: timer.any_garage_door_open
+    - action: script.turn_off
+      target:
+        entity_id: script.scr_repeat_say_garage_open
 
 #
 # FRONT & BACK DOOR OPENING ACTIVITY TRIGGERS
@@ -1929,25 +1930,21 @@
     - platform: event
       event_type: timer.finished
       event_data:
-        entity_id: timer.timer_lg_garage_door
-    - platform: event
-      event_type: timer.finished
-      event_data:
-        entity_id: timer.timer_sm_garage_door
+        entity_id: timer.any_garage_door_open
   actions:
     - action: script.scr_repeat_say_garage_open
 
-# Reset timer if moving in/out of garage
+# Garage presence (camera occupancy) cancels the reminder & restarts the timer.
+# Covers both: presence during the initial countdown, and presence while
+# scr_repeat_say_garage_open is actively nagging (script.turn_off is a no-op
+# if it isn't running).
 - id: aut_reset_garage_timers
   alias: "aut reset garage timers"
   initial_state: true
   trigger:
     - platform: state
-      entity_id: device_tracker.ys_cell_ble
-      from: "garage"
-    - platform: state
-      entity_id: device_tracker.kt_cell_ble
-      from: "garage"
+      entity_id: binary_sensor.garage_person_occupancy
+      to: "on"
   conditions:
     condition: or
     conditions:
@@ -1958,11 +1955,12 @@
         entity_id: cover.small_garage_door
         state: "open"
   actions:
+    - action: script.turn_off
+      target:
+        entity_id: script.scr_repeat_say_garage_open
     - action: timer.start # timer.start is the same as a timer reset/restart
       target:
-        entity_id:
-          - timer.timer_lg_garage_door
-          - timer.timer_sm_garage_door
+        entity_id: timer.any_garage_door_open
 
 #
 # AUTO DOOR LOCK ON DOOR INACTIVITY
