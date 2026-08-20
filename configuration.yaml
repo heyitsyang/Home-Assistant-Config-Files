@@ -21,9 +21,8 @@ homeassistant:
   #  Contents of packages:
   #  - keymaster_basic.yaml - look for door lock configs for entry code assignments and notification here
 
-
 #  HTTP block moved to UI
-  # http:
+# http:
 #   # server_port: 61615                                 #  default port 8123 is used for local network unencrypted http
 #   # NOTE: ssl_certiciate and ssl_key are now configured in the NGINX SSL Proxy add-on
 #   # Do not enable these next two lines when using NGINX
@@ -57,7 +56,7 @@ command_line: !include command_line.yaml
 cover: !include covers.yaml
 #climate: !include climate.yaml
 group: !include groups.yaml
-influxdb: !include influxdb.yaml  # filters only - influxdb config now in UI
+influxdb: !include influxdb.yaml # filters only - influxdb config now in UI
 input_boolean: !include input_booleans.yaml
 input_number: !include input_numbers.yaml # configuring this in helpers is now preferred
 input_select: !include input_selects.yaml
@@ -74,7 +73,6 @@ sensor: !include sensors.yaml
 shell_command: !include shell_commands.yaml
 switch: !include switches.yaml
 template: !include templates.yaml
-timer: !include timers.yaml
 tts: !include tts.yaml
 utility_meter: !include utility_meters.yaml # cyclic totals from ever-climbing source sensors
 zone: !include zones.yaml
