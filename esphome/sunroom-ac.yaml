@@ -50,7 +50,7 @@ wifi:
 # especially under the mDNS query bursts HA sends on restart. Not needed
 # since HA reconnects via stored IP, not live mDNS browsing.
 mdns:
-  disable: true
+  disabled: true
 
 ota:
   - platform: esphome
