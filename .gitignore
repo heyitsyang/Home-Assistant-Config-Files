@@ -37,7 +37,7 @@ frigate*
 .exports
 backup_config.yaml
 secrets.yaml
-logger.yaml
+#logger.yaml
 .uuid
 .google.token
 .google_maps*
