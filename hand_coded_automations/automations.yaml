@@ -443,6 +443,30 @@
           "The time is {{ now().time().strftime('%-I:%M')  | replace(':00', " o'clock") 
           | regex_replace(':0(\\d)', ' oh \\1') }}"
 
+- id: aut_push_local_weather_to_rainmachine
+  alias: "Push Local Weather to RainMachine"
+  trigger:
+    - platform: time_pattern
+      hours: "/1"
+  condition:
+    - condition: template
+      value_template: >
+        {{ is_number(states('sensor.kflwildw56_local_temperature'))
+           and is_number(states('sensor.kflwildw56_local_humidity')) }}
+  action:
+    - action: rainmachine.push_weather_data
+      data:
+        device_id: a86130450fff6c02ef1a6b2956715a8b
+        temperature: "{{ ((states('sensor.kflwildw56_local_temperature') | float(32) - 32) * 5 / 9) | round(1) }}"
+        dewpoint: "{{ ((states('sensor.kflwildw56_local_dew_point') | float(32) - 32) * 5 / 9) | round(1) }}"
+        minrh: "{{ states('sensor.kflwildw56_local_humidity') | float(0) | round(0) }}"
+        maxrh: "{{ states('sensor.kflwildw56_local_humidity') | float(0) | round(0) }}"
+        wind: "{{ (states('sensor.kflwildw56_local_wind_speed') | float(0) * 0.44704) | round(2) }}"
+        pressure: "{{ (states('sensor.kflwildw56_local_abs_pressure') | float(29.92) * 3.38639) | round(2) }}"
+        rain: "{{ (states('sensor.kflwildw56_local_hourly_rain_rate') | float(0) * 25.4) | round(2) }}"
+        solarrad: "{{ (states('sensor.kflwildw56_local_solar_rad') | float(0) * 0.0864) | round(2) }}"
+
+
 - id: aut_daily_reboot_wx_observerip
   alias: "aut daily reboot wx observerip"
   trigger:
