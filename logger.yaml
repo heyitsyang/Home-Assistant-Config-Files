@@ -73,3 +73,4 @@ filters:
     - "Platform meshtastic does not generate unique IDs"
   homeassistant.components.automation.aut_arrival_announcement:
     - "The model is overloaded. Please try again later."
+    - "Sorry, I had a problem getting a response from Google Generative AI.: This model is currently experiencing high demand."
