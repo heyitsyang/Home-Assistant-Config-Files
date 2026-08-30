@@ -5,11 +5,12 @@
 ##     - states between reboots                ##
 ##     - history data                          ##
 ##                                             ##
-##  Items kept in tyhe recorder should be      ##
-##  for the short term (~30days max).  Longer  ##
-##  term data shoudl go into influxDB          ##
-##                                             ##
-##    SEE influxdb.yaml FOR INFLUXDB FILTERS!  ##
+##  Raw state history is kept for              ##
+##  purge_keep_days. Long-term numeric trends  ##
+##  (temp/humidity/pressure/etc) survive       ##
+##  indefinitely via HA long-term statistics   ##
+##  instead (requires state_class on the       ##
+##  entity - see customize.yaml).              ##
 ##                                             ##
 #################################################
 
@@ -17,7 +18,7 @@ db_url: !secret mariadb_url
 
 auto_purge: true
 auto_repack: true
-purge_keep_days: 7 # how many days of history to keep
+purge_keep_days: 30 # how many days of raw history to keep
 
 include:
   domains:
@@ -69,7 +70,6 @@ exclude:
     - binary_sensor.hot_*
   entities:
     - automation.awtrix_mega_weather
-    - sensor.influxdb_db_size
     - sensor.date
     - sensor.time
     - sensor.date_time

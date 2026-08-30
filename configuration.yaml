@@ -56,7 +56,6 @@ command_line: !include command_line.yaml
 cover: !include covers.yaml
 #climate: !include climate.yaml
 group: !include groups.yaml
-influxdb: !include influxdb.yaml # filters only - influxdb config now in UI
 input_boolean: !include input_booleans.yaml
 input_number: !include input_numbers.yaml # configuring this in helpers is now preferred
 input_select: !include input_selects.yaml
