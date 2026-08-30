@@ -8,49 +8,47 @@ binary_sensor.leak_kitchen_sink_rear:
   device_class: moisture
 binary_sensor.leak_refrigerator:
   device_class: moisture
-binary_sensor.leak_karens_sink:
+binary_sensor.leak_karens_sink_water_leak:
   device_class: moisture
-binary_sensor.leak_yangs_sink:
+binary_sensor.leak_yangs_sink_water_leak:
   device_class: moisture
-binary_sensor.leak_guest_sink:
+binary_sensor.leak_guest_sink_water_leak:
   device_class: moisture
-binary_sensor.leak_guest_toilet:
+binary_sensor.leak_guest_toilet_water_leak:
   device_class: moisture
-binary_sensor.leak_laundry_sink:
+binary_sensor.leak_laundry:
   device_class: moisture
-binary_sensor.leak_washer:
+binary_sensor.leak_dishwasher:
   device_class: moisture
-binary_sensor.front_door_opened:
+binary_sensor.front_door_open:
   friendly_name: Front Door
   device_class: door
   icon: mdi:door
-binary_sensor.back_door_opened:
+binary_sensor.back_door_open:
   friendly_name: Back Door
   device_class: door
   icon: mdi:door
-binary_sensor.garagehouse_door_opened:
+binary_sensor.garagehouse_door_open:
   friendly_name: Garage-House Door
   device_class: door
   icon: mdi:door
-binary_sensor.sunrm_window_1_opened:
+binary_sensor.sun_room_window_1_open:
   friendly_name: Sun Room Window 1
   device_class: window
   icon: mdi:window-closed
-binary_sensor.sunrm_window_2_opened:
+binary_sensor.sun_room_window_2_open:
   friendly_name: Sun Room Window 2
   device_class: window
   icon: mdi:window-closed
-binary_sensor.sunrm_window_3_opened:
+binary_sensor.sun_room_window_3_open:
   friendly_name: Sun Room Window 3
   device_class: window
   icon: mdi:window-closed
-binary_sensor.sunrm_window_4_opened:
+binary_sensor.sun_room_window_4_open:
   friendly_name: Sun Room Window 4
   device_class: window
   icon: mdi:window-closed
-camera.rosie_cleaning_map:
-  friendly_name: Rosie's last cleaning map
-climate.sunrm_ac:
+climate.sunroom_ac:
   friendly_name: Sunroom
 climate.local_ecobee:
   friendly_name: Main House
@@ -108,30 +106,15 @@ light.front_door_lights:
 light.back_door_lights:
   friendly_name: Back Door Lights
   icon: mdi:lightbulb
-proximity.home_ys:
-  icon: mdi:map-marker-distance
-proximity.home_kt:
-  icon: mdi:map-marker-distance
-proximity.home_yskt:
-  icon: mdi:map-marker-multiple
 person.yang:
   entity_picture: /local/avatars/ys.jpg
 person.karen:
   entity_picture: /local/avatars/kt.jpg
-sensor.ssl_cert_expiry:
-  friendly_name: SSL Cert Expiry
-  icon: mdi:timer-sand
-sensor.home_assistant_v2_db:
-  friendly_name: MySQL DB size
-  icon: mdi:database
-sensor.influxdb_db_size:
-  friendly_name: Influx DB Size
-  icon: mdi:database
-sensor.local_ecobee_temperature:
+sensor.local_ecobee_current_temperature:
   friendly_name: Thermostat Temperature
   icon: mdi:thermometer
   device_class: temperature
-sensor.local_ecobee_humidity:
+sensor.local_ecobee_current_humidity:
   friendly_name: Thermostat Humidity
   icon: mdi:water-percent
   device_class: humidity
@@ -147,58 +130,18 @@ sensor.ecobee_avg_indoor_temperature:
   friendly_name: Avg Indoor Temp
   icon: mdi:thermometer
   device_class: temperature
+  state_class: measurement
 sensor.guest_suite_display_battery_percent:
   icon: mdi:battery-unknown
   device_class: battery
-sensor.mrcool_sunroom_temperature:
-  icon: mdi:thermometer
-  device_class: temperature
-sensor.norcoose_outdoor_temperature:
-  friendly_name: Norcoose Temperature
-  icon: mdi:thermometer
-  device_class: temperature
-sensor.norcoose_outdoor_humidity:
-  friendly_name: Norcoose Humidity
-  icon: mdi:water-percent
-  device_class: humidity
-sensor.dark_sky_temperature:
-  friendly_name: Outdoor Temperature
-  icon: mdi:thermometer
-  device_class: temperature
-sensor.dark_sky_humidity:
-  friendly_name: Outdoor Humidity
-  icon: mdi:water-percent
-  device_class: humidity
-sensor.dark_sky_uv_index:
-  friendly_name: UV Index
-sensor.allergy_index_today:
-  friendly_name: Allergy Index
-sensor.master_bedroom_temperature:
-  friendly_name: Master Bedroom Temperature
-  icon: mdi:thermometer
-  device_class: temperature
-# sensor.10m_avg_master_bedroom_temperature:
-#   icon: mdi:format-align-middle
-#   unit_of_measurement: ºF
-sensor.garage_temperature:
-  friendly_name: Garage Temperature
+sensor.actual_sunroom_temperature:
   icon: mdi:thermometer
   device_class: temperature
 sensor.attic_temperature:
   friendly_name: Attic Temperature
   icon: mdi:thermometer
   device_class: temperature
-sensor.rack_exhaust_temperature:
-  friendly_name: Rack Exhaust Temperature
-  icon: mdi:thermometer
-  device_class: temperature
-sensor.rack_exhaust_humidity:
-  friendly_name: Rack Exhaust Humidity
-  icon: mdi:water-percent
-  device_class: humidity
-sensor.rack_exhaust_pressure:
-  friendly_name: Rack Exhaust Pressure
-  icon: mdi:fan
+  state_class: measurement
 sensor.kflwildw56_local_solar_rad_lx:
   friendly_name: Weather Station Raw Solar Local Lx
   icon: mdi:brightness-6
@@ -207,11 +150,13 @@ sensor.kflwildw56_backed_up_local_solar_rad_lx:
   friendly_name: B/U Weather Station Raw Solar Local Rad Lx
   icon: mdi:brightness-6
   device_class: illuminance
+  state_class: measurement
 sensor.filtered_kflwildw56_bu_local_rad_lx:
   friendly_name: Filtered Weather Station BU Local Rad Lx
   icon: mdi:sunglasses
   device_class: illuminance
-sensor.suggested_brightness:
+  state_class: measurement
+sensor.lv_rm_suggested_brightness:
   icon: mdi:brightness-percent
 sensor.filtered_living_rm_visible_light:
   friendly_name: Filtered Living Rm Visible Light
@@ -222,8 +167,8 @@ sensor.raw_living_rm_visible_light:
 switch.candles:
   friendly_name: Candles
   icon: mdi:candle
-switch.above_cabinet_lights:
-  friendly_name: Above Cabinet Lights
+switch.kitchen_cabinet_lights:
+  friendly_name: Kitchen Cabinet Lights
   icon: mdi:lightbulb
 switch.sm_garage_opener_power:
   friendly_name: Sm Garage Door Power
@@ -231,9 +176,6 @@ switch.sm_garage_opener_power:
 switch.lg_garage_opener_power:
   friendly_name: Lg Garage Door Power
   icon: mdi:toggle-switch
-script.scr_unregistered_spt_test:
-  friendly_name: Unregistered SPT Test
-  icon: mdi:gesture-tap-button
 script.scr_manual_say_time:
   friendly_name: Say time
   icon: mdi:clock-time-two
@@ -254,13 +196,13 @@ script.scr_occupied_sim:
 #   icon: mdi:home-map-marker
 sensor.last_static_pressure_test:
   icon: mdi:calendar-clock
-sensor.front_door_lock_battery:
+sensor.front_door_lock_battery_level:
   icon: mdi:battery-unknown
   device_class: battery
-sensor.back_door_lock_battery:
+sensor.back_door_lock_battery_level:
   icon: mdi:battery-unknown
   device_class: battery
-sensor.living_room_motion_battery_level:
+sensor.living_area_motion_battery_level:
   icon: mdi:battery-unknown
   device_class: battery
 sensor.sunrm_window_1_opened_battery:
@@ -299,18 +241,19 @@ sensor.sun_room_remote_4_battery_level:
 sensor.junior_temperature:
   icon: mdi:thermometer
   device_class: temperature
+  state_class: measurement
 sensor.junior_system_fan_status:
   icon: mdi:tailwind
 sensor.junior_cpu_fan_status:
   icon: mdi:memory
 sensor.bacman_temperature:
   icon: mdi:thermometer
+  device_class: temperature
+  state_class: measurement
 sensor.bacman_cpu_fan_status:
   icon: mdi:memory
 sensor.bacman_system_fan_status:
   icon: mdi:tailwind
-vacuum.rosie:
-  friendly_name: Rosie status
 sensor.dishwasher_sonoff_energy_today:
   device_class: energy
 sensor.dishwasher_sonoff_energy_yesterday:
@@ -333,3 +276,85 @@ sensor.hamstation_energy_apparentpower:
   device_class: apparent_power
 device_tracker.meshtastic_ys0_400605850_node_position:
   entity_picture: /local/images/golf-cart.jpg
+# state_class added below so these get HA long-term statistics (InfluxDB migration)
+sensor.actual_sunroom_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.awtrix_b86ae8_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.drybox_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.espresense_adjusted_sunroom_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.espresense_guestbdrm_ds18b20_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.espresense_masterbdrm_ds18b20_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.espresense_office_ds18b20_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.espresense_sunrm_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.mid_rack_temperature_f:
+  device_class: temperature
+  state_class: measurement
+sensor.upper_rack_temperature_f:
+  device_class: temperature
+  state_class: measurement
+sensor.water_temperature:
+  device_class: temperature
+  state_class: measurement
+sensor.awtrix_b86ae8_humidity:
+  device_class: humidity
+  state_class: measurement
+sensor.drybox_relative_humidity:
+  device_class: humidity
+  state_class: measurement
+sensor.drybox_absolute_humidity:
+  state_class: measurement
+sensor.espresense_sunrm_humidity:
+  device_class: humidity
+  state_class: measurement
+sensor.water_pressure:
+  device_class: pressure
+  state_class: measurement
+sensor.water_static_pressure_loss_per_minute:
+  device_class: pressure
+  state_class: measurement
+sensor.unvalidated_water_static_pressure_test_result:
+  device_class: pressure
+  state_class: measurement
+sensor.validated_water_static_pressure_test_result:
+  device_class: pressure
+  state_class: measurement
+sensor.karen_template_weight:
+  device_class: weight
+  state_class: measurement
+sensor.yang_template_weight:
+  device_class: weight
+  state_class: measurement
+sensor.karen_template_impedance:
+  state_class: measurement
+sensor.yang_template_impedance:
+  state_class: measurement
+sensor.irrig_zone_0_gals:
+  device_class: volume
+  state_class: measurement
+sensor.irrig_zone_1_gals:
+  device_class: volume
+  state_class: measurement
+sensor.irrig_zone_2_gals:
+  device_class: volume
+  state_class: measurement
+sensor.irrig_zone_3_gals:
+  device_class: volume
+  state_class: measurement
+sensor.irrig_zone_4_gals:
+  device_class: volume
+  state_class: measurement
