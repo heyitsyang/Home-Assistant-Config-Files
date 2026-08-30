@@ -340,13 +340,13 @@ scr_arrival_announcement:
             {% if is_state('input_boolean.inp_bool_visitor_while_out_flag', 'on') %}
               "Hello Mistress Karen, welcome home.  While you were away, there was a visitor at the front door"
             {% else %}
-              "Hello Mistress Karen. {{ ai_welcome_text.data | regex_replace('[[:punct:]]+$', '') }}" 
+              "Hello Mistress Karen. {{ ai_welcome_text.data | regex_replace('[.,!?;:\'")-]+$', '') }}" 
             {% endif %}
           {% else %}
             {% if is_state('input_boolean.inp_bool_visitor_while_out_flag', 'on') %}
               "Hello Master Yang, welcome home.  While you were away, there was a visitor at the front door"
             {% else %}
-              "Hello Master Yang. {{ ai_welcome_text.data | regex_replace('[[:punct:]]+$', '') }}"
+              "Hello Master Yang. {{ ai_welcome_text.data | regex_replace('[.,!?;:\'")-]+$', '') }}"
             {% endif %}
           {% endif %}
 
@@ -1062,7 +1062,7 @@ scr_say_phrase:
                       - media_player.greatroom_speakers
                       - media_player.garage_speakers
                     # remove trailing punctuation to prevent "cough" sound (piper bug)
-                    media_content_id: media-source://tts/tts.piper?message="{{ message | regex_replace('[[:punct:]]+$', '') }}"
+                    media_content_id: media-source://tts/tts.piper?message="{{ message | regex_replace('[.,!?;:\'")-]+$', '') }}"
                     media_content_type: music
           default:
             - action: media_player.play_media
