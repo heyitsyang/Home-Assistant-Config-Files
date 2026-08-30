@@ -18,13 +18,11 @@ binary_sensor.leak_guest_toilet_water_leak:
   device_class: moisture
 binary_sensor.leak_laundry:
   device_class: moisture
-binary_sensor.leak_dishwasher:
-  device_class: moisture
 binary_sensor.front_door_open:
   friendly_name: Front Door
   device_class: door
   icon: mdi:door
-binary_sensor.back_door_open:
+binary_sensor.back_door_window_door_is_open:
   friendly_name: Back Door
   device_class: door
   icon: mdi:door
