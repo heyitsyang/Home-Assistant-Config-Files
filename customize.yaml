@@ -132,14 +132,6 @@ sensor.ecobee_avg_indoor_temperature:
 sensor.guest_suite_display_battery_percent:
   icon: mdi:battery-unknown
   device_class: battery
-sensor.actual_sunroom_temperature:
-  icon: mdi:thermometer
-  device_class: temperature
-sensor.attic_temperature:
-  friendly_name: Attic Temperature
-  icon: mdi:thermometer
-  device_class: temperature
-  state_class: measurement
 sensor.kflwildw56_local_solar_rad_lx:
   friendly_name: Weather Station Raw Solar Local Lx
   icon: mdi:brightness-6
@@ -275,6 +267,11 @@ sensor.hamstation_energy_apparentpower:
 device_tracker.meshtastic_ys0_400605850_node_position:
   entity_picture: /local/images/golf-cart.jpg
 # state_class added below so these get HA long-term statistics (InfluxDB migration)
+sensor.attic_temperature:
+  friendly_name: Attic Temperature
+  icon: mdi:thermometer
+  device_class: temperature
+  state_class: measurement
 sensor.actual_sunroom_temperature:
   device_class: temperature
   state_class: measurement
