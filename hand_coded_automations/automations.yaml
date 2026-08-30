@@ -463,7 +463,10 @@
         maxrh: "{{ states('sensor.kflwildw56_local_humidity') | float(0) | round(0) }}"
         wind: "{{ (states('sensor.kflwildw56_local_wind_speed') | float(0) * 0.44704) | round(2) }}"
         pressure: "{{ (states('sensor.kflwildw56_local_abs_pressure') | float(29.92) * 3.38639) | round(2) }}"
-        rain: "{{ (states('sensor.kflwildw56_local_hourly_rain_rate') | float(0) * 25.4) | round(2) }}"
+        # cumulative daily total, pushed as-is each run - matches how RainMachine's own
+        # installed Ambient Weather Network parser reports rain (addValue() with dailyrainin,
+        # no delta math), which is confirmed accurate on the Rain Observed graph.
+        rain: "{{ (states('sensor.kflwildw56_local_daily_rain') | float(0) * 25.4) | round(2) }}"
         solarrad: "{{ (states('sensor.kflwildw56_local_solar_rad') | float(0) * 0.0864) | round(2) }}"
 
 
