@@ -62,3 +62,4 @@ zigbee.db-wal
 
 .ha_run.lock
 .cache/brands/integrations/mqtt/logo.png
+.cache/brands/integrations/influxdb/icon@2x.png
