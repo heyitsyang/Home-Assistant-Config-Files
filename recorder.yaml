@@ -51,6 +51,11 @@ include:
     - device_tracker.ys_*
     - device_tracker.kt_*
     - sensor.irrig_*
+    # monitored mesh nodes only - see exclude.entity_globs below
+    - sensor.meshtastic_ys0_1218617136_* # ...9f30
+    - sensor.meshtastic_ys0_1594801232_* # ...bc50
+    - sensor.meshtastic_ys0_2610934133_* # ...b175
+    - sensor.meshtastic_ys0_2997308732_* # ...4d3c (base node)
   entities:
     - device_tracker.opnsense_ys_cell_shencentral_net
     - device_tracker.opnsense_kt_cell_shencentral_net
@@ -68,6 +73,8 @@ exclude:
     - binary_sensor.*_battery*
     - binary_sensor.esp01_*
     - binary_sensor.hot_*
+    # no long-term stats for mesh nodes except the ones included above
+    - sensor.meshtastic_ys0_*
   entities:
     - automation.awtrix_mega_weather
     - sensor.date
