@@ -103,9 +103,9 @@ blueprint:
             value: F
           - label: C
             value: C
-          multiple: false
-          custom_value: false
           sort: false
+          custom_value: false
+          multiple: false
       default: °
     current_temp_var:
       name: The current outside temperature
@@ -184,9 +184,9 @@ blueprint:
             value: risen
           - label: Only show moon if risen + night
             value: night
-          multiple: false
-          custom_value: false
           sort: false
+          custom_value: false
+          multiple: false
       default: night
     use_moon_clear_night:
       name: Swap Clear Night for Moon
@@ -269,9 +269,9 @@ blueprint:
           options:
           - Relative
           - Actual
-          multiple: false
-          custom_value: false
           sort: false
+          custom_value: false
+          multiple: false
       default: Actual
     sun_time_format:
       name: Actual Time Format
@@ -326,9 +326,9 @@ blueprint:
             value: 'true'
           - label: Do not show weather overlay animation
             value: 'false'
-          multiple: false
-          custom_value: false
           sort: false
+          custom_value: false
+          multiple: false
       default: 'true'
     icon_clear_night:
       name: Icon for clear-night
