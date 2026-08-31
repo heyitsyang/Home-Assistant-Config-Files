@@ -4,6 +4,20 @@
 ### SENSORS  ###
 
 #
+# SQL
+#
+
+- platform: sql
+  name: HA DB Size
+  icon: mdi:database
+  scan_interval: 3600
+  query: "SELECT ROUND(page_count * page_size / 1024 / 1024, 1) as size FROM pragma_page_count(), pragma_page_size();"
+  column: "size"
+  unit_of_measurement: "MB"
+  state_class: "measurement"
+  device_class: "data_size"
+
+#
 # Filters are considered a type of sensor
 #
 
