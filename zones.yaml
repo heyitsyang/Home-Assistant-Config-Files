@@ -385,7 +385,7 @@
   radius: 100 # meters
   icon: mdi:blank
 
-- name: Bradenton Village VRC
+- name: Bradenton VRC
   latitude: 28.854888
   longitude: -81.983364
   radius: 61 # meters
@@ -433,12 +433,6 @@
   radius: 88 # meters
   icon: mdi:blank
 
-- name: Cattail VRC
-  latitude: 28.806294
-  longitude: -82.024488
-  radius: 67 # meters
-  icon: mdi:blank
-
 - name: Trillium VRC
   latitude: 28.8418
   longitude: -82.02093
@@ -451,6 +445,12 @@
   radius: 96 # meters
   icon: mdi:blank
   
+- name: Blanchard VRC
+  latitude: 28.771620
+  longitude: -81.989761
+  radius: 100 # meters
+  icon: mdi:blank
+
 - name: Franklin VRC
   latitude: 28.768958
   longitude: -81.946123
@@ -481,9 +481,6 @@
   radius: 90 # unverified
   icon: mdi:blank
 
-# to be added when more info avaialble:
-# Clarendon VRC
-# Franklin VRC
 
 #
 # NEIGHBORHOOD REC CENTERS (VRC)
@@ -533,11 +530,15 @@
   radius: 30 # unverified
   icon: mdi:blank
 
-- name: Bonnybrook NRC
-  latitude: 28.954183707463457
-  longitude: -81.9412588893394
-  radius: 30 # unverified
-  icon: mdi:blank
+# DISABLED 8/31/2026 -- coordinates were a copy of Hilltop NRC's and are wrong.
+# Bonnybrook is 675 Belvedere Boulevard.  OSM carries no house numbers on that
+# road, so this needs a manual pin per the procedure at the top of this file.
+# For reference, Pimlico VRC at 530 Belvedere Blvd is 28.919946, -82.017577.
+# - name: Bonnybrook NRC
+#   latitude:
+#   longitude:
+#   radius: 30 # unverified - NRC average
+#   icon: mdi:blank
 
 - name: Bradford NRC
   latitude: 28.803304
@@ -648,9 +649,9 @@
   icon: mdi:blank
 
 - name: Edenfield NRC
-  latitude: 28.770834
-  longitude: -81.994064
-  radius: 30 # unverified
+  latitude: 28.781252
+  longitude: -81.978504
+  radius: 50 # meters
   icon: mdi:blank
 
 - name: Fernandina NRC
@@ -713,10 +714,16 @@
   radius: 30 # unverified
   icon: mdi:blank
 
+- name: LaGrange NRC
+  latitude: 28.766776
+  longitude: -81.985364
+  radius: 56 # meters
+  icon: mdi:blank
+
 - name: Lake Deaton NRC
-  latitude: 28.954183707463457
-  longitude: -81.9412588893394
-  radius: 30 # unverified
+  latitude: 28.839210526485964
+  longitude: -81.99779275759751
+  radius: 40 # meters
   icon: mdi:blank
 
 - name: Lake Miona Shores NRC
@@ -1034,20 +1041,17 @@
   radius: 55 # meters
   icon: mdi:blank
 
-#
-# NEIGHBORHOOD REC CENTERS
-#
-
-- name: Collier NRC
-  latitude: 28.851990
-  longitude: -82.011360
-  radius: 41 # meters
-  icon: mdi:blank
 
 #
 # SHOPPING CENTERS
 #
 
+- name: Walmart Citrus Blvd
+  latitude: 28.843105
+  longitude: -81.899130
+  radius: 161 # meters
+  icon: mdi:blank
+  
 - name: Walmart Wedgewood Ln
   latitude: 28.92978
   longitude: -82.03122
