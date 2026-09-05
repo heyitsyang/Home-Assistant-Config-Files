@@ -57,7 +57,7 @@ scr_goodmorning:
       continue_on_error: true
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c # find the alexa device_id by creating this action in Developer Tools>Actions
-        text_command: when will it rain today # by using UI mode, select the alexa device, then switch to editor to see id
+        text_command: when will it rain today       # by using UI mode, select the alexa device, then switch to editor to see id
     - if:
         - condition: state
           entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
@@ -78,7 +78,7 @@ scr_goodmorning:
               While you were asleep, there was a visitor at the front door.
               You might want to check for packages.
     - delay:
-        seconds: 3 # delay to reduce noise competition from shades
+        seconds: 5 # delay to reduce noise competition from shades
     - action: cover.set_cover_position
       target:
         entity_id: cover.master_bedroom_inner_shades
