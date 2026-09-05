@@ -6,3 +6,9 @@
 
 
 #villages_square_events: /share/scripts/villages_square_events.sh
+
+# used by scr_calendar_summary — message is base64-encoded before templating
+# into the command so calendar event titles can't break shell quoting.
+# shell_command does not invoke a shell itself (no pipes/redirects), so the
+# actual decode-and-write happens inside the script it calls
+write_calendar_summary: /share/scripts/write_calendar_summary.sh "{{ message_b64 }}"

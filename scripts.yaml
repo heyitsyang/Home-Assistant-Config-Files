@@ -39,6 +39,159 @@ scr_ha_startup:
               - input_boolean.inp_bool_visitor_while_sleeping_flag
 
 #
+# CALENDAR SUMMARY SCRIPT
+#   Builds an Alexa-style spoken summary of today's events (future-only,
+#   all-day events first) plus a 5-day look-ahead for birthdays/
+#   anniversaries, writes it to /share/calendar_summary.txt, and speaks
+#   it on the master bedroom Echo. Called (blocking) from scr_goodmorning.
+#
+scr_calendar_summary:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    # 1. Pull today's events (00:00 today through 00:00 tomorrow) from every
+    #    included calendar
+    - action: calendar.get_events
+      target:
+        entity_id:
+          - calendar.yangminshengmailcom
+          - calendar.shen_bdays_annivs_gatherings
+          - calendar.karenpcsmomshengmailcom
+          - calendar.optional_activities
+          - calendar.yskt_events
+          - calendar.birthdays
+      data:
+        start_date_time: "{{ today_at('00:00:00').isoformat() }}"
+        end_date_time: "{{ (today_at('00:00:00') + timedelta(days=1)).isoformat() }}"
+      response_variable: today_events_response
+
+    # 2. Merge, then split into all-day (date-only "start", 10-char
+    #    "YYYY-MM-DD") vs timed events, keeping only timed events that
+    #    haven't started yet, sorted earliest-first
+    - variables:
+        all_events_today: >-
+          {%- set ns = namespace(events=[]) -%}
+          {%- for cal_id, cal_data in today_events_response.items() -%}
+            {%- for ev in cal_data.events -%}
+              {%- set ns.events = ns.events + [ev] -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ ns.events }}
+        all_day_events: >-
+          {%- set ns = namespace(events=[]) -%}
+          {%- for ev in all_events_today -%}
+            {%- if (ev.start | length) == 10 -%}
+              {%- set ns.events = ns.events + [ev] -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.events }}
+        timed_events_future: >-
+          {%- set ns = namespace(events=[]) -%}
+          {%- for ev in all_events_today -%}
+            {%- if (ev.start | length) > 10 and as_datetime(ev.start) > now() -%}
+              {%- set ns.events = ns.events + [ev] -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ ns.events | sort(attribute='start') }}
+
+    # 3. Compose the "today" portion: all-day events first (skipped when
+    #    zero), then the timed-events sentence (always present)
+    - variables:
+        today_message: >-
+          {%- set ns = namespace(parts=[]) -%}
+          {%- if all_day_events | count == 1 -%}
+            {%- set ns.parts = ns.parts + ["You have 1 all day event: '" ~ all_day_events[0].summary ~ "'."] -%}
+          {%- elif all_day_events | count > 1 -%}
+            {%- set titles = namespace(list=[]) -%}
+            {%- for ev in all_day_events -%}
+              {%- set titles.list = titles.list + ["'" ~ ev.summary ~ "'"] -%}
+            {%- endfor -%}
+            {%- set ns.parts = ns.parts + ["You have " ~ (all_day_events | count) ~ " all day events: " ~ (titles.list | join(', ')) ~ "."] -%}
+          {%- endif -%}
+          {%- if timed_events_future | count == 0 -%}
+            {%- set ns.parts = ns.parts + ["You have no events remaining today."] -%}
+          {%- elif timed_events_future | count == 1 -%}
+            {%- set dt = as_datetime(timed_events_future[0].start) | as_local -%}
+            {%- set t = dt.strftime('%-I %p') if dt.minute == 0 else dt.strftime('%-I:%M %p') -%}
+            {%- set ns.parts = ns.parts + ["Today, there is one event. At " ~ t ~ ", there's '" ~ timed_events_future[0].summary ~ "'."] -%}
+          {%- else -%}
+            {%- set evparts = namespace(list=[]) -%}
+            {%- for ev in timed_events_future -%}
+              {%- set dt = as_datetime(ev.start) | as_local -%}
+              {%- set t = dt.strftime('%-I %p') if dt.minute == 0 else dt.strftime('%-I:%M %p') -%}
+              {%- if loop.index == 1 -%}
+                {%- set evparts.list = evparts.list + ["Right now, there's '" ~ ev.summary ~ "'."] -%}
+              {%- elif loop.index == 2 -%}
+                {%- set evparts.list = evparts.list + ["Next, at " ~ t ~ ", there's '" ~ ev.summary ~ "'."] -%}
+              {%- else -%}
+                {%- set evparts.list = evparts.list + ["Then, at " ~ t ~ ", there's '" ~ ev.summary ~ "'."] -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- set ns.parts = ns.parts + ["Today, there are " ~ (timed_events_future | count) ~ " events remaining. " ~ (evparts.list | join(' '))] -%}
+          {%- endif -%}
+          {{ ns.parts | join(' ') }}
+
+    # 4. Pull the look-ahead window: tomorrow 00:00 through +6 days 00:00
+    #    (i.e. tomorrow through 5 days out, inclusive), birthdays/annivs only
+    - action: calendar.get_events
+      target:
+        entity_id:
+          - calendar.birthdays
+          - calendar.shen_bdays_annivs_gatherings
+      data:
+        start_date_time: "{{ (today_at('00:00:00') + timedelta(days=1)).isoformat() }}"
+        end_date_time: "{{ (today_at('00:00:00') + timedelta(days=6)).isoformat() }}"
+      response_variable: lookahead_events_response
+
+    # 5. Merge and sort the look-ahead events (all-day, so lexicographic
+    #    sort on "YYYY-MM-DD" is chronologically correct)
+    - variables:
+        lookahead_events: >-
+          {%- set ns = namespace(events=[]) -%}
+          {%- for cal_id, cal_data in lookahead_events_response.items() -%}
+            {%- for ev in cal_data.events -%}
+              {%- set ns.events = ns.events + [ev] -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ ns.events | sort(attribute='start') }}
+
+    # 6. Compose the look-ahead section (empty when nothing upcoming)
+    - variables:
+        lookahead_message: >-
+          {%- if lookahead_events | count == 0 -%}
+          {%- elif lookahead_events | count == 1 -%}
+            {%- set dt = strptime(lookahead_events[0].start, '%Y-%m-%d') -%}
+            You have an upcoming event on {{ dt.strftime('%A, %B %-d') }}, '{{ lookahead_events[0].summary }}'.
+          {%- else -%}
+            {%- set ns = namespace(parts=[]) -%}
+            {%- for ev in lookahead_events -%}
+              {%- set dt = strptime(ev.start, '%Y-%m-%d') -%}
+              {%- set ns.parts = ns.parts + ["On " ~ dt.strftime('%A, %B %-d') ~ ", '" ~ ev.summary ~ "'."] -%}
+            {%- endfor -%}
+            You have {{ lookahead_events | count }} upcoming events in the next 5 days. {{ ns.parts | join(' ') }}
+          {%- endif -%}
+
+    # 7. Final combined message, whitespace collapsed
+    - variables:
+        calendar_summary_message: >-
+          {{ (today_message ~ ' ' ~ lookahead_message) | trim | regex_replace('\s+', ' ') }}
+
+    # 8. Write to /share/calendar_summary.txt via shell_command (the
+    #    "file" notify platform doesn't exist in this HA version); the
+    #    message is base64-encoded before templating into the shell
+    #    command so event titles can't break shell quoting
+    - action: shell_command.write_calendar_summary
+      data:
+        message_b64: "{{ calendar_summary_message | base64_encode }}"
+
+    # 9. Speak the same summary on the master bedroom Echo
+    - action: notify.send_message
+      data:
+        message: "{{ calendar_summary_message }}"
+      target:
+        entity_id: notify.echo_masterbdrm_speak
+
+#
 # GOOD MORNING SCRIPT
 #   Other actions are accomplished in the Alexa routine - see Alexa App
 #
@@ -53,6 +206,8 @@ scr_goodmorning:
       target:
         entity_id:
           - input_boolean.inp_bool_sleeping
+    - action: script.scr_calendar_summary # blocking call — speaks the calendar summary before the weather announcement
+      continue_on_error: true  
     - action: alexa_devices.send_info_skill
       continue_on_error: true
       data:
