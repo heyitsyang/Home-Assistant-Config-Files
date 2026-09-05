@@ -52,7 +52,8 @@ smart_home:
       - script.scr_partially_close_masterbdrm_outer_shades
       - script.scr_goodnight
       - script.scr_goodmorning
-    #     - script.scr_vacuum_start_custom_cleaning
+      - script.scr_calendar_summary
+      #     - script.scr_vacuum_start_custom_cleaning
       - script.scr_reset_mood_lights_to_default
       - sensor.garage_controller_temperature
       - sensor.ecobee_avg_indoor_temperature
