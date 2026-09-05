@@ -54,10 +54,7 @@ scr_goodmorning:
         entity_id:
           - input_boolean.inp_bool_sleeping
     - action: alexa_devices.send_info_skill
-      data:
-        device_id: 67ed12dd11b803c76f3c3d8e614a232c
-        info_skill: calendar
-    - action: alexa_devices.send_info_skill
+      continue_on_error: true
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c
         info_skill: weather
