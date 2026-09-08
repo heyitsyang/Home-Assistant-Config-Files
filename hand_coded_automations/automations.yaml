@@ -1039,11 +1039,15 @@
   alias: "aut drybox humidity above tolerance"
   initial_state: true
   trigger:
-    - platform: numeric_state
+    - platform: time
+      at: "09:00:00"
+  condition:
+    - condition: time
+      weekday:
+        - mon
+    - condition: numeric_state
       entity_id: sensor.drybox_relative_humidity
       above: input_number.inp_num_drybox_relative_humidity_threshold
-      for:
-        hours: 12
   actions:
     - action: notify.persistent_notification
       data:
