@@ -1039,15 +1039,30 @@
   alias: "aut drybox humidity above tolerance"
   initial_state: true
   trigger:
-    - platform: time
+    - platform: numeric_state # sensor reports ~hourly; 2h "for" ~= 3 successive readings above
+      id: humidity_excursion  # threshold, debounced against brief spikes from opening the box
+      entity_id: sensor.drybox_relative_humidity
+      above: input_number.inp_num_drybox_relative_humidity_threshold
+      for:
+        hours: 2
+    - platform: time # weekly backstop in case the excursion trigger above was already
+      id: weekly_check # consumed (edge trigger) and the humidity is still out of tolerance
       at: "09:00:00"
   condition:
-    - condition: time
-      weekday:
-        - mon
     - condition: numeric_state
       entity_id: sensor.drybox_relative_humidity
       above: input_number.inp_num_drybox_relative_humidity_threshold
+    - condition: or
+      conditions:
+        - condition: trigger
+          id: humidity_excursion
+        - condition: and
+          conditions:
+            - condition: trigger
+              id: weekly_check
+            - condition: time
+              weekday:
+                - mon
   actions:
     - action: notify.persistent_notification
       data:
