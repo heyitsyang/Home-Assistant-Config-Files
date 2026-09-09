@@ -44,6 +44,66 @@
 #   sampling_size: 600 # default state value is the running average of this many samples
 #   precision: 2 # number of decimal places
 
+#
+# RECORDER LOAD REDUCTION - system_monitor/opnsense sensors update every 10-70s and never
+# repeat a value, so recording them raw was the majority of the DB size. These "_average_internal"
+# statistics sensors maintain a rolling 5-min average but are themselves excluded from recorder
+# (see recorder.yaml). A trigger-based template sensor in templates.yaml samples each one every
+# 5 minutes and that sampled sensor is what actually gets recorded - 288 rows/day instead of
+# thousands, while still reflecting the average of that 5-min window rather than a single instant.
+#
+- platform: statistics
+  name: "System CPU Usage Average Internal"
+  unique_id: system_cpu_usage_average_internal
+  entity_id: sensor.system_monitor_processor_use
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+
+- platform: statistics
+  name: "OPNsense CPU Usage Average Internal"
+  unique_id: opnsense_cpu_usage_average_internal
+  entity_id: sensor.opnsense_shencentral_net_cpu_usage
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+
+- platform: statistics
+  name: "OPNsense CPU 0 Temp Average Internal"
+  unique_id: opnsense_cpu_0_temp_average_internal
+  entity_id: sensor.opnsense_shencentral_net_temp_cpu_0
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+  precision: 1
+
+- platform: statistics
+  name: "OPNsense CPU 1 Temp Average Internal"
+  unique_id: opnsense_cpu_1_temp_average_internal
+  entity_id: sensor.opnsense_shencentral_net_temp_cpu_1
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+  precision: 1
+
+- platform: statistics
+  name: "OPNsense CPU 2 Temp Average Internal"
+  unique_id: opnsense_cpu_2_temp_average_internal
+  entity_id: sensor.opnsense_shencentral_net_temp_cpu_2
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+  precision: 1
+
+- platform: statistics
+  name: "OPNsense CPU 3 Temp Average Internal"
+  unique_id: opnsense_cpu_3_temp_average_internal
+  entity_id: sensor.opnsense_shencentral_net_temp_cpu_3
+  state_characteristic: mean
+  max_age:
+    minutes: 5
+  precision: 1
+
 - platform: filter
   name: "Filtered Living Rm Visible Light"
   unique_id: filtered_living_rm_visible_light

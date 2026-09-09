@@ -235,6 +235,51 @@
         {% endif %}
 
 #
+# RECORDER LOAD REDUCTION - samples the rolling 5-min average statistics sensors
+# (sensors.yaml) every 5 minutes so only these entities hit the recorder, not the
+# noisy system_monitor/opnsense sources they're derived from.
+#
+- trigger:
+    - trigger: time_pattern
+      minutes: "/5"
+  sensor:
+    - name: "System CPU Usage (5min Average)"
+      unique_id: system_cpu_usage_average_5m
+      unit_of_measurement: "%"
+      icon: mdi:cpu-64-bit
+      state_class: measurement
+      state: "{{ states('sensor.system_cpu_usage_average_internal') }}"
+    - name: "OPNsense CPU Usage (5min Average)"
+      unique_id: opnsense_cpu_usage_average_5m
+      unit_of_measurement: "%"
+      state_class: measurement
+      state: "{{ states('sensor.opnsense_cpu_usage_average_internal') }}"
+    - name: "OPNsense CPU 0 Temp (5min Average)"
+      unique_id: opnsense_cpu_0_temp_average_5m
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      state: "{{ states('sensor.opnsense_cpu_0_temp_average_internal') }}"
+    - name: "OPNsense CPU 1 Temp (5min Average)"
+      unique_id: opnsense_cpu_1_temp_average_5m
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      state: "{{ states('sensor.opnsense_cpu_1_temp_average_internal') }}"
+    - name: "OPNsense CPU 2 Temp (5min Average)"
+      unique_id: opnsense_cpu_2_temp_average_5m
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      state: "{{ states('sensor.opnsense_cpu_2_temp_average_internal') }}"
+    - name: "OPNsense CPU 3 Temp (5min Average)"
+      unique_id: opnsense_cpu_3_temp_average_5m
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      state: "{{ states('sensor.opnsense_cpu_3_temp_average_internal') }}"
+
+#
 # CLIMATE
 #
 

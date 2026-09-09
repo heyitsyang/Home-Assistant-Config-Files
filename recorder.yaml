@@ -82,3 +82,19 @@ exclude:
     - sensor.date_time
     - sensor.time_date
     - sun.sun
+    # raw sources now sampled every 5 min via sensors.yaml/templates.yaml - see
+    # sensor.*_5min_average for the entities that actually get recorded
+    - sensor.system_monitor_processor_use
+    - sensor.opnsense_shencentral_net_cpu_usage
+    - sensor.opnsense_shencentral_net_temp_cpu_0
+    - sensor.opnsense_shencentral_net_temp_cpu_1
+    - sensor.opnsense_shencentral_net_temp_cpu_2
+    - sensor.opnsense_shencentral_net_temp_cpu_3
+    # internal statistics helpers - update every source tick, only their 5-min
+    # sampled counterparts (sensor.*_5min_average) need to be recorded
+    - sensor.system_cpu_usage_average_internal
+    - sensor.opnsense_cpu_usage_average_internal
+    - sensor.opnsense_cpu_0_temp_average_internal
+    - sensor.opnsense_cpu_1_temp_average_internal
+    - sensor.opnsense_cpu_2_temp_average_internal
+    - sensor.opnsense_cpu_3_temp_average_internal
