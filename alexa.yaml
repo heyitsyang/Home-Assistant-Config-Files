@@ -103,6 +103,8 @@ smart_home:
       name: "Goodmorning script"
     script.scr_goodnight:
       name: "Goodnight Script"
+    script.scr_calendar_summary:
+      name: "Calendar Summary"
     # script.scr_vacuum_start_custom_cleaning:
     #   name: "Rosie"
     #   display_categories: "VACUUM_CLEANER"
