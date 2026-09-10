@@ -68,7 +68,7 @@ api:
 
 # Enable logging
 logger:
-  level: DEBUG  # temporarily raised from INFO to trace Midea UART status frames
+  level: INFO
   baud_rate: 0  # 0 disables logging via UART
 
 uart:
