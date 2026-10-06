@@ -53,7 +53,6 @@ smart_home:
       - script.scr_goodnight
       - script.scr_goodmorning
       - script.scr_calendar_summary
-      #     - script.scr_vacuum_start_custom_cleaning
       - script.scr_reset_mood_lights_to_default
       - sensor.garage_controller_temperature
       - sensor.ecobee_avg_indoor_temperature
@@ -105,9 +104,6 @@ smart_home:
       name: "Goodnight Script"
     script.scr_calendar_summary:
       name: "Calendar Summary"
-    # script.scr_vacuum_start_custom_cleaning:
-    #   name: "Rosie"
-    #   display_categories: "VACUUM_CLEANER"
     input_boolean.inp_bool_announcements:
       name: "Announcements"
     # cover.large_garage_door:

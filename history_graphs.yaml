@@ -26,7 +26,7 @@ gr3:
   entities:
     - sensor.kflwildw56_aws_temp
     - sensor.local_ecobee_current_temperature
-    - sensor.actual_sunroom_temperature
+    - sensor.mrcool_sunroom_temperature
     - sensor.attic_temperature
     - sensor.garage_controller_temperature
     - sensor.upper_rack_temperature_f

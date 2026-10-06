@@ -168,36 +168,6 @@
         title: "SPT consecutive aborts exceeds threshold"
         message: "SPT consecutive aborts: {{ state_attr('sensor.spt_data_status', 'consec_aborts') }}"
 
-#
-# START VACUUM (ROSIE)
-#
-# - id: aut_start_vacuum
-#   alias: "aut start vacuum"
-#   initial_state: true
-#   trigger:
-#     - platform: time
-#       at: "07:35:00"
-#   conditions:
-#     - condition: time
-#       weekday:
-#         - sun
-#     - condition: state
-#       entity_id: input_boolean.inp_bool_vacuum_every_sunday
-#       state: "on"
-#     - condition: state # do not execute if extended absence ON
-#       entity_id: input_boolean.inp_bool_extended_absence_mode
-#       state: "off"
-#     - condition: state
-#       entity_id: input_boolean.inp_bool_guest_mode # do not execute unless Overnight Guest is OFF
-#       state: "off" # in case we have a guest
-#     - condition: template # testing for 'not_home' doesn't work if in a known zone so use != 'home'
-#       value_template: "{{ states('person.yang') != 'home' }}"
-#     - condition: template # testing for 'not_home' doesn't work if in a known zone so use != 'home'
-#       value_template: "{{ states('person.karen') != 'home' }}"
-#   actions:
-#     - action: script.scr_vacuum_start_custom_cleaning
-
-#
 # SET SLEEPING & ANNOUNCEMENT HOURS AUTOMATICALLY
 #
 # *** input_datetime_assume_asleep is also used in startup actions in scripts.yaml  ***
@@ -1367,24 +1337,6 @@
       data:
         message: "The dryer cycle has finished"
 
-#
-# VACUUM DONE NOTIFICATION
-#
-#
-# - id: aut_vacuum_done_announce
-#   alias: "aut vacuum done"
-#   initial_state: true
-#   trigger:
-#     - platform: state
-#       entity_id: vacuum.rosie
-#       from: "cleaning"
-#       to: "docked"
-#   actions:
-#     - action: notify.alexa_yellow_ring
-#       data:
-#         message: "Rosie is a dirty girl"
-
-#
 # AUTO LIVING AREA LIGHTING - MOTION
 #
 - id: aut_auto_living_area_motion
