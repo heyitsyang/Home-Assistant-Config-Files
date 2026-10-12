@@ -309,27 +309,6 @@ blueprint:
           step: 1.0
           mode: slider
       default: 30
-    show_overlay:
-      name: Show overlay animation
-      description: "\nChoose to show an animated overlay depicting the weather conditions.
-        The following mappings are used:\n- **Clear**: `clear-night`, `cloudy`, `exceptional`,
-        `fog`, `partlycloudy`, `sunny`, `windy`, `windy-variant`  \n  → No animation,
-        off\n\n- **Frost**: `hail`\n  → Light frost effect on the display\n\n- **Thunder**:
-        `lightning`, `lightning-rainy`\n  → Rain animation with thunder flashes\n\n-
-        **Storm**: `pouring`  \n  → Heavy rain animation\n\n- **Drizzle**: `rainy`
-        \ \n  → Light rain animation\n\n- **Snow**: `snowy`, `snowy-rainy`\n  → Snow
-        falls vertically\n"
-      selector:
-        select:
-          options:
-          - label: Show weather overlay animation
-            value: 'true'
-          - label: Do not show weather overlay animation
-            value: 'false'
-          multiple: false
-          custom_value: false
-          sort: false
-      default: 'true'
     icon_clear_night:
       name: Icon for clear-night
       description: "\nThe default clear_night icon is: \n\n  ![](https://developer.lametric.com/content/apps/icon_thumbs/53383_icon_thumb.gif?v=2)
@@ -644,18 +623,6 @@ variables:
     \ {{clear_night_dict[moon_phase]}}\n{%- elif (sun_next_event == 'sunrise') and
     use_moon_sunny_night and (current_condition == 'sunny') -%}\n  \n{%- else %}\n
     \ {{ icon_dict[current_condition] }}\n{%- endif %}\n"
-  overlay_dict: '{{ dict({''clear-night'': ''clear'', ''cloudy'': ''clear'', ''exceptional'':
-    ''clear'', ''fog'': ''clear'', ''hail'': ''frost'', ''lightning'': ''thunder'',
-    ''lightning-rainy'': ''thunder'', ''partlycloudy'': ''clear'', ''pouring'': ''storm'',
-    ''rainy'': ''drizzle'', ''rain'': ''rain'', ''snowy'': ''snow'', ''snowy-rainy'':
-    ''snow'', ''sunny'': ''clear'', ''windy'': ''clear'',  ''windy-variant'': ''clear''})}}'
-  overlay: '{{ overlay_dict[current_condition] }}
-
-    '
-  show_overlay_input: !input show_overlay
-  show_overlay: '{{ (show_overlay_input) == ''true'' }}
-
-    '
   moon_data: "{%- macro draw_moon(phase,x=22,y=0) %}\n  {%- if phase == 'first_quarter'
     \ %}\n    {\"db\":[{{x}},{{y}},8,8,[0,0,3355443,3355443,14079702,14079702,0,0,0,3355443,3355443,3355443,15790320,14079702,14079702,0,3355443,3355443,3355443,3355443,13355979,13355979,14079702,14079702,3355443,3355443,1644825,3355443,13355979,15790320,15790320,14079702,3355443,3355443,1644825,3355443,15790320,15790320,15790320,14079702,3355443,3355443,3355443,3355443,15790320,13355979,14079702,14079702,0,3355443,3355443,3355443,15790320,14079702,14079702,0,0,0,3355443,3355443,14079702,14079702,0,0]]}\n
     \ {%- endif  %}\n  {%- if phase == 'full_moon'  %}\n    {\"db\":[{{x}},{{y}},8,8,[0,0,14079702,14079702,14079702,14079702,0,0,0,14079702,14079702,15790320,15790320,14079702,14079702,0,14079702,14079702,15790320,15790320,11974326,11974326,14079702,14079702,14079702,15790320,11974326,15790320,11974326,15790320,15790320,14079702,14079702,15790320,11974326,15790320,15790320,15790320,15790320,14079702,14079702,14079702,15790320,15790320,15790320,11974326,14079702,14079702,0,14079702,14079702,11974326,15790320,14079702,14079702,0,0,0,14079702,14079702,14079702,14079702,0,0]]}\n
@@ -671,9 +638,9 @@ variables:
     {{draw_moon(moon_phase,0,0)}} {%- else -%} {{draw_moon(moon_phase,23,0)}} {%-
     endif -%}\n"
 trigger:
-- platform: time_pattern
-  minutes: /1
-- platform: state
+- trigger: time_pattern
+  seconds: /5
+- trigger: state
   entity_id: !input forecast_var
   id: Changes
   enabled: true
@@ -734,8 +701,7 @@ action:
           endif -%}\n\n    {% if show_moon %}\n    ,{{moon_data}}\n    {% endif %}\n
           \   ],\n    \"icon\": \"{{icon}}\",\n    \"duration\": {{message_duration}},\n
           \   \"pushIcon\": 2,\n    \"lifetime\": 120,\n    \"lifetimeMode\":1,\n
-          \   \"weather\": \"{{current_condition}}\"\n    {% if show_overlay %}\n
-          \   ,\"overlay\": \"{{overlay}}\"\n    {% endif %}\n    }"
+          \   \"weather\": \"{{current_condition}}\"\n    }"
     - action: mqtt.publish
       data:
         qos: 0
