@@ -183,27 +183,6 @@ sensor.back_door_lock_battery_level:
 sensor.living_area_motion_battery_level:
   icon: mdi:battery-unknown
   device_class: battery
-sensor.sunrm_window_1_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.sunrm_window_2_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.sunrm_window_3_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.sunrm_window_4_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.front_door_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.back_door_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
-sensor.garagehouse_door_opened_battery:
-  icon: mdi:battery-unknown
-  device_class: battery
 sensor.sun_room_remote_1_battery_level:
   icon: mdi:battery-unknown
   device_class: battery
@@ -315,16 +294,6 @@ sensor.unvalidated_water_static_pressure_test_result:
   state_class: measurement
 sensor.validated_water_static_pressure_test_result:
   device_class: pressure
-  state_class: measurement
-sensor.karen_template_weight:
-  device_class: weight
-  state_class: measurement
-sensor.yang_template_weight:
-  device_class: weight
-  state_class: measurement
-sensor.karen_template_impedance:
-  state_class: measurement
-sensor.yang_template_impedance:
   state_class: measurement
 sensor.irrig_zone_0_gals:
   device_class: volume
