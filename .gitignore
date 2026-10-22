@@ -13,7 +13,6 @@
 .storage
 .cloud
 .cache
-.addon-env
 .claude
 .claudecode
 custom_components
@@ -24,7 +23,6 @@ image
 NOTES
 zigbee2mqtt
 ccab4aaf_frigate
-claude-code-persist
 tmp_debug
 
 # Ignore files
@@ -49,7 +47,6 @@ google_calendars.yaml
 *.log
 *.log.*
 *.db
-claude-code-persist/.claude/.credentials.json
 
 
 blueprints/automation/homeassistant/motion_light.yaml
