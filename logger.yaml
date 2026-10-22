@@ -74,3 +74,7 @@ filters:
   homeassistant.components.automation.aut_arrival_announcement:
     - "The model is overloaded. Please try again later."
     - "This model is currently experiencing high demand."
+  homeassistant.components.script.scr_arrival_announcement:
+    - "This model is currently experiencing high demand."
+  homeassistant.components.google_generative_ai_conversation:
+    - "This model is currently experiencing high demand."
