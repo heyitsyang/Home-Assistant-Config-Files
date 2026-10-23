@@ -19,12 +19,12 @@ logger:
 
 # Enable Home Assistant API
 api:
-  encryption:
-    key: "49JYSBjzsdDaoSTGL5BZYQUbe+T8nXX1APjCbkbh+zA="
 
 ota:
   - platform: esphome
-    password: "4d007ad452b2308f0433831018f7cf6d"
+    # Empty password: the running firmware still asks for auth, and this
+    # makes the uploader answer with "" (matches the device)
+    password: ""
 
 wifi:
   ssid: !secret wifi_ssid
