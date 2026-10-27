@@ -120,7 +120,7 @@ scr_calendar_summary:
               {%- set dt = as_datetime(ev.start) | as_local -%}
               {%- set t = dt.strftime('%-I %p') if dt.minute == 0 else dt.strftime('%-I:%M %p') -%}
               {%- if loop.index == 1 -%}
-                {%- set evparts.list = evparts.list + ["Right now, there's '" ~ ev.summary ~ "'."] -%}
+                {%- set evparts.list = evparts.list + ["First, at " ~ t ~ ", there's '" ~ ev.summary ~ "'."] -%}
               {%- elif loop.index == 2 -%}
                 {%- set evparts.list = evparts.list + ["Next, at " ~ t ~ ", there's '" ~ ev.summary ~ "'."] -%}
               {%- else -%}
