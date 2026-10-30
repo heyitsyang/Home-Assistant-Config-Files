@@ -2544,27 +2544,35 @@
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_1_inner_battery
       below: 20
+      for: "02:00:00" # shades report hourly and occasionally send a single bogus 0%
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_1_outer_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_2_inner_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_2_outer_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_3_inner_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_3_outer_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_4_inner_battery
       below: 20
+      for: "02:00:00"
     - platform: numeric_state
       entity_id: sensor.master_bedroom_shade_4_outer_battery
       below: 20
+      for: "02:00:00"
   actions:
     - action: notify.send_message
       target:
