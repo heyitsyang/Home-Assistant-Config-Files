@@ -152,6 +152,37 @@
       state: >-
         {{ is_state('input_boolean.inp_bool_lum_mood_lights_f_solar_trig','on') }}
 
+# Kitchen lights are all on, so the upper LEDs stay on the all-white preset until one turns off.
+#   Same test as the aut_kitchen_mood_100_bright_white trigger - keep the two in step
+- binary_sensor:
+    - name: kitchen_upper_leds_all_white_active
+      unique_id: kitchen_upper_leds_all_white_active
+      state: >-
+        {{ (is_state('light.island_lights', 'on') or is_state('light.island_lights', 'unavailable'))
+        and (is_state('light.kitchen_cabinet_lights', 'on') or is_state('light.kitchen_cabinet_lights', 'unavailable'))
+        and (is_state('light.kitchen_leds_lower', 'on') or is_state('light.kitchen_leds_lower', 'unavailable')) }}
+
+# Exposed to Alexa as "Mood lights". A group can't load a preset, so turn_on does it first.
+- switch:
+    - name: mood_lights
+      unique_id: mood_lights
+      state: >-
+        {{ is_state('group.mood_lights', 'on') }}
+      turn_on:
+        - if:
+            - condition: state
+              entity_id: binary_sensor.kitchen_upper_leds_all_white_active
+              state: "off"
+          then:
+            - action: script.scr_turn_on_kitchen_leds_upper
+        - action: homeassistant.turn_on
+          target:
+            entity_id: group.mood_lights
+      turn_off:
+        - action: homeassistant.turn_off
+          target:
+            entity_id: group.mood_lights
+
 - binary_sensor:
     - name: lum_sunrm_shades_trig
       unique_id: lum_sunrm_shades_trig

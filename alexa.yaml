@@ -22,9 +22,10 @@ smart_home:
       - fan
     exclude_entity_globs:
       - light.*leds*segment*
+      - light.unifi_*_led
     include_entities:
       - group.garage_opener_power
-      - group.mood_lights
+      - switch.mood_lights
       - input_boolean.party_mode
       - input_boolean.inp_bool_theater_mode
       - input_boolean.inp_bool_guest_mode
@@ -74,7 +75,6 @@ smart_home:
       - switch.back_door_lights # mapped to lights.xxx
       - switch.entryway_lights # mapped to lights.xxx
       - switch.kitchen_cabinet_lights # mapped to lights.xxx
-      - switch.master_closet_lights # mapped to lights.xxx
       - switch.eating_area_lights # mapped to lights.xxx
 
   # Create friendlier aliases for Alexa
@@ -180,7 +180,7 @@ smart_home:
       display_categories: TEMPERATURE_SENSOR
     group.garage_opener_power:
       name: "Garage opener power"
-    group.mood_lights:
+    switch.mood_lights:
       name: "Mood lights"
       display_categories: LIGHT
     light.office_cabinet_leds_master:

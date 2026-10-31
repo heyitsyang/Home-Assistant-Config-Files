@@ -30,10 +30,6 @@
   entity_id: switch.entryway_lights
 
 - platform: switch
-  name: Master Closet Lights
-  entity_id: switch.master_closet_lights
-
-- platform: switch
   name: Kitchen Cabinet Lights
   entity_id: switch.kitchen_cabinet_lights
 

@@ -933,12 +933,17 @@ scr_mood_lighting_on:
         - action: scene.turn_on
           target:
             entity_id: scene.sun_room_uplights_20
+    - if: # preset first so the LEDs don't flash their old settings; leave all-white alone
+        - condition: state
+          entity_id: binary_sensor.kitchen_upper_leds_all_white_active
+          state: "off"
+      then:
+        - action: script.scr_turn_on_kitchen_leds_upper
     - action: homeassistant.turn_on
       target:
         entity_id: group.mood_lights
-    - action: script.scr_turn_on_kitchen_leds_upper
 
-scr_turn_on_kitchen_leds_upper:
+scr_turn_on_kitchen_leds_upper: # the presets turn the LEDs on themselves
   sequence:
     - if:
         - condition: time
@@ -946,21 +951,12 @@ scr_turn_on_kitchen_leds_upper:
             - mon # night before trash day
             - thu # night before trash day
       then:
-        - action: light.turn_on
-          target:
-            entity_id: light.kitchen_leds_upper
-        - action: light.turn_on
-          target:
-            entity_id: light.kitchen_leds_upper_main
         - action: select.select_option
           target:
             entity_id: select.kitchen_leds_upper_preset
           data:
             option: "Trash Night"
       else:
-        - action: light.turn_on
-          target:
-            entity_id: light.kitchen_leds_upper_main
         - action: script.scr_reset_mood_lights_to_default
 
 scr_reset_mood_lights_to_default:
@@ -1003,11 +999,16 @@ scr_pathway_motion_lighting_on:
     - action: light.turn_on
       target:
         entity_id: light.kitchen_leds_upper
-    - action: select.select_option
-      target:
-        entity_id: select.kitchen_leds_upper_preset
-      data:
-        option: "20% Spots Warm Wht"
+    - if: # leave all-white alone
+        - condition: state
+          entity_id: binary_sensor.kitchen_upper_leds_all_white_active
+          state: "off"
+      then:
+        - action: select.select_option
+          target:
+            entity_id: select.kitchen_leds_upper_preset
+          data:
+            option: "20% Spots Warm Wht"
     - action: homeassistant.turn_on
       target:
         entity_id: group.pathway_lights
@@ -1021,9 +1022,18 @@ scr_pathway_motion_lighting_off:
     - condition: state
       entity_id: group.pathway_lights
       state: "on"
-    - action: homeassistant.turn_off
-      target:
-        entity_id: group.pathway_lights
+    - if: # leave all-white alone
+        - condition: state
+          entity_id: binary_sensor.kitchen_upper_leds_all_white_active
+          state: "on"
+      then:
+        - action: homeassistant.turn_off
+          target:
+            entity_id: switch.candles
+      else:
+        - action: homeassistant.turn_off
+          target:
+            entity_id: group.pathway_lights
 
 #
 # GREAT ROOM LIGHTING

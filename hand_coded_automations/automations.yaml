@@ -1909,13 +1909,20 @@
       for:
         minutes: 10
   actions:
-    - action: script.scr_reset_mood_lights_to_default
+    - if: # leave all-white alone; aut_kitchen_mood_normal handles the LEDs when it ends
+        - condition: state
+          entity_id: binary_sensor.kitchen_upper_leds_all_white_active
+          state: "off"
+      then:
+        - action: script.scr_reset_mood_lights_to_default
+        - action: homeassistant.turn_off
+          target:
+            entity_id: light.kitchen_leds_upper_main
     - action: homeassistant.turn_off
       target:
         entity_id:
           - light.sun_room_uplights
           - switch.candles
-          - light.kitchen_leds_upper_main
           - switch.christmas_tree
 
 #
@@ -2937,6 +2944,9 @@
         - condition: state
           entity_id: input_boolean.inp_bool_lum_mood_lights_f_solar_trig
           state: "on"
+        - condition: state
+          entity_id: input_boolean.inp_bool_sleeping # stay off after bedtime
+          state: "off"
       then:
         - action: script.scr_turn_on_kitchen_leds_upper
       else:
