@@ -171,10 +171,12 @@ scr_calendar_summary:
             You have {{ lookahead_events | count }} upcoming events in the next 5 days. {{ ns.parts | join(' ') }}
           {%- endif -%}
 
-    # 7. Final combined message, whitespace collapsed
+    # 7. Final combined message, whitespace collapsed; & < > in event titles
+    #    are replaced because Alexa's speak skill fails on them ("having
+    #    trouble accessing your Simon Says Now skill")
     - variables:
         calendar_summary_message: >-
-          {{ (today_message ~ ' ' ~ lookahead_message) | trim | regex_replace('\s+', ' ') }}
+          {{ (today_message ~ ' ' ~ lookahead_message) | replace('&', ' and ') | replace('<', ' ') | replace('>', ' ') | trim | regex_replace('\s+', ' ') }}
 
     # 8. Write to /share/calendar_summary.txt via shell_command (the
     #    "file" notify platform doesn't exist in this HA version); the
