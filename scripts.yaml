@@ -193,6 +193,13 @@ scr_calendar_summary:
       target:
         entity_id: notify.echo_masterbdrm_speak
 
+    # 10. Return the text so scr_goodmorning can estimate how long it takes to speak
+    - variables:
+        calendar_summary_result:
+          message: "{{ calendar_summary_message }}"
+    - stop: "Calendar summary spoken"
+      response_variable: calendar_summary_result
+
 #
 # GOOD MORNING SCRIPT
 #   Other actions are accomplished in the Alexa routine - see Alexa App
@@ -209,7 +216,8 @@ scr_goodmorning:
         entity_id:
           - input_boolean.inp_bool_sleeping
     - action: script.scr_calendar_summary # blocking call — speaks the calendar summary before the weather announcement
-      continue_on_error: true  
+      continue_on_error: true
+      response_variable: calendar_summary
     - action: alexa_devices.send_info_skill
       continue_on_error: true
       data:
@@ -220,6 +228,10 @@ scr_goodmorning:
       data:
         device_id: 67ed12dd11b803c76f3c3d8e614a232c # find the alexa device_id by creating this action in Developer Tools>Actions
         text_command: when will it rain today # by using UI mode, select the alexa device, then switch to editor to see id
+    - variables:
+        visitor_message: >-
+          While you were asleep, there was a visitor at the front door.
+          I'll turn on the yellow ring as a reminder to check for packages.
     - if:
         - condition: state
           entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
@@ -228,9 +240,7 @@ scr_goodmorning:
         - action: notify.send_message
           continue_on_error: true
           data:
-            message: >
-              While you were asleep, there was a visitor at the front door.  
-              I'll turn on the yellow ring as a reminder to check for packages.
+            message: "{{ visitor_message }}"
           target:
             entity_id: notify.echo_masterbdrm_speak
         - action: notify.alexa_yellow_ring
@@ -239,8 +249,20 @@ scr_goodmorning:
             message: >
               While you were asleep, there was a visitor at the front door.
               You might want to check for packages.
+    # Wait for Alexa to finish talking before moving the shades. The speak actions
+    # above return as soon as Alexa accepts them, and the Echo's media_player stays
+    # "idle" while speaking, so the speech time is estimated rather than detected:
+    # the words actually spoken at words_per_second, plus Alexa's own weather and
+    # rain answers, whose text HA never sees.
+    - variables:
+        alexa_weather_and_when_secs: 45 # the value to tune: raise if the shades overlap the speech
+        words_per_second: 2.3
     - delay:
-        seconds: 5 # delay to reduce noise competition from shades
+        seconds: >-
+          {% set calendar_text = (calendar_summary | default({}, true)).get('message', '') %}
+          {% set visitor_text = visitor_message if is_state('input_boolean.inp_bool_visitor_while_sleeping_flag', 'on') else '' %}
+          {% set word_count = (calendar_text ~ ' ' ~ visitor_text).split() | count %}
+          {{ (word_count / words_per_second) | round(0, 'ceil') | int + alexa_weather_and_when_secs }}
     - action: cover.set_cover_position
       target:
         entity_id: cover.master_bedroom_inner_shades
