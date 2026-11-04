@@ -57,8 +57,8 @@ ota:
 
 # Enable Home Assistant API
 api:
-  services:
-    - service: follow_me
+  actions:
+    - action: follow_me
       variables:
         temperature: float
       then:
