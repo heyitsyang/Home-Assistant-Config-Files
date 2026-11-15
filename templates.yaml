@@ -360,6 +360,84 @@
       state: "{{ (states('sensor.espresense_sunrm_temperature') | float(default=0) - 8.23) | round(2) }}"
       unit_of_measurement: "°F"
 
+# FURNACE FILTER DUE DATE - last changed + change interval (months) from the UI helpers
+#   input_datetime.furnace_filter_last_changed & input_number.furnace_filter_change_interval
+#   Day is clamped to the end of the target month (e.g. May 31 + 9 months = Feb 28/29)
+#   See aut_furnace_filter_change_due_email & aut_furnace_filter_changed_button
+- sensor:
+    - name: "Furnace filter due date"
+      unique_id: furnace_filter_due_date
+      device_class: date
+      icon: mdi:air-filter
+      state: >-
+        {% set d = states('input_datetime.furnace_filter_last_changed') %}
+        {% set n = states('input_number.furnace_filter_change_interval') | int(0) %}
+        {% if d | as_datetime is none or n < 1 %}
+          {{ none }}
+        {% else %}
+          {% set y, m, dd = d.split('-') | map('int') | list %}
+          {% set total = y * 12 + (m - 1) + n %}
+          {% set ny = total // 12 %}
+          {% set nm = total % 12 + 1 %}
+          {% set next_first = '%04d-%02d-01' | format(ny + (nm // 12), nm % 12 + 1) %}
+          {% set last_day = ((next_first | as_datetime) - timedelta(days=1)).day %}
+          {{ '%04d-%02d-%02d' | format(ny, nm, [dd, last_day] | min) }}
+        {% endif %}
+      attributes:
+        days_remaining: >-
+          {% set due = states('sensor.furnace_filter_due_date') | as_datetime %}
+          {{ (due.date() - now().date()).days if due is not none else none }}
+
+# AIR HANDLER RUNTIME SINCE FURNACE FILTER CHANGE (minutes)
+#   Accumulates each completed binary_sensor.air_handler run when it turns off (a run in
+#   progress is added when it ends). Accumulated rather than history_stats because the
+#   recorder only keeps purge_keep_days (30) of raw history. Value survives restarts.
+#   Resets to 0 when input_datetime.furnace_filter_last_changed changes.
+#   To set/correct the total, fire event furnace_filter_runtime_set with data: {minutes: N}
+#   (seeded 2026-11-15 with 57.9 min of runtime on 11-13 from recorder history)
+- trigger:
+    - trigger: state
+      entity_id: binary_sensor.air_handler
+      from: "on"
+      id: run_end
+    - trigger: state
+      entity_id: input_datetime.furnace_filter_last_changed
+      not_from: [unknown, unavailable]
+      not_to: [unknown, unavailable]
+      id: reset
+    - trigger: event
+      event_type: furnace_filter_runtime_set
+      id: set
+  variables:
+    # new total (this.state is the value before this update)
+    total: >-
+      {% if trigger.id == 'reset' %}
+        0
+      {% elif trigger.id == 'set' %}
+        {{ trigger.event.data.minutes | float(0) | round(1) }}
+      {% else %}
+        {{ (this.state | float(0) + (now() - trigger.from_state.last_changed).total_seconds() / 60) | round(1) }}
+      {% endif %}
+  sensor:
+    - name: "Air handler runtime since filter change"
+      unique_id: air_handler_runtime_since_filter_change
+      unit_of_measurement: min
+      state_class: total_increasing
+      icon: mdi:fan-clock
+      state: "{{ total }}"
+      attributes:
+        # e.g. "2d 5h 13m"
+        formatted: >-
+          {% set m = total | float(0) | int %}
+          {{ '%dd %dh %dm' | format(m // 1440, (m % 1440) // 60, m % 60) }}
+        # average daily runtime since the change (as of the last update)
+        avg_hours_per_day: >-
+          {% set d = states('input_datetime.furnace_filter_last_changed') | as_datetime %}
+          {% if d is none %}{{ none }}{% else %}
+            {% set days = [(now() - as_local(d)).total_seconds() / 86400, 1] | max %}
+            {{ (total | float(0) / 60 / days) | round(1) }}
+          {% endif %}
+
 #
 # MISC SENSORS
 #

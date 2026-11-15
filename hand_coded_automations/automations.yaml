@@ -398,6 +398,54 @@
         brightness_pct: "{{ states('sensor.lv_rm_suggested_brightness') | int(default=0) }}"
 
 #
+# FURNACE FILTER CHANGE REMINDER
+#
+# Due date = sensor.furnace_filter_due_date (templates.yaml). Interval & last-changed date are
+# UI helpers shown on Household > Climate Control. Email yang & karen on the due date, then
+# every 7 days while overdue, until the "Furnace filter changed" button is pressed.
+- id: furnace_filter_change_due_email
+  alias: "aut furnace filter change due email"
+  triggers:
+    - trigger: time
+      at: "09:00:00"
+  conditions:
+    - condition: template
+      value_template: >-
+        {% set due = states('sensor.furnace_filter_due_date') | as_datetime %}
+        {% if due is none %}false{% else %}
+          {% set overdue = (now().date() - due.date()).days %}
+          {{ overdue >= 0 and overdue % 7 == 0 }}
+        {% endif %}
+  actions:
+    - action: notify.send_message
+      target:
+        entity_id:
+          - notify.gmail_to_yang
+          - notify.gmail_to_karen
+      data:
+        title: "Furnace filter change due"
+        message: >-
+          {% set overdue = (now().date() - (states('sensor.furnace_filter_due_date') | as_datetime).date()).days %}
+          The furnace filter was last changed {{ states('input_datetime.furnace_filter_last_changed') }}
+          and was due {{ states('sensor.furnace_filter_due_date') }}{{ ' (' ~ overdue ~ ' days ago)' if overdue > 0 else ' (today)' }}.
+          Air handler runtime since the last change: {{ state_attr('sensor.air_handler_runtime_since_filter_change', 'formatted') }}.
+          After replacing it, press "Furnace filter changed" on the Household > Climate Control dashboard.
+
+# "Furnace filter changed" button records today as the change date
+- id: furnace_filter_changed_button
+  alias: "aut furnace filter changed button"
+  triggers:
+    - trigger: state
+      entity_id: input_button.furnace_filter_changed
+      not_from: unavailable
+  actions:
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.furnace_filter_last_changed
+      data:
+        date: "{{ now().date().isoformat() }}"
+
+#
 # MISC
 #
 - id: aut_hourly_actions
