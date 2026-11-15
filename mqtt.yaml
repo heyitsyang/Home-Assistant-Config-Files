@@ -330,13 +330,16 @@ binary_sensor:
 #
 
 #
-# MQTT SWITCHES
+# MQTT VALVES
 #
-switch:
-  - name: "Water Valve"
+valve:
+  - name: "Water Valve" # main house water valve - valve.water_valve
     unique_id: water_valve
+    device_class: water
     state_topic: "watermain/valve_zeroisclosed"
     command_topic: "watermain/cmd/valveState"
-    payload_on: "1"
-    payload_off: "0"
+    payload_open: "1"
+    payload_close: "0"
+    state_open: "1"
+    state_closed: "0"
     qos: 2

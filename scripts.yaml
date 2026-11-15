@@ -573,9 +573,9 @@ scr_common_extended_absence_on:
           entity_id: input_boolean.leave_water_valve_on
           state: "off"
       then:
-        - action: switch.turn_off
+        - action: valve.close_valve
           target:
-            entity_id: switch.water_valve
+            entity_id: valve.water_valve
     - delay: "00:20:00"
     - action: switch.turn_off
       target:
@@ -586,9 +586,9 @@ scr_common_extended_absence_on:
 scr_common_extended_absence_off:
   mode: restart # start new script run after stopping previous to prevent confusion due to delay
   sequence:
-    - action: switch.turn_on
+    - action: valve.open_valve
       target:
-        entity_id: switch.water_valve
+        entity_id: valve.water_valve
     - action: switch.turn_on
       target:
         entity_id:

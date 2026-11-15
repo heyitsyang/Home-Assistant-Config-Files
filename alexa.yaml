@@ -59,7 +59,7 @@ smart_home:
       - sensor.ecobee_avg_indoor_temperature
       - switch.hamstation
       - switch.lan2_power
-      - switch.water_valve
+      - valve.water_valve
       - switch.candles
       - switch.christmas_tree
     #      - switch.lg_garage_opener_power  # use group.garage_opener_power instead

@@ -59,7 +59,7 @@ include:
   entities:
     - device_tracker.opnsense_ys_cell_shencentral_net
     - device_tracker.opnsense_kt_cell_shencentral_net
-    - valve.water_valve # main valve open/closed - shows SPT closures in history (switch_as_x wrapper of switch.water_valve; valve domain not recorded)
+    - valve.water_valve # main valve open/closed - shows SPT closures in history (valve domain not recorded)
 
 exclude:
   domains:

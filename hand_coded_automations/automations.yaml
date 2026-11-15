@@ -1195,9 +1195,9 @@
       from: "off"
       to: "on"
   actions:
-    - action: switch.turn_off
+    - action: valve.close_valve
       target:
-        entity_id: switch.water_valve
+        entity_id: valve.water_valve
     - action: script.scr_say_phrase
       data:
         priority: "high"
@@ -1279,8 +1279,8 @@
           - condition: template
             value_template: "{{ repeat.index <= 4 }}"
           - condition: state
-            entity_id: switch.water_valve
-            state: "off"
+            entity_id: valve.water_valve
+            state: "closed"
         sequence:
           - action: script.scr_say_phrase
             data:
