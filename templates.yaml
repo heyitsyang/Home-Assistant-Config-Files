@@ -430,13 +430,18 @@
         formatted: >-
           {% set m = total | float(0) | int %}
           {{ '%dd %dh %dm' | format(m // 1440, (m % 1440) // 60, m % 60) }}
-        # average daily runtime since the change (as of the last update)
-        avg_hours_per_day: >-
-          {% set d = states('input_datetime.furnace_filter_last_changed') | as_datetime %}
-          {% if d is none %}{{ none }}{% else %}
-            {% set days = [(now() - as_local(d)).total_seconds() / 86400, 1] | max %}
-            {{ (total | float(0) / 60 / days) | round(1) }}
-          {% endif %}
+
+# AIR HANDLER AVERAGE DAILY RUNTIME - rolling 14-day window
+#   sensor.air_handler_runtime_14_days is a History Stats UI helper (hours on, last 14 days)
+- sensor:
+    - name: "Air handler average daily runtime"
+      unique_id: air_handler_average_daily_runtime
+      unit_of_measurement: h
+      device_class: duration
+      state_class: measurement
+      icon: mdi:chart-line
+      availability: "{{ is_number(states('sensor.air_handler_runtime_14_days')) }}"
+      state: "{{ (states('sensor.air_handler_runtime_14_days') | float / 14) | round(1) }}"
 
 #
 # MISC SENSORS
