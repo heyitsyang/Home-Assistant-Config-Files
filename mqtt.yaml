@@ -246,6 +246,7 @@ sensor:
   - unique_id: unvalidated_water_static_pressure_test_result # see template sensor.validated_water_static_pressure_test_result
     name: "Unvalidated Water Static Pressure Test Result"
     state_topic: "watermain/spt_result"
+    json_attributes_topic: "watermain/spt_result/attributes" # test_end, test_minutes, beginning_pressure, ending_pressure
     unit_of_measurement: "psi"
 
   # misc individual sensors
