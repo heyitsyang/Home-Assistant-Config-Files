@@ -458,6 +458,12 @@ scr_goodnight: # called by Alexa as PART of Goodnight Routine
               - light.office_cabinet_leds_master
               - light.office_monitor_leds
               - light.guest_room_lights
+    - if: # otherwise aut_mood_lights_daily_off does it when sleeping turns on below
+        - condition: state
+          entity_id: input_boolean.inp_bool_sleeping
+          state: "on"
+      then:
+        - action: script.scr_mood_lights_bedtime_off
     - action: input_boolean.turn_on
       target:
         entity_id: input_boolean.inp_bool_sleeping
@@ -988,6 +994,27 @@ scr_reset_mood_lights_to_default:
         entity_id: select.kitchen_leds_upper_preset
       data:
         option: "50% Spots Warm Wht"
+
+# Bedtime: called by aut_mood_lights_daily_off (sleeping turns on) and by scr_goodnight
+#   when sleeping was already on (e.g. aut_assume_asleep at 22:50, then pathway motion).
+#   The preset includes "on", so the LEDs are turned off again after 2s in case the
+#   preset lands after the first off (suspected cause of 11-16).
+scr_mood_lights_bedtime_off:
+  mode: single
+  max_exceeded: silent
+  sequence:
+    - action: script.scr_reset_mood_lights_to_default
+    - action: homeassistant.turn_off
+      target:
+        entity_id:
+          - light.sun_room_uplights
+          - switch.candles
+          - light.kitchen_leds_upper_main
+          - switch.christmas_tree
+    - delay: "00:00:02"
+    - action: light.turn_off
+      target:
+        entity_id: light.kitchen_leds_upper_main
 
 #
 # MOTION LIGHTING - if luminosity is low and motion is detected

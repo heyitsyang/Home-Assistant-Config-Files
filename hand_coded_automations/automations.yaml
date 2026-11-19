@@ -233,14 +233,7 @@
       entity_id: input_boolean.inp_bool_sleeping
       to: "on"
   actions:
-    - action: script.scr_reset_mood_lights_to_default
-    - action: homeassistant.turn_off
-      target:
-        entity_id:
-          - light.sun_room_uplights
-          - switch.candles
-          - light.kitchen_leds_upper_main
-          - switch.christmas_tree
+    - action: script.scr_mood_lights_bedtime_off
 
 #
 # TURN OFF GOOD MORNING USED SEMAPHORE
