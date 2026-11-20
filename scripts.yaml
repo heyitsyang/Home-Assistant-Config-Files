@@ -1111,14 +1111,19 @@ scr_frontporch_activity:
         entity_id: camera.frontporch
         filename: /config/www/camera_stills/frontporch.jpg
     - if:
-        - condition: not # testing for "not_home" else doesn't work if in a known zone so use !home logic
+        # person.* presence includes WiFi presence via the router, which lags ~20 min
+        # after we leave, so check each phone's BT and GPS trackers individually here.
+        # Away = none of them says "home" (test !home, since "not_home" fails in other zones).
+        - condition: not
           conditions:
             - condition: state
-              entity_id: person.yang
+              entity_id:
+                - device_tracker.ys_cell_ble
+                - device_tracker.ys_cell_gps
+                - device_tracker.kt_cell_ble
+                - device_tracker.kt_cell_gps
               state: "home"
-            - condition: state
-              entity_id: person.karen
-              state: "home"
+              match: any
       then:
         - action: input_boolean.turn_on
           target:
