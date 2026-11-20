@@ -408,27 +408,33 @@
     - trigger: event
       event_type: furnace_filter_runtime_set
       id: set
+  # `this` is NOT available in trigger-level variables (UndefinedError), only in
+  # the entity's own templates, so variables hold only the trigger-derived parts
+  # and the state/attribute templates add this.state (the value before this update).
   variables:
-    # new total (this.state is the value before this update)
-    total: >-
-      {% if trigger.id == 'reset' %}
-        0
-      {% elif trigger.id == 'set' %}
-        {{ trigger.event.data.minutes | float(0) | round(1) }}
-      {% else %}
-        {{ (this.state | float(0) + (now() - trigger.from_state.last_changed).total_seconds() / 60) | round(1) }}
-      {% endif %}
+    run_minutes: >-
+      {{ (now() - trigger.from_state.last_changed).total_seconds() / 60
+         if trigger.id == 'run_end' else 0 }}
+    set_minutes: >-
+      {{ trigger.event.data.minutes | float(0) if trigger.id == 'set' else 0 }}
   sensor:
     - name: "Air handler runtime since filter change"
       unique_id: air_handler_runtime_since_filter_change
       unit_of_measurement: min
       state_class: total_increasing
       icon: mdi:fan-clock
-      state: "{{ total }}"
+      state: >-
+        {% if trigger.id == 'reset' %} 0
+        {% elif trigger.id == 'set' %} {{ set_minutes | float(0) | round(1) }}
+        {% else %} {{ (this.state | float(0) + run_minutes | float(0)) | round(1) }}
+        {% endif %}
       attributes:
-        # e.g. "2d 5h 13m"
+        # e.g. "2d 5h 13m" (same total as state; both render against the old this.state)
         formatted: >-
-          {% set m = total | float(0) | int %}
+          {% if trigger.id == 'reset' %}{% set m = 0 %}
+          {% elif trigger.id == 'set' %}{% set m = set_minutes | float(0) | int %}
+          {% else %}{% set m = (this.state | float(0) + run_minutes | float(0)) | int %}
+          {% endif %}
           {{ '%dd %dh %dm' | format(m // 1440, (m % 1440) // 60, m % 60) }}
 
 # AIR HANDLER AVERAGE DAILY RUNTIME - rolling 14-day window
