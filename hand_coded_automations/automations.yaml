@@ -2651,6 +2651,52 @@
             Your current version is {{states("sensor.current_version")}}.
             See https://github.com/home-assistant/home-assistant/releases
 
+#
+# NVME WRITE STALL LOG ENTRY
+#
+# sensor.nvme_recent_stalls (command_line.yaml, every 10 min) lists stalls from the host kernel log.
+# Writes one WARNING per new stall to Settings > System > Logs so stall-caused timeouts
+# (Frigate stats, Whisper, WLED) can be told apart from real errors. Timestamps are the
+# stall's real time, not when it was noticed. input_datetime.nvme_last_reported_stall
+# (UI helper) remembers the newest stall already reported, so restarts don't repeat entries.
+#
+- id: aut_nvme_stall_log
+  alias: "aut nvme stall log"
+  initial_state: true
+  mode: queued
+  trigger:
+    - platform: state
+      entity_id: sensor.nvme_recent_stalls
+  conditions:
+    - condition: template
+      value_template: "{{ trigger.to_state.state not in ['unknown', 'unavailable'] }}"
+  actions:
+    - variables:
+        reported: "{{ state_attr('input_datetime.nvme_last_reported_stall', 'timestamp') | float(0) }}"
+        new_stalls: >-
+          {{ state_attr('sensor.nvme_recent_stalls', 'stalls') | default([], true)
+             | map('as_timestamp', 0) | select('>', reported) | list }}
+    - repeat:
+        for_each: "{{ new_stalls }}"
+        sequence:
+          - action: system_log.write
+            data:
+              logger: nvme_stall
+              level: warning
+              message: >-
+                NVMe write stall: host kernel aborted hung disk writes at
+                {{ repeat.item | timestamp_custom('%m-%d %H:%M:%S') }}.
+                Timeouts from {{ (repeat.item - 60) | timestamp_custom('%H:%M:%S') }} to
+                {{ (repeat.item + 40) | timestamp_custom('%H:%M:%S') }} (Frigate stats,
+                Whisper, WLED, etc.) are caused by this and can be ignored.
+    - if: "{{ new_stalls | count > 0 }}"
+      then:
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.nvme_last_reported_stall
+          data:
+            timestamp: "{{ new_stalls | max }}"
+
 # - id: aut_new_hacs_updates
 #   alias: New HACS Updates (Persistent Notification)"
 #   mode: single

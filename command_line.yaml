@@ -1,1 +1,12 @@
-[]
+# NVMe WRITE STALLS - host drive occasionally hangs on writes; Frigate/Whisper/WLED log timeouts meanwhile.
+# Script reads the host kernel log via the Supervisor API; aut_nvme_stall_log writes new stalls to the HA log.
+- sensor:
+    name: "NVMe recent stalls"
+    unique_id: nvme_recent_stalls
+    command: "python3 /share/scripts/nvme_stalls.py"
+    command_timeout: 30
+    scan_interval: 600
+    device_class: timestamp
+    value_template: "{{ value_json.last }}"
+    json_attributes:
+      - stalls
