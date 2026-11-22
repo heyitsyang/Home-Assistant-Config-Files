@@ -1131,21 +1131,27 @@ scr_frontporch_activity:
         - action: notify.alexa_yellow_ring
           data:
             message: "While you were out, there was a visitor at the front door"
-        - action: notify.send_message
-          target:
-            entity_id:
-              - notify.ys_cell
-              - notify.kt_cell
+        # notify.mobile_app_* (not notify.send_message): send_message rejects the extra data: (clickAction/tts_text)
+        - action: notify.mobile_app_ys_cell
           data:
             title: Front door activity
             message: "Front door activity detected"
             data:
               clickAction: "lovelace/last-snaps"
-        - action: notify.send_message
-          target:
-            entity_id:
-              - notify.ys_cell
-              - notify.kt_cell
+        - action: notify.mobile_app_kt_cell
+          data:
+            title: Front door activity
+            message: "Front door activity detected"
+            data:
+              clickAction: "lovelace/last-snaps"
+        - action: notify.mobile_app_ys_cell
+          data:
+            title: Front door activity
+            message: TTS
+            data:
+              tts_text: "Front door activity detected"
+              car_ui: true
+        - action: notify.mobile_app_kt_cell
           data:
             title: Front door activity
             message: TTS
@@ -1160,11 +1166,13 @@ scr_frontporch_activity:
         - action: input_boolean.turn_on
           target:
             entity_id: input_boolean.inp_bool_visitor_while_sleeping_flag
-        - action: notify.send_message
-          target:
-            entity_id:
-              - notify.ys_cell
-              - notify.kt_cell
+        - action: notify.mobile_app_ys_cell
+          data:
+            title: Front door activity
+            message: "Front door activity detected while asleep"
+            data:
+              clickAction: "lovelace/last-snaps"
+        - action: notify.mobile_app_kt_cell
           data:
             title: Front door activity
             message: "Front door activity detected while asleep"

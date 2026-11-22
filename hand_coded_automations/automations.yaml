@@ -1786,10 +1786,12 @@
   initial_state: true
   trigger:
     - platform: state
-      entity_id:
-        - binary_sensor.driveway_zone_person_occupancy
-        - binary_sensor.driveway_zone_car_occupancy
+      entity_id: binary_sensor.driveway_zone_person_occupancy
       to: "on"
+    - platform: state
+      entity_id: binary_sensor.driveway_zone_car_occupancy
+      to: "on"
+      for: "00:00:03" # ignore sub-second blips, e.g. neighbor's parked car box jumping into the zone at dusk
   actions:
     - action: script.scr_front_door_lights_on
 
