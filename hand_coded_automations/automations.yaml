@@ -843,7 +843,7 @@
   trigger:
     - platform: numeric_state
       entity_id: sensor.irrig_valve_leak_daily
-      above: input_number.irrig_seep_gals_per_day_limit
+      above: input_number.irrig_seep_gal_per_day_limit
   condition: # this prevents immediate triggering after home assistant startup
     - condition: template
       value_template: >-
@@ -858,7 +858,7 @@
         message: |
           {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
           irrigation valve off, against a limit of
-          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          {{ states('input_number.irrig_seep_gal_per_day_limit') | int(0) }}.
           That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
           sustained - too slow for the per-session leak test to ever catch.
           Suspect a valve diaphragm not seating fully.
@@ -870,7 +870,7 @@
         message: |
           {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
           irrigation valve off, against a limit of
-          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          {{ states('input_number.irrig_seep_gal_per_day_limit') | int(0) }}.
           That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
           sustained - too slow for the per-session leak test to ever catch.
           Suspect a valve diaphragm not seating fully.
@@ -884,7 +884,7 @@
         message: |
           {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
           irrigation valve off, against a limit of
-          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          {{ states('input_number.irrig_seep_gal_per_day_limit') | int(0) }}.
           That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
           sustained - too slow for the per-session leak test to ever catch.
           Suspect a valve diaphragm not seating fully.
@@ -894,7 +894,7 @@
         message: |
           {{ states('sensor.irrig_valve_leak_daily') }} gallons have flowed today with every
           irrigation valve off, against a limit of
-          {{ states('input_number.irrig_seep_gals_per_day_limit') | int(0) }}.
+          {{ states('input_number.irrig_seep_gal_per_day_limit') | int(0) }}.
           That is about {{ (states('sensor.irrig_valve_leak_daily') | float(default=0) / 1440) | round(4) }} GPM
           sustained - too slow for the per-session leak test to ever catch.
           Suspect a valve diaphragm not seating fully.

@@ -172,8 +172,6 @@ script.scr_manual_say_time:
 script.scr_occupied_sim:
   friendly_name: Simulate occupation
   icon: mdi:home-lightbulb
-sensor.last_static_pressure_test:
-  icon: mdi:calendar-clock
 sensor.front_door_lock_battery_level:
   icon: mdi:battery-unknown
   device_class: battery

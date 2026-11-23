@@ -23,7 +23,7 @@
 # Source must be state_class: total_increasing - see mqtt.yaml. The device's odometer resets to
 # 0 on reboot and total_increasing reads that as a meter reset rather than a negative delta.
 #
-# Alert threshold is input_number.irrig_seep_gals_per_day_limit, acted on by
+# Alert threshold is input_number.irrig_seep_gal_per_day_limit, acted on by
 # aut_irrig_seep_notify. Normal valve changeover contributes about 1 gallon per irrigation
 # session, so the default of 5 gal/day sits clear of that noise floor.
 #
